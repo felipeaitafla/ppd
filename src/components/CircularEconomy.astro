@@ -1,0 +1,110 @@
+---
+const offers = [
+  {
+    label: 'Compre',
+    text: 'iPhones seminovos revisados por especialistas, com até 24 meses de garantia.',
+  },
+  {
+    label: 'Troque',
+    text: 'seu modelo atual pagando apenas a diferença. Avaliamos na hora.',
+  },
+  {
+    label: 'Venda',
+    text: 'seu celular para a Pede Pro Dindo, avaliação e pagamento realizados na hora.',
+  },
+];
+---
+
+<section class="circular">
+  <div class="circular__top">
+    <span class="circular__label">Economia circular</span>
+    <img
+      src="/assets/icon-circular.svg"
+      alt=""
+      width="26"
+      height="16"
+      class="circular__icon"
+    />
+  </div>
+
+  <div class="circular__content">
+    <h2 class="circular__headline">
+      <strong>A partir da economia circular,</strong> democratizamos o acesso a dispositivos
+      de alto nível com celulares <strong>seminovos, revisados e com garantia.</strong>
+    </h2>
+
+    <ul class="circular__offers">
+      {offers.map((offer) => (
+        <li>
+          <p><strong>{offer.label}</strong> {offer.text}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .circular {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--color-bg-alt);
+  }
+
+  .circular__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+  }
+
+  .circular__label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-label);
+  }
+
+  .circular__icon {
+    flex-shrink: 0;
+  }
+
+  .circular__content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xl);
+  }
+
+  .circular__headline {
+    flex: 1 1 26rem;
+    font-size: var(--fs-h2);
+    line-height: 1.25;
+    font-weight: 400;
+    color: var(--color-black);
+  }
+
+  .circular__headline strong {
+    font-weight: 600;
+  }
+
+  .circular__offers {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    flex: 1 1 16rem;
+    max-width: 19.4375rem;
+  }
+
+  .circular__offers p {
+    font-size: var(--fs-card);
+    line-height: 1.5;
+    color: var(--color-text-muted);
+  }
+
+  .circular__offers strong {
+    font-weight: 600;
+    color: var(--color-black);
+  }
+</style>
