@@ -1,0 +1,122 @@
+---
+import { Image } from 'astro:assets';
+import ctaPhoto from '../assets/cta-whatsapp.png';
+import { whatsappUrl } from '../data/site';
+---
+
+<a
+  class="cta"
+  href={whatsappUrl}
+  target="_blank"
+  rel="noopener"
+  aria-label="Clique e fale conosco pelo WhatsApp"
+  data-cta
+>
+  <Image
+    src={ctaPhoto}
+    alt=""
+    width={1440}
+    widths={[480, 768, 1080, 1440]}
+    sizes="100vw"
+    format="webp"
+    quality={70}
+    loading="lazy"
+    class="cta__photo"
+  />
+  <span class="cta__veil"></span>
+  <span class="cta__label" aria-hidden="true">Clique e fale conosco</span>
+</a>
+
+<style>
+  .cta {
+    position: relative;
+    display: block;
+    aspect-ratio: 1440 / 333;
+    overflow: hidden;
+    background: var(--color-dark);
+    cursor: pointer;
+  }
+
+  .cta__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* A foto é retrato e a faixa é uma tira larga: 71% reproduz o
+       enquadramento do Figma — a parede de capas e o painel de texto. */
+    object-position: center 71%;
+    transition: transform 600ms ease;
+  }
+
+  .cta:hover .cta__photo,
+  .cta:focus-visible .cta__photo {
+    transform: scale(1.06);
+  }
+
+  .cta__veil {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.58);
+  }
+
+  /* Segue o cursor por `--x`/`--y`; sem JS ou sem mouse cai no centro. */
+  .cta__label {
+    position: absolute;
+    left: var(--x, 50%);
+    top: var(--y, 50%);
+    transform: translate(-50%, -50%);
+    padding: var(--space-2xs) var(--space-sm);
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    line-height: 1.25;
+    white-space: nowrap;
+    color: var(--color-white);
+    opacity: 0;
+    transition: opacity 250ms ease;
+    pointer-events: none;
+  }
+
+  .cta:hover .cta__label,
+  .cta:focus-visible .cta__label {
+    opacity: 1;
+  }
+
+  /* Sem hover não há como revelar nada: o convite fica sempre à vista. */
+  @media (hover: none) {
+    .cta__label {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cta__photo {
+      transition: none;
+    }
+
+    .cta:hover .cta__photo,
+    .cta:focus-visible .cta__photo {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  /* JS porque a posição do ponteiro só existe em tempo de execução — o
+     CSS não tem como saber onde o cursor está para a legenda acompanhá-lo. */
+  const cta = document.querySelector<HTMLElement>('[data-cta]');
+  const label = cta?.querySelector<HTMLElement>('.cta__label');
+
+  if (cta && label && matchMedia('(hover: hover)').matches) {
+    cta.addEventListener('mousemove', (e) => {
+      const r = cta.getBoundingClientRect();
+      label.style.setProperty('--x', `${e.clientX - r.left}px`);
+      label.style.setProperty('--y', `${e.clientY - r.top}px`);
+    });
+
+    /* Zera ao sair para a legenda não reaparecer na última posição do
+       ponteiro no próximo hover. */
+    cta.addEventListener('mouseleave', () => {
+      label.style.removeProperty('--x');
+      label.style.removeProperty('--y');
+    });
+  }
+</script>

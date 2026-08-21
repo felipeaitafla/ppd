@@ -1,0 +1,392 @@
+---
+import { Image } from 'astro:assets';
+import Button from './Button.astro';
+import amanda from '../assets/depo-amanda.png';
+import eliane from '../assets/depo-eliane.png';
+import bruno from '../assets/depo-bruno.png';
+import loreni from '../assets/depo-loreni.png';
+import pedro from '../assets/depo-pedro.png';
+
+/* Só a matriz tem depoimentos no Figma. As pastilhas das outras cidades
+   entram como estado visual, sem clique — decisão de escopo, não
+   pendência: não há o que filtrar até existirem avaliações delas. */
+const cities = [
+  'Santo Ângelo',
+  'Santa Rosa',
+  'Ijuí',
+  'São Borja',
+  'Santiago',
+];
+
+const reviews = [
+  {
+    name: 'Amanda',
+    avatar: amanda,
+    text: 'Tive uma ótima experiência de atendimento na loja da Pede Pro Dindo de Santo Ângelo. Precisei realizar a troca da bateria do celular e fiz uma boa pesquisa de preços em 5 lojas da cidade. O valor do serviço da Pede pro Dindo ficou bem parecido com...',
+  },
+  {
+    name: 'Eliane Palmeiro',
+    avatar: eliane,
+    text: 'Fui maravilhosamente bem atendida, não tenho palavras para o belo atendimento, voltarei sempre!',
+  },
+  {
+    name: 'Bruno Rodrigues Silva',
+    avatar: bruno,
+    text: 'Atendimento excepcional e produtos de qualidade! Super recomendo! Um destaque para o atendimento do Luan, sempre atencioso e prestativo! Parabéns pelo ótimo trabalho!',
+  },
+  {
+    name: 'Loreni Oliveira',
+    avatar: loreni,
+    text: 'Ótima super indico pois fui muito bem atendida ótima funcionária uma menina Paola maravilhosa tratamento especial.olha nota 10 e super indico a loja pede pro dindo ótimos funcionários parabéns é 10 em tudo de Minha aquisição e ótimo',
+  },
+  {
+    name: 'Pedro Pezzini',
+    avatar: pedro,
+    text: 'Atendimento muito bom, com vendas consultivas. Tirei todas as minhas dúvidas e ainda saí com meu novo aparelho.',
+  },
+];
+---
+
+{/* Trilho e pino existem para a seção prender: o pino gruda na tela e o
+    trilho, mais alto que ele exatamente na medida do que sobra do carrossel,
+    dá à página o percurso que o script converte em rolagem lateral. Sem JS
+    ligado, os dois são `div`s comuns e a seção fica como sempre foi. */}
+<section class="depos" data-secao>
+  <div class="depos__trilho" data-trilho>
+    <div class="depos__pino" data-pino>
+      <div class="depos__head">
+        <span class="depos__label">Depoimentos</span>
+        <div class="depos__title">
+          <h2>+4000 avaliações 5 estrelas no Google</h2>
+          <div class="depos__rating">
+            <img
+              src="/assets/icon-google.svg"
+              alt="Google"
+              width="25"
+              height="26"
+            />
+            <img
+              src="/assets/icon-stars.svg"
+              alt="Nota 5 de 5"
+              width="127"
+              height="22"
+              class="depos__stars"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="depos__body">
+        <div class="depos__bar">
+          <ul class="depos__cities">
+            {cities.map((city, i) => (
+              <li class:list={[{ 'is-active': i === 0 }]}>{city}</li>
+            ))}
+          </ul>
+          {/* TODO: URL real do perfil no Google. */}
+          <Button href="#">Acessar Google Review</Button>
+        </div>
+
+        {/* Focável de propósito: com a barra de rolagem escondida, o teclado
+            só alcança a faixa se ela puder receber foco — daí as setas rolam
+            os cartões como rolariam qualquer região com overflow. */}
+        <ul
+          class="depos__row"
+          data-carrossel
+          tabindex="0"
+          aria-label="Depoimentos de clientes"
+        >
+          {reviews.map((review) => (
+            <li class="depo">
+              <div class="depo__quote"><p>{review.text}</p></div>
+              <div class="depo__by">
+                <Image
+                  src={review.avatar}
+                  alt=""
+                  width={80}
+                  format="webp"
+                  quality={80}
+                  loading="lazy"
+                  class="depo__avatar"
+                />
+                <span>{review.name}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .depos {
+    /* 128px em cima e embaixo, 64px nas laterais — o mesmo par de Unidades e
+       do FAQ. */
+    padding: var(--space-lg) var(--space-md);
+    background: var(--color-white);
+  }
+
+  .depos__pino {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-block);
+  }
+
+  /* Prender é decisão do script — só ele sabe quanto excedente há para
+     percorrer —, então a classe, a altura do trilho e o `top` do pino saem
+     todos de lá, de uma vez: CSS e JS nunca discordam sobre o percurso. */
+  .depos.is-preso .depos__pino {
+    position: sticky;
+    top: var(--pino-topo, 0px);
+  }
+
+  .depos__head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .depos__label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-label);
+  }
+
+  .depos__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+  }
+
+  .depos__title h2 {
+    /* Teto em `em`, não em `rem`: a caixa escala junto com a fonte, então o
+       título cabe em uma linha em qualquer viewport onde sobre espaço ao
+       lado da nota do Google — o teto de 710px do Figma quebrava em duas. */
+    max-width: 24em;
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .depos__rating {
+    display: flex;
+    align-items: center;
+    gap: var(--space-list);
+  }
+
+  .depos__rating img {
+    width: auto;
+    height: max(1.125rem, 0.751vw + .9489rem); /* 26px @1440 — escala fluida sem teto, ver CLAUDE.md */
+  }
+
+  .depos__stars {
+    height: max(.9375rem, 0.657vw + .7835rem); /* 22px @1440 — escala fluida sem teto, ver CLAUDE.md */
+  }
+
+  .depos__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-list);
+  }
+
+  .depos__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2xs);
+  }
+
+  /* Sem clique por decisão de escopo: são `li`, não botões, para nada
+     anunciar-se como acionável enquanto não filtram de fato. */
+  .depos__cities {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .depos__cities li {
+    padding: var(--space-3xs) var(--space-list);
+    font-size: var(--fs-nav);
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--color-pill);
+    border: 1px solid color-mix(in srgb, var(--color-pill-line) 30%, transparent);
+    border-radius: 63px;
+  }
+
+  .depos__cities .is-active {
+    color: var(--color-ink-soft);
+    background: var(--color-card);
+    border-color: transparent;
+    border-radius: var(--radius);
+  }
+
+  /* Cinco cartões de 376px não cabem em viewport nenhuma: a faixa rola na
+     horizontal e sangra até a borda da seção, senão o corte do último
+     cartão sugeriria que a lista acabou ali. */
+  .depos__row {
+    display: flex;
+    gap: var(--space-2xs);
+    overflow-x: auto;
+    margin-inline: calc(var(--space-md) * -1);
+    padding-inline: var(--space-md);
+    scroll-padding-inline: var(--space-md);
+    overscroll-behavior-x: contain;
+    /* Barra escondida: com a seção presa, quem tem mouse anda a faixa
+       rolando a própria página, e quem usa teclado alcança a faixa pelo
+       foco — a barra só cobrava espaço embaixo dos cartões. */
+    scrollbar-width: none;
+  }
+
+  .depos__row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .depos__row:focus-visible {
+    /* Para dentro: a faixa sangra até a borda da tela e um contorno por
+       fora ficaria metade cortado. */
+    outline: 2px solid var(--color-black);
+    outline-offset: -2px;
+  }
+
+  /* Snap só no toque — que é justamente onde a seção não prende: o dedo joga
+     a faixa e ela precisa parar alinhada. No mouse quem escreve `scrollLeft`
+     é o script, quadro a quadro, e o snap obrigatório puxaria cada passo de
+     volta ao cartão mais próximo. */
+  @media (pointer: coarse) {
+    .depos__row {
+      scroll-snap-type: x mandatory;
+    }
+  }
+
+  .depo {
+    flex: 0 0 var(--w-card);
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+    background: var(--color-card);
+    scroll-snap-align: start;
+  }
+
+  .depo__quote {
+    min-height: max(9rem, 8.263vw + 7.0634rem); /* 232px @1440 — escala fluida sem teto, ver CLAUDE.md */
+    padding: var(--space-sm);
+    font-size: var(--fs-card);
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--color-text-muted);
+  }
+
+  .depo__by {
+    display: flex;
+    align-items: center;
+    gap: max(.625rem, 0.469vw + .515rem); /* 15px @1440 — escala fluida sem teto, ver CLAUDE.md */
+    margin-top: auto;
+    padding: var(--space-list) var(--space-sm);
+    border-top: 1px solid var(--color-rule);
+    font-size: var(--fs-card);
+    font-weight: 500;
+    color: var(--color-ink-soft);
+  }
+
+  .depo__avatar {
+    flex-shrink: 0;
+    width: max(2rem, 0.751vw + 1.8239rem); /* 40px @1440 — escala fluida sem teto, ver CLAUDE.md */
+    height: max(2rem, 0.751vw + 1.8239rem);
+    border-radius: 50%;
+    object-fit: cover;
+  }
+</style>
+
+<script>
+  /* Os cinco cartões nunca cabem na tela, e com a barra de rolagem escondida
+     nada mais denunciava que havia depoimento à direita. Então a seção
+     prende: enquanto o pino está grudado, o quanto a página andou dentro do
+     trilho é exatamente o quanto a faixa anda para o lado, um pixel para cada
+     pixel. Quem passou da seção leu todos os cartões no caminho.
+
+     É posição, não evento: ninguém intercepta a roda, então não há disputa
+     com a rolagem suave do Lenis, e roda, toque, teclado e barra de rolagem
+     chegam todos ao mesmo lugar. Sem JS, a seção continua a faixa rolável
+     que sempre foi. */
+
+  /* Onde a trava não entra: no toque o dedo já arrasta a faixa direto, e
+     prender a página tomaria dele um gesto que funciona; e quem pediu menos
+     movimento não tem por que ganhar a página andando de lado. */
+  const ponteiroPreciso = matchMedia('(pointer: fine)');
+  const menosMovimento = matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('[data-secao]').forEach((secao) => {
+    const trilho = secao.querySelector<HTMLElement>('[data-trilho]');
+    const pino = secao.querySelector<HTMLElement>('[data-pino]');
+    const faixa = secao.querySelector<HTMLElement>('[data-carrossel]');
+    if (!trilho || !pino || !faixa) return;
+
+    let percurso = 0;
+    let topo = 0;
+
+    const medir = () => {
+      /* Desfaz antes de medir: altura do trilho e `top` do pino são o que
+         está sendo calculado, e medir por cima dos valores da vez anterior
+         devolveria a resposta anterior. Como nada disso é pintado antes do
+         fim da função, a desmontagem não pisca. */
+      secao.classList.remove('is-preso');
+      trilho.style.height = '';
+      pino.style.removeProperty('--pino-topo');
+
+      const excedente = faixa.scrollWidth - faixa.clientWidth;
+      const alturaPino = pino.offsetHeight;
+
+      if (excedente < 1 || !ponteiroPreciso.matches || menosMovimento.matches) {
+        percurso = 0;
+        /* Volta ao primeiro cartão: sem a trava, uma faixa parada no meio do
+           percurso só pareceria cortada. */
+        faixa.scrollLeft = 0;
+        return;
+      }
+
+      /* Centrado quando sobra tela; encostado embaixo quando o pino é mais
+         alto que ela, para o corte cair no título e não nos cartões. */
+      const folga = window.innerHeight - alturaPino;
+      topo = folga > 0 ? folga / 2 : folga;
+      percurso = excedente;
+
+      trilho.style.height = `${alturaPino + percurso}px`;
+      pino.style.setProperty('--pino-topo', `${topo}px`);
+      secao.classList.add('is-preso');
+      acompanhar();
+    };
+
+    const acompanhar = () => {
+      if (!percurso) return;
+      /* Zero no instante em que o pino gruda, `percurso` no instante em que
+         ele solta — o mesmo intervalo que a faixa tem para percorrer. */
+      const andado = topo - trilho.getBoundingClientRect().top;
+      faixa.scrollLeft = Math.min(Math.max(andado, 0), percurso);
+    };
+
+    /* A medição força layout; num `resize` contínuo isso é caro, e o quadro
+       seguinte é cedo o bastante para ninguém perceber. */
+    let agendada = 0;
+    const remedir = () => {
+      cancelAnimationFrame(agendada);
+      agendada = requestAnimationFrame(medir);
+    };
+
+    window.addEventListener('scroll', acompanhar, { passive: true });
+    /* `resize` pela altura da tela, que decide o `top`; ResizeObserver pela
+       altura do pino, que muda com a fonte carregada e com a quebra do
+       título — nenhum dos dois avisa pelo outro. */
+    window.addEventListener('resize', remedir);
+    new ResizeObserver(remedir).observe(pino);
+    ponteiroPreciso.addEventListener('change', remedir);
+    menosMovimento.addEventListener('change', remedir);
+
+    medir();
+  });
+</script>

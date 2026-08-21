@@ -1,0 +1,318 @@
+---
+import Hero from './Hero.astro';
+import Intro from './Intro.astro';
+---
+
+{/* A abertura da página é uma tela só, atravessada duas vezes: o hero fica
+    preso enquanto o manifesto passa por cima dele, entrando pela direita,
+    no compasso da rolagem. Depois que ele chega, o quadro continua preso
+    mais uma tela — é a saída, em que a seção seguinte sobe de baixo por
+    cima do manifesto e ele acompanha, devagar, num parallax.
+
+    Os dois moram no mesmo quadro porque é o quadro que prende. Fossem
+    seções irmãs, o hero subiria enquanto o manifesto entra e abriria um vão
+    branco embaixo dele no meio da travessia. */}
+<div class="abertura" data-abertura>
+  {/* Alvo do link "Manifesto" do menu. O `id` não pode morar na seção: ela
+      é sticky, já está no topo da tela desde o começo, e pular para ela não
+      moveria a página um pixel. Aqui ele marca o ponto do percurso em que o
+      manifesto termina de entrar — e, com a abertura solta, cai exatamente
+      no topo da seção, porque a entrada dura o mesmo que a altura do hero. */}
+  <span class="abertura__alvo" id="manifesto" data-alvo></span>
+
+  {/* O ponto em que a espera acaba e a saída começa, pelo mesmo motivo do
+      alvo acima: quem escreve a medida é o CSS, e o script lê de volta do
+      próprio percurso em vez de repetir a conta. */}
+  <span class="abertura__solta" data-solta></span>
+
+  <div class="abertura__quadro" data-quadro>
+    <div class="abertura__camada abertura__camada--hero"><Hero /></div>
+    {/* O recorte fica na camada e o deslocamento no invólucro de dentro, e
+        não os dois na mesma caixa, para o recorte não alcançar a camada do
+        hero — é lá que mora a gaveta do menu, que é `fixed` e não pode
+        arriscar ser cortada por ninguém. */}
+    <div class="abertura__camada abertura__camada--manifesto">
+      <div class="abertura__deslize"><Intro /></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .abertura {
+    /* As duas medidas do percurso, ambas em telas roladas: `--entrada` é o
+       quanto se rola para o manifesto atravessar; `--espera` é o quanto ele
+       fica parado, cobrindo o hero, antes de a página voltar a subir. Sem a
+       espera o texto chegaria e já começaria a sair de cena.
+
+       A espera é a única parte do trilho em que a rolagem não move nada, e
+       por isso é a que denuncia: meia tela dela lia como travamento, não
+       como pausa. Um quinto de tela é uma batida — sobra tempo de ler porque
+       a saída também é lenta, o quadro solta e o manifesto ainda leva uma
+       tela inteira para subir, legível o caminho todo. */
+    --entrada: 100svh;
+    --espera: 20svh;
+
+    /* A terceira medida, a da saída: o quanto o quadro segue preso depois da
+       espera, enquanto a seção seguinte sobe por cima dele. Uma tela é
+       exatamente o que ela leva para cobrir o quadro — ela rola em 1:1 e o
+       quadro está parado —, então é aqui que a travessia acaba.
+
+       Em `dvh` como a altura do quadro, e não em `svh` como as duas de cima:
+       esta se compara com a tela de verdade, a mesma que a seção seguinte
+       atravessa. Em `svh` a saída terminaria antes da cobertura no celular e
+       o manifesto trocaria de velocidade numa tira ainda visível. */
+    --saida: 100dvh;
+
+    /* A fração da velocidade da página com que o manifesto sobe na saída —
+       é o parallax. Mesmo 0.3 do movimento que o hero teve até o manifesto
+       passar a entrar de lado (ver o fim do script em `Hero.astro`): é lento
+       o bastante para ler como profundidade, e não como uma segunda rolagem.
+
+       Não pode passar de 1: o vão que o manifesto deixa embaixo ao subir é
+       `--ritmo` da tela, e quem o cobre é a seção que entra, que já andou uma
+       tela inteira no mesmo tempo. Acima de 1 o vão corre na frente dela. */
+    --ritmo: 0.3;
+
+    position: relative;
+  }
+
+  /* Prender é decisão do script — ele é quem sabe se o movimento foi pedido
+     ou dispensado —, então a altura do trilho entra junto com a classe. Sem
+     ela isto tudo são `div`s comuns e as duas seções empilham na vertical,
+     uma tela embaixo da outra. */
+  .abertura.is-presa {
+    height: calc(100dvh + var(--entrada) + var(--espera) + var(--saida));
+
+    /* A saída é tempo emprestado da seção seguinte, não tempo somado à
+       página: o trilho cresce uma tela e a margem negativa puxa a seção de
+       baixo a mesma tela para cima. A rolagem total continua a mesma — ela
+       só passa a acontecer POR CIMA do quadro preso, em vez de depois dele.
+
+       É esta margem que faz a seção seguinte entrar na tela no instante em
+       que a espera acaba, e é por isso que a saída não precisa de nenhum
+       aviso do outro lado: quem vier depois da abertura é coberto por ela na
+       medida certa, seja qual for. Quem pinta em cima de quem está em
+       `global.css` — passa por outro componente, e escopo não atravessa. */
+    margin-bottom: calc(var(--saida) * -1);
+  }
+
+  .abertura__alvo,
+  .abertura__solta {
+    position: absolute;
+  }
+
+  .abertura__alvo {
+    top: var(--entrada);
+  }
+
+  .abertura__solta {
+    top: calc(var(--entrada) + var(--espera));
+  }
+
+  /* `dvh` e não `svh` como no resto: o quadro fica preso por duas telas e
+     meia, tempo de sobra para a barra do navegador recolher no celular. Em
+     `svh` ele pararia na altura da tela com a barra aberta e abriria uma
+     tira do fundo embaixo do hero pelo percurso inteiro. */
+  .abertura.is-presa .abertura__quadro {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    display: grid;
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  }
+
+  /* As duas camadas ocupam a mesma célula, e o manifesto pinta por cima só
+     por vir depois no DOM — nenhum `z-index` para manter em pé. */
+  .abertura.is-presa .abertura__camada {
+    grid-area: 1 / 1;
+  }
+
+  /* O recorte segura o manifesto enquanto ele espera fora da tela: o que
+     transborda para a direita é rolável, e sem isto a página inteira
+     ganharia uma barra horizontal. `clip` e não `hidden` para não virar um
+     contêiner de rolagem à toa. */
+  .abertura.is-presa .abertura__camada--manifesto {
+    overflow: clip;
+  }
+
+  /* O hero se apaga na mesma medida em que a saída anda — e some, não fica
+     transparente à toa: em `--recuo` 1 ele não pinta mais nada.
+
+     Ninguém vê o apagar, porque a saída só começa depois que o painel já
+     cobre o quadro inteiro. O que se vê, sem isto, é a borda de baixo dele:
+     parado no fim do trilho, o quadro repousa dentro da seção seguinte, e
+     com a rolagem parando em fração de pixel — o normal com rolagem suave —
+     essa borda serrilha e vira um fio cinza de ponta a ponta, no meio de uma
+     seção que não tem nada a ver com ele. Fim do percurso, fim do hero.
+
+     Na seção e não na camada: a gaveta do menu também mora aqui, é `fixed`,
+     e apagar junto seria apagar o menu no meio da página. */
+  .abertura.is-presa .abertura__camada--hero > :global(section) {
+    opacity: calc(1 - var(--recuo, 0));
+  }
+
+  /* As duas travessias do painel, num transform só porque são o mesmo
+     elemento em dois momentos que não se cruzam: na entrada `--recuo` é 0, e
+     na saída `--avanco` já é 1.
+
+     X — uma tela inteira à direita quando `--avanco` é 0, no lugar quando
+     é 1. `--avanco` tem um segundo leitor: o reveal palavra a palavra do
+     manifesto, em `Intro.astro`, que escalona a mesma fração pela ordem da
+     leitura. Os dois andam juntos de propósito — o painel chega enquanto o
+     texto se materializa dentro dele. Quem mexer no percurso aqui mexe nos
+     dois movimentos.
+
+     Y — o parallax da saída. O quadro está preso, então subir o painel a
+     `--ritmo` da tela é subi-lo a `--ritmo` da velocidade da página, que
+     nesse trecho é a velocidade da seção que entra. Sobe dentro do recorte:
+     o texto some pela borda de cima como sumiria pelo alto da tela, e o vão
+     que abre embaixo é sempre menor que o pedaço já coberto. */
+  .abertura.is-presa .abertura__deslize {
+    transform: translate3d(
+      calc((1 - var(--avanco, 0)) * 100%),
+      calc(var(--recuo, 0) * var(--ritmo) * var(--saida) * -1),
+      0
+    );
+    will-change: transform;
+  }
+
+  /* As seções trazem a própria altura de tela cheia, medida em `svh`; presas
+     no quadro, quem manda é o quadro. Sem isto o hero encolheria de volta
+     para `100svh` dentro de uma célula de `100dvh`.
+
+     Nas seções e não em todo filho: a gaveta do menu também é filha da
+     camada do hero, e é `fixed` — altura não é assunto dela. */
+  .abertura.is-presa :global(section) {
+    height: 100%;
+  }
+
+  /* O painel é mais alto que o quadro na medida do parallax, mais um fio. Uma
+     tela redonda bastaria para cobrir o hero parado; subindo, ela descobriria
+     o hero embaixo na mesma medida em que sobe — e o que aparece ali não é o
+     hero por escolha, é o hero por descuido.
+
+     O 1px não é margem de erro do desenho, é do navegador: altura vira
+     múltiplo de 1/64 de pixel, o deslocamento não, e em tela de altura
+     fracionária (901px, 1013px — o normal em Windows com escala de tela) a
+     conta que fecha em decimal perde essa fração no arredondamento. O que
+     sobrava era menos de 0,02px, e mesmo assim o hero pintava ali um fio
+     cinza de ponta a ponta, atravessando a seção seguinte.
+
+     A sobra fica o tempo todo dentro do recorte da camada, então ninguém a
+     vê: ela existe para que não haja nada para ver. O fundo branco aqui, e
+     não só no `.intro` (`Intro.astro`), é o que garante isso: sem ele a
+     sobra ficaria transparente e descobriria o hero desbotando por baixo. */
+  .abertura.is-presa .abertura__deslize {
+    height: calc(100% + var(--ritmo) * var(--saida) + 1px);
+    background: var(--color-white);
+  }
+
+  /* A seção de dentro, porém, não pode herdar essa altura inflada: ela é
+     quem centraliza o manifesto verticalmente (`Intro.astro`), e centralizar
+     dentro de uma caixa mais alta que a tela empurra o texto para baixo do
+     meio real — foi o que o Felipe viu e pediu para corrigir. Trava-se aqui
+     em `100dvh`, a altura de verdade do quadro; a sobra que `--ritmo` pede
+     continua existindo em `.abertura__deslize`, por baixo do fim da seção,
+     coberta pelo branco da regra acima. */
+  .abertura.is-presa .abertura__camada--manifesto :global(section) {
+    height: 100dvh;
+  }
+</style>
+
+<script>
+  /* O manifesto entra pela direita e sai por cima na medida em que a página
+     rola: com o quadro preso, o quanto já se rolou dentro do trilho vira a
+     fração percorrida de cada trecho, e o CSS transforma essas frações em
+     deslocamento.
+
+     É posição, não evento: ninguém intercepta roda nem toque, a rolagem
+     continua linear e a rolagem suave do Lenis segue intacta. Sem JS, as
+     duas seções voltam a ser duas telas empilhadas. */
+
+  /* Uma tela deslizando por cima da outra é movimento grande, do tipo que
+     incomoda de verdade quem pediu para reduzir: aí a abertura não prende e
+     o manifesto entra por baixo, como qualquer seção. */
+  const menosMovimento = matchMedia('(prefers-reduced-motion: reduce)');
+
+  const fracao = (n: number) => Math.min(Math.max(n, 0), 1);
+
+  document
+    .querySelectorAll<HTMLElement>('[data-abertura]')
+    .forEach((abertura) => {
+      const alvo = abertura.querySelector<HTMLElement>('[data-alvo]');
+      const solta = abertura.querySelector<HTMLElement>('[data-solta]');
+      const quadro = abertura.querySelector<HTMLElement>('[data-quadro]');
+      if (!alvo || !solta || !quadro) return;
+
+      /* Todo mundo que vem depois, e não só quem cobre: parado no fim do
+         trilho, o quadro ainda ocupa uma tela de página, e a seção que cobre
+         pode ser mais curta que isso — o que sobra dela cairia por cima da
+         seguinte. A classe que sobe uma camada está em `global.css`; sai
+         daqui porque é a mesma decisão que prende o quadro, e sem prender
+         não há quadro por cima de ninguém.
+
+         Os `<script>` do Astro entram na conta e não custam nada: são
+         `display: none`, camada não é assunto deles. */
+      const depois: Element[] = [];
+      for (let irmao = abertura.nextElementSibling; irmao; irmao = irmao.nextElementSibling) {
+        depois.push(irmao);
+      }
+
+      let entrada = 0;
+      let inicioSaida = 0;
+      let saida = 0;
+
+      const medir = () => {
+        abertura.classList.remove('is-presa');
+        depois.forEach((secao) => secao.classList.remove('is-sobre-abertura'));
+        abertura.style.removeProperty('--avanco');
+        abertura.style.removeProperty('--recuo');
+
+        if (menosMovimento.matches) {
+          entrada = 0;
+          return;
+        }
+
+        abertura.classList.add('is-presa');
+        depois.forEach((secao) => secao.classList.add('is-sobre-abertura'));
+        /* Medidos, não constantes: os dois marcos já moram nos pontos que
+           interessam do percurso, então ler o quanto desceram é ler as
+           mesmas medidas que o CSS usou — mexer em `--entrada`, `--espera`
+           ou `--saida` lá em cima não deixa a conta para trás. */
+        entrada = alvo.offsetTop;
+        inicioSaida = solta.offsetTop;
+        /* O trilho menos a altura do quadro é o tanto que ele fica preso; o
+           que sobra depois do início da saída é a saída. */
+        saida = abertura.offsetHeight - quadro.offsetHeight - inicioSaida;
+        acompanhar();
+      };
+
+      const acompanhar = () => {
+        if (!entrada) return;
+        const andado = -abertura.getBoundingClientRect().top;
+        /* Zero no instante em que o quadro gruda, 1 quando o manifesto
+           acaba de cobrir o hero; daí para a frente é a espera. */
+        abertura.style.setProperty('--avanco', fracao(andado / entrada).toFixed(4));
+        /* Recomeça do zero quando a espera acaba e a seção de baixo aponta
+           na borda da tela, e chega a 1 quando ela terminou de cobrir. */
+        if (saida > 0) {
+          const recuo = fracao((andado - inicioSaida) / saida);
+          abertura.style.setProperty('--recuo', recuo.toFixed(4));
+        }
+      };
+
+      /* A medição força layout; num `resize` contínuo isso é caro, e o
+         quadro seguinte é cedo o bastante para ninguém perceber. */
+      let agendada = 0;
+      const remedir = () => {
+        cancelAnimationFrame(agendada);
+        agendada = requestAnimationFrame(medir);
+      };
+
+      window.addEventListener('scroll', acompanhar, { passive: true });
+      window.addEventListener('resize', remedir);
+      menosMovimento.addEventListener('change', remedir);
+
+      medir();
+    });
+</script>

@@ -1,0 +1,219 @@
+---
+interface Props {
+  /* O `id` que o menu procura para chegar à camada de baixo. Ele não pode
+     morar na seção revelada: ela anda deslocada durante o percurso, e
+     responderia a quem pergunta a posição deslocada, não a que ocupa na
+     página — o pulo do menu cairia no meio da revelação. Aqui ele fica na
+     borda de baixo da tampa, que é onde a camada de baixo pousa quando o
+     percurso termina. Com ou sem o efeito, é o mesmo ponto. */
+  alvo: string;
+
+  /* Sobrescreve o --profundidade padrão (1, o teto) declarado no <style>
+     abaixo. Opcional: quem não passar nada continua exatamente como antes
+     — o valor mora na folha de estilo, não aqui. Existe porque nem toda
+     revelação pede o mesmo peso: FAQ→Rodapé usa 0.6 de propósito, mais
+     leve que o teto, por ser só a transição normal de fim de página, ao
+     contrário da de economia circular/unidades (que fica no padrão). */
+  profundidade?: number;
+
+  /* Cor do vão que a camada de baixo deixa embaixo de si perto do fim do
+     percurso (ver comentário no <style>). O padrão (branco) presume o
+     resto da página branca ao redor — presunção que quebra quando as duas
+     seções são escuras, como FAQ→Rodapé: sem isto, o vão piscaria uma tira
+     branca sobre conteúdo escuro nos últimos pixels da rolagem. */
+  corVao?: string;
+}
+
+const { alvo, profundidade, corVao } = Astro.props;
+
+const estilo = [
+  profundidade === undefined ? '' : `--profundidade: ${profundidade};`,
+  corVao === undefined ? '' : `background: ${corVao};`,
+]
+  .join(' ')
+  .trim();
+---
+
+{/* Duas seções em duas camadas, as duas andando, em velocidades diferentes.
+    A de cima — a tampa — rola normal e sai de cena; a de baixo sobe mais
+    devagar atrás dela e vai aparecendo embaixo da borda dela. A profundidade
+    vem dessa diferença, e não de uma estar parada: parada, a de cima teria
+    que tapar a tela inteira o percurso todo, senão abriria uma tira
+    mostrando a de baixo já na posição final — o pedaço errado da seção, e um
+    pulo. Andando devagar, a posição da camada de baixo é contínua com a
+    rolagem normal, e a tampa pode ter a altura que o conteúdo pedir.
+
+    Três medidas, todas tiradas de duas que o navegador conhece — a altura da
+    tampa e a altura da tela:
+
+    · o ATRASO é o quanto a camada de baixo fica adiantada em relação ao
+      lugar dela no fluxo, no começo do percurso. É a altura da tampa vezes
+      `--profundidade`; em 1, a borda de cima da camada de baixo começa
+      colada na borda de cima da tampa — o máximo possível sem que ela apareça
+      ACIMA da tampa em vez de embaixo.
+    · o PERCURSO é uma tela mais o atraso. Começa quando o topo da tampa
+      encosta na borda de baixo da tela, e é essa soma que faz a camada de
+      baixo estar exatamente na borda de baixo da tela nesse instante: nada
+      aparece fora de hora, e a entrada não tem salto.
+    · a VELOCIDADE da camada de baixo é a tela dividida pelo percurso (~55%
+      da rolagem em 1440×900). Sai da conta, não é escolhida.
+
+    O atraso vai a zero no fim do percurso, então a camada de baixo pousa
+    exatamente onde o fluxo a colocaria, e a página segue sem nada fora do
+    lugar. Quem mexer nos números tem dois limites a respeitar: o topo da
+    camada de baixo não pode passar acima do topo da tampa (aparecia por cima
+    dela), nem cair abaixo da borda de baixo dela (abria um vão entre as
+    duas). */}
+<div
+  class="revelacao"
+  data-revelacao
+  style={estilo || undefined}
+>
+  <div class="revelacao__tampa" data-tampa>
+    <slot name="tampa" />
+    <div class="revelacao__alvo" id={alvo}></div>
+  </div>
+
+  <div class="revelacao__fundo"><slot name="fundo" /></div>
+</div>
+
+<style>
+  .revelacao {
+    /* Quanto da tampa a camada de baixo passa escondida atrás dela no começo
+       do percurso. 1 é o teto — acima disso ela aparece por cima da tampa, e
+       não embaixo. Baixar este número encurta o percurso e aproxima as duas
+       velocidades: em 0.5 a camada de baixo anda a ~70% da rolagem, e o
+       efeito lê como respiro, não como camada. */
+    --profundidade: 1;
+
+    /* Adiantada, a camada de baixo deixa embaixo de si um vão da altura do
+       atraso. Ele só alcança a tela nos últimos pixels do percurso, quando já
+       encolheu quase a zero, e o que está atrás dele também é branco — mas
+       declarar aqui é o que tira a dependência de sorte. */
+    background: var(--color-white);
+  }
+
+  /* Fora do efeito não faz nada — nada se sobrepõe a nada. Vale sempre porque
+     é ele que ancora o alvo do menu na borda de baixo da tampa. */
+  .revelacao__tampa {
+    position: relative;
+  }
+
+  .revelacao__alvo {
+    position: absolute;
+    bottom: 0;
+  }
+
+  /* O deslocamento da camada de baixo. Os valores de reserva são o que segura
+     os dois caminhos sem movimento: sem JS, e com movimento reduzido, o
+     script não publica nada, `--avanco` vale 1, e a conta inteira dá zero —
+     as duas seções voltam a ser duas seções empilhadas, cada uma com a altura
+     do próprio conteúdo. */
+  .revelacao__fundo {
+    transform: translate3d(
+      0,
+      calc(var(--tampa, 0px) * var(--profundidade) * (1 - var(--avanco, 1)) * -1),
+      0
+    );
+  }
+
+  /* A tampa tem que pintar por cima da camada de baixo, e a camada de baixo
+     tem `transform` — o que já a faz pintar acima de qualquer bloco comum que
+     venha antes. Uma camada explícita resolve, e resolve aqui dentro: as duas
+     moram no mesmo invólucro, então a ordem entre elas não depende de ninguém
+     de fora. Junto com a classe porque, sem o efeito, elas não se
+     sobrepõem. */
+  .revelacao.is-em-camadas .revelacao__tampa {
+    z-index: 1;
+  }
+
+  .revelacao.is-em-camadas .revelacao__fundo {
+    will-change: transform;
+  }
+</style>
+
+<script>
+  /* A camada de baixo sobe mais devagar que a página na medida em que se
+     rola: o quanto já se andou do percurso vira a fração revelada, e o CSS
+     transforma essa fração em deslocamento.
+
+     É posição, não evento: ninguém intercepta roda nem toque, a rolagem
+     continua linear e a suavização do Lenis segue intacta. */
+
+  /* Duas camadas correndo em velocidades diferentes é movimento grande, do
+     tipo que incomoda de verdade quem pediu para reduzir: aí não há camada
+     nenhuma, e as duas seções entram rolando como quaisquer duas seções. */
+  const menosMovimento = matchMedia('(prefers-reduced-motion: reduce)');
+
+  const fracao = (n: number) => Math.min(Math.max(n, 0), 1);
+
+  document
+    .querySelectorAll<HTMLElement>('[data-revelacao]')
+    .forEach((revelacao) => {
+      const tampa = revelacao.querySelector<HTMLElement>('[data-tampa]');
+      if (!tampa) return;
+
+      let tela = 0;
+      let percurso = 0;
+
+      const medir = () => {
+        revelacao.classList.remove('is-em-camadas');
+        revelacao.style.removeProperty('--tampa');
+        revelacao.style.removeProperty('--avanco');
+
+        if (menosMovimento.matches) {
+          percurso = 0;
+          return;
+        }
+
+        /* A altura da tampa é a de um texto: ninguém a declara em lugar
+           nenhum, e por isso é o script quem a mede e a publica — ao
+           contrário da abertura, onde as medidas do percurso são do CSS e o
+           script só as lê de volta. O que continua do lado do CSS é a
+           decisão: `--profundidade` é desenho, e é lido de lá. */
+        const profundidade =
+          parseFloat(
+            getComputedStyle(revelacao).getPropertyValue('--profundidade')
+          ) || 0;
+
+        const altura = tampa.offsetHeight;
+        tela = window.innerHeight;
+        percurso = tela + altura * profundidade;
+        if (!percurso) return;
+
+        revelacao.style.setProperty('--tampa', `${altura}px`);
+        revelacao.classList.add('is-em-camadas');
+        acompanhar();
+      };
+
+      const acompanhar = () => {
+        if (!percurso) return;
+        /* O percurso começa uma tela antes de o topo da tampa chegar ao topo
+           da tela. `top` é o quanto falta para ele chegar lá, então uma tela
+           menos isso é o quanto já se andou — negativo antes da hora, e a
+           fração corta. */
+        const andado = tela - revelacao.getBoundingClientRect().top;
+        revelacao.style.setProperty('--avanco', fracao(andado / percurso).toFixed(4));
+      };
+
+      /* A medição força layout; num `resize` contínuo isso é caro, e o quadro
+         seguinte é cedo o bastante para ninguém perceber. */
+      let agendada = 0;
+      const remedir = () => {
+        cancelAnimationFrame(agendada);
+        agendada = requestAnimationFrame(medir);
+      };
+
+      window.addEventListener('scroll', acompanhar, { passive: true });
+      window.addEventListener('resize', remedir);
+      menosMovimento.addEventListener('change', remedir);
+
+      /* Altura de texto muda sozinha: quando a fonte termina de carregar,
+         quando a tela muda de largura, quando o navegador reflui por conta
+         própria. Medir uma vez na carga erraria nos três casos — o observador
+         cobre todos, e a primeira medida também vem dele, no instante em que
+         começa a observar. Trocar de classe aqui não mexe na altura da tampa,
+         então ele não se realimenta. */
+      new ResizeObserver(remedir).observe(tampa);
+    });
+</script>

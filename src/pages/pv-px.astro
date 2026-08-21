@@ -1,0 +1,80 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import Intro from '../components/Intro.astro';
+import CircularEconomy from '../components/CircularEconomy.astro';
+import Stores from '../components/Stores.astro';
+---
+
+<Layout title="pv" description="pv">
+  <main>
+    <Hero />
+    <Intro />
+    <CircularEconomy />
+    <Stores />
+  </main>
+</Layout>
+
+<script>
+  const hero = document.querySelector<HTMLElement>('.hero')!;
+  const intro = document.querySelector<HTMLElement>('.intro')!;
+  const vh = window.innerHeight;
+
+  const frame = () =>
+    new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+  /* Reconstrói estaticamente o que se veria rolado até `ver`: o print
+     headless sempre captura a partir do topo do documento, então subo o
+     conteúdo pela margem e aplico ao hero o mesmo deslocamento que o
+     script daria naquele scroll. */
+  const ver = Number(new URLSearchParams(location.search).get('ver') || 0);
+  if (ver) {
+    document.body.style.marginTop = `-${ver}px`;
+    hero.style.transform = `translateY(${ver * 0.7}px)`;
+    throw new Error('modo visual');
+  }
+
+  const cs = getComputedStyle(hero);
+  const linhas: string[] = [
+    `supports=${CSS.supports('animation-timeline', 'scroll()')}` +
+      `  reduce=${matchMedia('(prefers-reduced-motion: reduce)').matches}` +
+      `  vh=${vh}`,
+    `name=${cs.animationName}  dur=${cs.animationDuration}` +
+      `  timeline=${cs.animationTimeline}  range=${(cs as any).animationRange}`,
+  ];
+
+  for (const y of [0, 0.25, 0.5, 1]) {
+    const alvo = Math.round(y * vh);
+    window.scrollTo(0, alvo);
+    await frame();
+
+    const m = new DOMMatrixReadOnly(getComputedStyle(hero).transform);
+    const h = hero.getBoundingClientRect();
+    const i = intro.getBoundingClientRect();
+
+    /* Velocidade real do hero: quanto o topo dele subiu por pixel rolado. */
+    const vel = alvo === 0 ? 0 : Math.abs(h.top) / alvo;
+
+    /* Quem realmente pinta por cima na faixa em que os dois se sobrepõem. */
+    const sobrepoe = h.bottom - i.top;
+    let topo = '-';
+    if (sobrepoe > 4) {
+      const alvoY = Math.min(i.top + sobrepoe / 2, vh - 2);
+      const el = document.elementFromPoint(20, Math.max(2, alvoY));
+      topo = el ? `${el.tagName}.${el.className || '-'}`.slice(0, 34) : 'nada';
+    }
+
+    linhas.push(
+      `scroll=${alvo}  ty=${Math.round(m.m42)}  hero.top=${Math.round(h.top)}` +
+        `  intro.top=${Math.round(i.top)}  vel=${vel.toFixed(2)}` +
+        `  sobrep=${Math.round(sobrepoe)}  emCima=${topo}`
+    );
+  }
+
+  window.scrollTo(0, 0);
+  const box = document.createElement('pre');
+  box.style.cssText =
+    'position:fixed;inset:0 0 auto 0;z-index:99;background:#ff0;color:#000;font:11px monospace;white-space:pre-wrap;margin:0;padding:6px';
+  box.textContent = linhas.join('\n');
+  document.body.append(box);
+</script>

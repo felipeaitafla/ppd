@@ -1,0 +1,293 @@
+---
+import { Image } from 'astro:assets';
+import Button from './Button.astro';
+import { units } from '../data/site';
+import loja1 from '../assets/loja-1.png';
+import loja2 from '../assets/loja-2.png';
+import loja3 from '../assets/loja-3.png';
+import loja4 from '../assets/loja-4.png';
+
+/* A ordem é a do Figma: a primeira ocupa o slot grande, as três seguintes
+   a faixa de baixo. A rotação embaralha isso a cada ciclo, então toda foto
+   passa pelo slot grande — por isso todas são servidas no tamanho dele. */
+const photos = [
+  {
+    src: loja1,
+    alt: 'Salão da loja com parede de capas, fones e acessórios para iPhone',
+  },
+  {
+    src: loja2,
+    alt: 'Fachada de uma unidade Pede Pro Dindo',
+  },
+  {
+    src: loja3,
+    alt: 'Área de exposição da loja com aparelhos sobre as bancadas',
+  },
+  {
+    src: loja4,
+    alt: 'iPhones em exposição sobre a bancada de atendimento',
+  },
+];
+---
+
+{/* Sem `id`: o alvo do link "Unidades" vive em `Revelacao.astro`, que é quem
+    sabe onde esta seção para quando termina de ser revelada — o motivo está
+    comentado lá. */}
+<section class="stores">
+  <div class="stores__gallery" data-gallery>
+    {photos.map((photo, position) => (
+      <figure
+        class:list={['stores__slot', { 'stores__slot--lead': position === 0 }]}
+        data-slot
+      >
+        {photos.map((item, index) => (
+          <Image
+            src={item.src}
+            alt={item.alt}
+            width={1440}
+            widths={[480, 768, 1080, 1440]}
+            sizes="(min-width: 60rem) 44vw, 92vw"
+            format="webp"
+            quality={70}
+            loading="lazy"
+            decoding="async"
+            class:list={['stores__photo', { 'is-active': index === position }]}
+          />
+        ))}
+      </figure>
+    ))}
+  </div>
+
+  <div class="stores__content">
+    <div class="stores__head">
+      <span class="stores__label">Onde nos encontrar</span>
+      <h2 class="stores__headline">Visite a PPD mais próxima.</h2>
+    </div>
+
+    <ul class="stores__list">
+      {units.map((unit) => (
+        <li>
+          {/* `details name` dá acordeão exclusivo sem uma linha de JS. */}
+          <details class="stores__unit" name="unidades" open={unit.matriz}>
+            <summary class="stores__unit-head">
+              <span>{unit.label}</span>
+              <span class="stores__unit-mark" aria-hidden="true"></span>
+            </summary>
+            <div class="stores__unit-body">
+              <Button>{unit.address}</Button>
+              <Button href={unit.instagramUrl}>{unit.instagram}</Button>
+              {unit.groupUrl && (
+                <Button href={unit.groupUrl}>Acessar grupo de ofertas</Button>
+              )}
+            </div>
+          </details>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .stores {
+    display: grid;
+    align-items: center;
+    gap: var(--space-md);
+    /* Respiro vertical dobrado (128px) contra os 64px das laterais. O mesmo
+       par vale em Depoimentos e no FAQ: as três seções de conteúdo longo
+       ficam com a mesma moldura, e a diferença entre elas passa a ser o
+       fundo, não o espaçamento. Aqui há um motivo a mais — esta seção é
+       revelada por baixo da economia circular, e sem o respiro de cima a
+       primeira foto nasceria colada na tampa. */
+    padding: var(--space-lg) var(--space-md);
+    /* O branco é o mesmo do corpo da página, então não muda nada à vista —
+       mas esta seção é a camada de baixo da revelação, e passa um bom trecho
+       parada atrás da economia circular e do quadro estacionado da abertura.
+       Fundo opaco é o que a separa dos dois; sem ele os três apareceriam de
+       uma vez, misturados. */
+    background: var(--color-white);
+  }
+
+  /* Mudança de comportamento: abaixo disso a galeria fica estreita demais
+     para as três fotos da faixa lerem como fotos. */
+  @media (min-width: 60rem) {
+    .stores {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* Três colunas com a foto grande atravessando as três: a altura de cada
+     slot vem da proporção do Figma, então a galeria inteira acompanha a
+     largura sem altura fixa em nenhum ponto. */
+  .stores__gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-gallery);
+  }
+
+  .stores__slot {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    aspect-ratio: 608 / 435;
+    border-radius: var(--radius);
+    background: var(--color-bg-alt);
+  }
+
+  .stores__slot--lead {
+    grid-column: 1 / -1;
+    aspect-ratio: 624 / 505;
+  }
+
+  /* As quatro fotos ficam empilhadas em cada slot e só a ativa aparece:
+     a troca é um crossfade, sem carregar nada no momento do corte. */
+  .stores__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 800ms ease;
+  }
+
+  .stores__photo.is-active {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stores__photo {
+      transition: none;
+    }
+  }
+
+  .stores__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .stores__head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .stores__label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-label);
+  }
+
+  .stores__headline {
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .stores__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-list);
+  }
+
+  /* A régua é do próprio cabeçalho, não da lista: assim ela aparece igual na
+     unidade aberta e na fechada, sem depender de qual é a última. */
+  .stores__unit-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding-bottom: var(--space-rule);
+    border-bottom: 1px solid var(--color-rule-faint);
+    font-size: var(--fs-unit);
+    font-weight: 500;
+    line-height: 1.5;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .stores__unit-head::-webkit-details-marker {
+    display: none;
+  }
+
+  .stores__unit-head:focus-visible {
+    outline: 2px solid var(--color-black);
+    outline-offset: 4px;
+  }
+
+  .stores__unit-mark {
+    flex-shrink: 0;
+    width: max(.875rem, 0.376vw + .787rem); /* 18px @1440 — escala fluida sem teto, ver CLAUDE.md */
+    font-weight: 400;
+    text-align: right;
+  }
+
+  .stores__unit-mark::before {
+    content: '+';
+  }
+
+  .stores__unit[open] .stores__unit-mark::before {
+    content: '−';
+  }
+
+  .stores__unit-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    margin-top: var(--space-list);
+    padding-left: var(--space-2xs);
+    font-size: var(--fs-card);
+    line-height: 1.5;
+    color: var(--color-label);
+  }
+</style>
+
+<script>
+  /* JS porque a rotação é estado — que foto está em que slot — e o ciclo
+     atravessa elementos diferentes; CSS não alcança. */
+  const INTERVALO = 4000;
+  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll('[data-gallery]').forEach((gallery) => {
+    const slots = [...gallery.querySelectorAll('[data-slot]')].map((slot) => [
+      ...slot.querySelectorAll('img'),
+    ]);
+    const total = slots[0]?.length ?? 0;
+    if (slots.length < 2 || total < 2) return;
+
+    let offset = 0;
+    let visivel = false;
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    const tick = () => {
+      offset = (offset + 1) % total;
+      slots.forEach((fotos, posicao) => {
+        const ativa = (posicao + offset) % total;
+        fotos.forEach((foto, i) => foto.classList.toggle('is-active', i === ativa));
+      });
+    };
+
+    /* Fora da tela não há o que animar, e quem pediu menos movimento já vê
+       as quatro fotos de uma vez — parar não esconde nada dessa pessoa. */
+    const sync = () => {
+      const rodar = visivel && !motion.matches;
+      if (rodar && !timer) timer = setInterval(tick, INTERVALO);
+      if (!rodar && timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    };
+
+    new IntersectionObserver(
+      ([entry]) => {
+        visivel = entry.isIntersecting;
+        sync();
+      },
+      { threshold: 0.2 }
+    ).observe(gallery);
+
+    motion.addEventListener('change', sync);
+  });
+</script>

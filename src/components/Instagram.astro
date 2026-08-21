@@ -1,0 +1,111 @@
+---
+import { instagramHandle, instagramUrl } from '../data/site';
+
+/* Assuntos que o perfil publica, como no Figma. Não são filtros: a grade
+   abaixo é uma só. */
+const topics = ['Dicas', 'Ofertas', 'Bastidores', 'Humor', 'Novidades Apple'];
+
+/* TODO: as seis últimas publicações do perfil. Enquanto elas não chegam, seis
+   quadrados cinzas — as duas fileiras de três do Figma — seguram a medida da
+   seção para o resto da página não mudar de altura quando o feed entrar. */
+const posts = 6;
+---
+
+<section class="insta" id="insta">
+  <div class="insta__head">
+    <a class="insta__handle" href={instagramUrl}>{instagramHandle}</a>
+    <h2>Siga-nos no Instagram e fique por dentro das novidades</h2>
+
+    <ul class="insta__topics">
+      {topics.map((topic) => <li>{topic}</li>)}
+    </ul>
+  </div>
+
+  {/* Escondida de leitor de tela enquanto for placeholder: seis caixas vazias
+      não dizem nada a quem não as vê. Quando virarem publicações de verdade,
+      cada uma passa a ser um link com legenda e o atributo sai. */}
+  <div class="insta__grid" aria-hidden="true">
+    {Array.from({ length: posts }, () => <div class="insta__post" />)}
+  </div>
+</section>
+
+<style>
+  /* Mesmo gabarito da seção Autorizada — coluna centrada, 128px de respiro em
+     cima e embaixo. O Figma não põe padding lateral nenhum porque a grade tem
+     largura fixa; aqui ele entra para os quadrados não encostarem na borda
+     quando a tela é mais estreita que a grade. */
+  .insta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    max-width: var(--w-insta);
+    margin-inline: auto;
+    padding: var(--space-lg) var(--space-md);
+    background: var(--color-white);
+  }
+
+  .insta__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-list);
+    text-align: center;
+  }
+
+  /* O rótulo da seção é o próprio handle, e é o único jeito de seguir o perfil
+     a partir daqui: a seção convida e o Figma não desenhou botão. Como link,
+     desenha igual — cor, corpo e caixa alta são os mesmos dos outros rótulos. */
+  .insta__handle {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-label);
+  }
+
+  .insta__head h2 {
+    /* Teto em `em`, não em `rem`: são os 642px do Figma medidos no corpo de
+       42px, então a caixa escala junto com a fonte e a quebra em duas linhas
+       se mantém em qualquer viewport. */
+    max-width: 15.25em;
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  /* Sem clique, como as pastilhas de cidade em Depoimentos: são `li` para nada
+     se anunciar como acionável. */
+  .insta__topics {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2xs) var(--space-list);
+  }
+
+  .insta__topics li {
+    padding: var(--space-3xs) var(--space-list);
+    font-size: var(--fs-nav);
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--color-ink-soft);
+    background: var(--color-card);
+    border-radius: var(--radius);
+  }
+
+  /* Três colunas em qualquer largura, e não duas no celular: é a grade do
+     Instagram, e ela só lê como feed em três. */
+  .insta__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2xs);
+    width: 100%;
+  }
+
+  .insta__post {
+    aspect-ratio: 1;
+    background: var(--color-placeholder);
+    border-radius: var(--radius);
+  }
+</style>

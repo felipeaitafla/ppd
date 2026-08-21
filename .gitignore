@@ -25,3 +25,9 @@ pnpm-debug.log*
 
 # vercel
 .vercel/
+
+.vercel
+
+# fontes de vídeo brutas (ProRes, centenas de MB) — só os .mp4 transcodificados
+# em public/video/ vão pro site; o bruto fica local, fora do repositório.
+*.mov

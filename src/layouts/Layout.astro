@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import 'lenis/dist/lenis.css';
 
 interface Props {
   title: string;
@@ -20,5 +21,23 @@ const { title, description } = Astro.props;
   </head>
   <body>
     <slot />
+
+    <script>
+      import Lenis from 'lenis';
+
+      const lenis = new Lenis({
+        lerp: 0.06,
+        wheelMultiplier: 0.85,
+        duration: 1.8,
+        easing: (t: number) => 1 - Math.pow(1 - t, 5),
+      });
+
+      function raf(time: number) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+
+      requestAnimationFrame(raf);
+    </script>
   </body>
 </html>

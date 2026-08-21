@@ -1,8 +1,10 @@
 ---
 ---
 
+{/* Sem `id` de propósito: o alvo do link "Manifesto" vive em `Abertura.astro`,
+    onde o percurso da entrada é conhecido — o motivo está comentado lá. */}
 <section class="intro">
-  <div class="intro__text">
+  <div class="intro__text" data-manifesto>
     <h1>
       A primeira <strong>Revenda Autorizada da Apple</strong> no Brasil especializada
       em <strong>economia circular.</strong>
@@ -15,23 +17,101 @@
 </section>
 
 <style>
+  /* Tela cheia porque o manifesto entra por cima do hero, e uma seção mais
+     baixa que a tela deixaria aparecer uma tira dele embaixo. O fundo opaco
+     é o que cobre — sem ele a travessia mostraria as duas camadas de uma
+     vez.
+
+     Centralizado verticalmente por pedido do Felipe — antes ficava
+     ancorado no topo para o vão de telas largas e baixas virar uma faixa
+     só embaixo, mas o efeito colateral (texto sempre no meio) valia menos
+     que o pedido explícito. Com a largura do texto amarrada à própria
+     fonte agora (ver `.intro__text`, `max-width` em `em`), o bloco também
+     para de mudar de altura entre resoluções — o vão que sobra acima/abaixo
+     dele fica mais previsível do que era quando a largura e a fonte
+     escalavam cada uma no seu próprio ritmo.
+
+     Alinhado à esquerda (não centralizado no eixo horizontal) com respiro
+     de `--space-lg` dos dois lados — pedido explícito do Felipe, 2026-08-21. */
   .intro {
     display: flex;
-    justify-content: center;
-    padding: var(--space-lg) var(--space-md);
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100svh;
+    padding-inline: var(--space-lg);
+    padding-block: var(--space-lg);
     background: var(--color-white);
   }
 
+  /* Mudança de comportamento: o manifesto é a única seção presa à altura da
+     tela — a camada da abertura recorta o que passar de 100dvh. No corpo
+     cheio o texto pede 935px, então em tela mais baixa que isso o respiro de
+     128px é a primeira coisa a ceder. O limiar de 1024px sobra sobre os 935:
+     precisa estar acima da altura pedida, senão sobra uma faixa de telas em
+     que o padding ainda é o inteiro e o texto já não cabe. */
+  @media (max-height: 64rem) {
+    .intro {
+      padding-block: var(--space-md);
+    }
+  }
+
+  /* No Figma as duas frases moram na mesma caixa de texto, separadas por uma
+     linha em branco. `1.3em` reproduz isso — é a própria entrelinha. O corpo
+     precisa estar declarado aqui, e não nos filhos: `em` em `gap` resolve
+     contra a font-size deste elemento, então nos filhos o gap cairia nos
+     16px herdados do body. */
   .intro__text {
     display: flex;
     flex-direction: column;
-    gap: 0.6em;
-    max-width: 46.875rem;
+    /* Único lugar onde o display não escala livre: esta seção fica presa a
+       uma tela e o que passar disso a camada da abertura recorta. Cortar o
+       texto é pior do que exibi-lo um pouco menor, então são três tetos, e
+       os três dizem a mesma coisa — o manifesto tem de caber inteiro:
+
+       3.625rem  o valor do Figma, que é o maior que ele precisa ser;
+       6vh       tela baixa, onde faltaria altura (o corpo cheio pede 935px);
+       7vw       tela estreita, onde a coluna é curta e o texto vira 20
+                 linhas. Inerte acima de ~600px de largura. */
+    font-size: min(var(--fs-h1), 3.625rem, 6vh, 7vw); /* 58px = Figma */
+    gap: 1.3em;
+    width: 100%;
+    /* Em `em`, não `rem`/`vw`: a largura precisa escalar exatamente junto
+       com a fonte deste elemento, senão a proporção largura/letra muda
+       entre resoluções e o texto quebra em pontos diferentes — o problema
+       que isto substitui. 17.931em = 1040px ÷ 58px (a largura e a fonte
+       exatas em 1440px, já medidas para o "garantida." do parágrafo não
+       cair sozinho numa linha — ver o histórico de `--w-intro`, removido
+       de `global.css` porque só esta seção o usava). Em qualquer tamanho
+       de fonte — maior, menor, no piso, sem teto — a largura o acompanha
+       na mesma razão, e a quebra de linha não muda. */
+    max-width: 17.931em;
+
+    /* Os botões do reveal, aqui e não em `:root` porque só esta seção tem o
+       que revelar — e porque `em` precisa resolver contra o display, que é
+       declarado neste elemento. O script lê os três daqui: o CSS é que manda
+       nos números, ele só os distribui pelas palavras.
+
+       --atraso    de que ponto do percurso em diante o texto começa a
+                   aparecer. Não é zero porque o painel entra ao mesmo tempo,
+                   e no começo da entrada ele ainda está quase todo fora da
+                   tela: revelar ali seria revelar no que ninguém vê.
+       --duracao   que fatia do percurso cada palavra leva para resolver.
+                   Larga de propósito, e maior que o intervalo entre uma
+                   palavra e a seguinte: é o tanto de palavras em trânsito ao
+                   mesmo tempo que abre o leque, em vez de as palavras
+                   acenderem uma a uma como um letreiro.
+       --empurrao  onde a palavra espera, à direita do lugar dela. Modesto de
+                   propósito: o painel já está deslizando a tela inteira, e um
+                   empurrão grande jogaria a palavra para fora do recorte —
+                   ela chegaria pronta, sem nunca mostrar o caminho. */
+    --atraso: 0.4;
+    --duracao: 0.35;
+    --empurrao: 10em;
   }
 
   .intro__text h1,
   .intro__text p {
-    font-size: var(--fs-h1);
+    font-size: inherit;
     line-height: 1.3;
     font-weight: 400;
     color: var(--color-black);
@@ -40,4 +120,83 @@
   .intro__text strong {
     font-weight: 600;
   }
+
+  /* As palavras chegam da direita e ganham contraste na ordem da leitura.
+     Cada uma carrega o ponto do percurso em que a vez dela começa
+     (`--inicio`, escrito pelo script) e lê o `--avanco` que `Abertura.astro`
+     publica na rolagem; disso sai `--p`, o quanto ELA já resolveu.
+
+     `:global()` porque os `span` nascem no script e nunca recebem o atributo
+     de escopo do Astro — o escopo continua preso ao `.intro__text` à
+     esquerda.
+
+     O fallback `1` no `--avanco` é o que segura os dois caminhos sem
+     movimento: sem JS os `span` nem existem, e com movimento reduzido a
+     abertura não prende e nunca publica `--avanco` — nos dois casos o texto
+     aparece pronto, no lugar e em preto. */
+  .intro__text :global(.intro__palavra) {
+    --p: clamp(0, calc((var(--avanco, 1) - var(--inicio, 0)) / var(--duracao)), 1);
+    display: inline-block;
+    /* Não zero: a palavra que ainda não chegou fica no limiar do branco, como
+       um rascunho do parágrafo, e não um vão. */
+    opacity: calc(0.06 + var(--p) * 0.94);
+    transform: translate3d(calc((1 - var(--p)) * var(--empurrao)), 0, 0);
+  }
 </style>
+
+<script>
+  /* Quebrar o manifesto em palavras é DOM, não CSS: `::first-line` e afins
+     não alcançam palavra a palavra, e o texto precisa continuar sendo texto
+     no HTML servido — por isso a divisão acontece aqui, depois, e não no
+     markup. Sem este script a seção é o parágrafo de sempre.
+
+     Percorre nós de texto e não `innerHTML` para os `<strong>` sobreviverem:
+     cada `span` nasce dentro do elemento em que o texto já morava, então o
+     negrito do Figma continua de pé. Os espaços voltam como texto solto, e
+     não dentro dos `span`, senão a linha não teria onde quebrar. */
+  document.querySelectorAll<HTMLElement>('[data-manifesto]').forEach((bloco) => {
+    const textos: Text[] = [];
+    const passeio = document.createTreeWalker(bloco, NodeFilter.SHOW_TEXT);
+    while (passeio.nextNode()) textos.push(passeio.currentNode as Text);
+
+    const palavras: HTMLElement[] = [];
+
+    textos.forEach((no) => {
+      const pedaco = document.createDocumentFragment();
+
+      (no.textContent ?? '').split(/(\s+)/).forEach((parte) => {
+        if (!parte) return;
+        if (/^\s+$/.test(parte)) {
+          pedaco.append(parte);
+          return;
+        }
+        const palavra = document.createElement('span');
+        palavra.className = 'intro__palavra';
+        palavra.textContent = parte;
+        pedaco.append(palavra);
+        palavras.push(palavra);
+      });
+
+      no.replaceWith(pedaco);
+    });
+
+    /* Os números do ritmo moram no CSS, junto do resto do desenho; aqui só se
+       lê e se distribui. A última palavra começa quando falta exatamente uma
+       duração para o fim, então ela resolve no mesmo instante em que o painel
+       termina de entrar — o reveal não sobra para dentro da espera nem acaba
+       antes da hora. */
+    const medida = getComputedStyle(bloco);
+    const numero = (nome: string, padrao: number) => {
+      const lido = parseFloat(medida.getPropertyValue(nome));
+      return Number.isFinite(lido) ? lido : padrao;
+    };
+
+    const atraso = numero('--atraso', 0.4);
+    const duracao = numero('--duracao', 0.35);
+    const passo = (1 - atraso - duracao) / Math.max(palavras.length - 1, 1);
+
+    palavras.forEach((palavra, ordem) => {
+      palavra.style.setProperty('--inicio', (atraso + ordem * passo).toFixed(4));
+    });
+  });
+</script>

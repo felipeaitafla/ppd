@@ -1,0 +1,188 @@
+---
+import { faq } from '../data/faq';
+
+/* `<details>` e não um acordeão em JS: a resposta fica no HTML servido esteja
+   a linha aberta ou fechada, então rastreador, leitor de tela e LLM leem as
+   oito respostas inteiras sem executar nada. `name` agrupa as oito num
+   acordeão exclusivo, como em Unidades — sem uma linha de script. */
+
+/* O mesmo conteúdo, de novo, em JSON-LD: o `<details>` resolve quem lê a
+   página, isto resolve quem lê o markup em busca de dados estruturados. */
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer.trim(),
+    },
+  })),
+};
+---
+
+<section class="faq" id="faq">
+  <div class="faq__row">
+    <span class="faq__label">Perguntas frequentes</span>
+
+    <div class="faq__content">
+      <h2 class="faq__headline">O que você precisa saber antes de comprar</h2>
+
+      <ul class="faq__list">
+        {faq.map((item, index) => (
+          <li>
+            {/* A primeira nasce aberta: fechadas, as oito linhas leem como uma
+                lista de links e nada denuncia que há resposta atrás. */}
+            <details class="faq__item" name="faq" open={index === 0}>
+              <summary class="faq__question">{item.question}</summary>
+              <div class="faq__answer" set:html={item.answer} />
+            </details>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+
+<style>
+  .faq {
+    /* 128px em cima e embaixo, 64px nas laterais — o mesmo par de Unidades e
+       Depoimentos. */
+    padding: var(--space-lg) var(--space-md);
+    background: var(--color-bg-dark);
+  }
+
+  .faq__row {
+    display: grid;
+    gap: var(--space-faq-row);
+  }
+
+  /* Mudança de comportamento: abaixo disso o rótulo e o conteúdo não cabem
+     lado a lado sem a coluna de texto perder medida de leitura.
+
+     As duas colunas são fixas e sobra folga à direita no frame de 1440 — é a
+     composição assimétrica do Figma, não engano. Em 706px a resposta dá ~88
+     caracteres por linha; deixar a coluna crescer até o fim passaria de 110. */
+  @media (min-width: 60rem) {
+    .faq__row {
+      grid-template-columns: var(--w-faq-head) var(--w-faq-body);
+      align-items: start;
+    }
+  }
+
+  .faq__label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-faq-label);
+  }
+
+  .faq__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  /* A caixa do título mede em `em`, e não em `vw`: quantas linhas ele ocupa é
+     a razão entre a largura da caixa e o corpo, então amarrar uma coisa na
+     outra segura as duas linhas desenhadas enquanto a coluna couber — com uma
+     medida em viewport a quebra voltaria a três em telas médias, onde o corpo
+     encolhe mais devagar que a largura. 13.5em = 567px em 1440; a quebra boa
+     ("O que você precisa saber" / "antes de comprar") pede 530. */
+  .faq__headline {
+    max-width: 13.5em;
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-white);
+  }
+
+  .faq__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    /* 12px do Figma: acerta a primeira pergunta com a primeira linha do
+       título, que é bem maior. */
+    padding-top: var(--space-2xs);
+  }
+
+  /* A régua é a borda do item, não um elemento entre pergunta e resposta: ela
+     fecha o item inteiro, e a distância até ela muda com o estado — 12px
+     abaixo da pergunta fechada, 24px abaixo da resposta aberta. */
+  .faq__item {
+    padding-bottom: var(--space-2xs);
+    border-bottom: 1px solid var(--color-dark-rule-faint);
+  }
+
+  .faq__item[open] {
+    padding-bottom: var(--space-list);
+  }
+
+  .faq__question {
+    display: flex;
+    align-items: center;
+    font-size: var(--fs-question);
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--color-faq-question);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .faq__question::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Branco, não preto: sobre #040404 o anel preto não existe. */
+  .faq__question:focus-visible {
+    outline: 2px solid var(--color-white);
+    outline-offset: 4px;
+  }
+
+  /* Aberta, a pergunta inverte para uma pílula branca. É o único sinal de
+     estado da seção — o Figma não desenha marcador em lugar nenhum, nem
+     fechado nem aberto. O texto recua para dentro da pílula; fechado ele
+     alinha com o título, e esse alinhamento vale o deslocamento. */
+  .faq__item[open] .faq__question {
+    padding: var(--space-faq-pill);
+    border-radius: var(--radius);
+    background: var(--color-faq-question);
+    color: var(--color-black);
+  }
+
+  .faq__item[open] .faq__question:focus-visible {
+    outline-color: var(--color-black);
+  }
+
+  .faq__answer {
+    margin-top: var(--space-list);
+    font-size: var(--fs-card);
+    line-height: 1.5;
+    color: var(--color-dark-text);
+  }
+
+  /* `:global()` porque o conteúdo entra por `set:html`: os elementos vêm da
+     string em `faq.ts` e nunca recebem o atributo de escopo do Astro, então
+     um seletor descendente comum não os alcançaria. O escopo continua preso
+     ao `.faq__answer` à esquerda. */
+  .faq__answer :global(p + p),
+  .faq__answer :global(ul),
+  .faq__answer :global(ul + p) {
+    margin-top: var(--space-2xs);
+  }
+
+  .faq__answer :global(ul) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+
+  .faq__answer :global(strong) {
+    font-weight: 600;
+    color: var(--color-white);
+  }
+</style>

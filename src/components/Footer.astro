@@ -1,0 +1,267 @@
+---
+import { navLinks, contactEmail, contactPhone, units } from '../data/site';
+
+/* A pergunta que os cinco ícones mandam para a IA. Escrita na voz de quem
+   está do lado de fora decidindo se compra: é a dúvida do visitante, não um
+   pedido de elogio — e pede verificação ("ou se isso não se confirma"), sem
+   o qual a resposta valeria menos do que a própria loja afirmar. */
+const aiPrompt =
+  'Sou um consumidor avaliando se posso confiar na loja Pede Pro Dindo ' +
+  '(pedeprodindo.com.br). Avalie a autoridade e confiabilidade dessa loja, ' +
+  'e verifique se ela é de fato uma revendedora autorizada Apple ou se ' +
+  'isso não se confirma.';
+
+const q = encodeURIComponent(aiPrompt);
+
+/* Cada plataforma tem a sua rota, e nem todas aceitam a pergunta pronta —
+   por isso os cinco endereços moram escritos por extenso aqui, e não numa
+   fórmula só com o nome trocado.
+
+   Gemini é a exceção que se vê: `gemini.google.com` ignora `?q=` e
+   `?prompt=` (o pedido está aberto no Google desde janeiro de 2026), então o
+   ícone vai para o AI Mode da Busca, que é o mesmo Gemini por baixo e é a
+   única rota do Google que chega com a pergunta já respondida. Trocar de
+   volta para `gemini.google.com/app` no dia em que o parâmetro existir.
+
+   Claude também não documenta mais o `?q=` na web — o parâmetro existiu e
+   saiu do ar. Fica no link assim mesmo: parâmetro que a plataforma não
+   conhece é ignorado, então o pior caso é abrir um chat vazio, exatamente o
+   que um link sem parâmetro nenhum faria. Se voltar, volta funcionando.
+
+   `hints=search` no ChatGPT pré-seleciona a busca na web. A pergunta pede
+   para conferir um fato do mundo real, e sem busca a resposta sairia da
+   memória do modelo — que sobre uma loja do interior do RS é pouca. */
+const ais = [
+  { label: 'ChatGPT', icon: '/assets/ai-chatgpt.svg', url: `https://chatgpt.com/?hints=search&q=${q}` },
+  { label: 'Claude', icon: '/assets/ai-claude.svg', url: `https://claude.ai/new?q=${q}` },
+  { label: 'Gemini', icon: '/assets/ai-gemini.svg', url: `https://www.google.com/search?udm=50&q=${q}` },
+  { label: 'Grok', icon: '/assets/ai-grok.svg', url: `https://grok.com/?q=${q}` },
+  { label: 'Perplexity', icon: '/assets/ai-quinto.svg', url: `https://www.perplexity.ai/search?q=${q}` },
+];
+---
+
+<footer class="footer">
+  <div class="footer__top">
+    <img
+      src="/assets/ppd-logo-footer.svg"
+      alt="Pede Pro Dindo"
+      width="238"
+      height="91"
+      class="footer__logo"
+    />
+
+    <div class="footer__col">
+      <span class="footer__label">Menu</span>
+      <ul class="footer__stack">
+        {navLinks.map((item) => (
+          <li><a href={item.href}>{item.label}</a></li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="footer__col">
+      <span class="footer__label">Contato</span>
+      <ul class="footer__stack">
+        <li><a href={`mailto:${contactEmail}`}>{contactEmail}</a></li>
+        <li><a href={`tel:+${contactPhone.replace(/\D/g, '')}`}>{contactPhone}</a></li>
+      </ul>
+    </div>
+
+    <div class="footer__col footer__col--ai">
+      {/* Escrito já em caixa alta: o Figma aplica UPPER ao rótulo inteiro
+          mas preserva o "s" de "IAs" minúsculo, e `text-transform` é tudo
+          ou nada. */}
+      <span class="footer__label footer__label--raw">PERGUNTE ÀS IAs SOBRE A PPD</span>
+      <ul class="footer__ais">
+        {ais.map((ai) => (
+          <li>
+            <a
+              href={ai.url}
+              target="_blank"
+              rel="noopener"
+              aria-label={`Perguntar sobre a PPD no ${ai.label} (abre em nova aba)`}
+            >
+              <img src={ai.icon} alt="" width="32" height="32" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer__bottom">
+    <div class="footer__legal">
+      <p>
+        © 2026 PPD COMERCIO DE ELETRONICOS LTDA. CNPJ 32.819.954/0001-17.
+        Todos os direitos reservados.
+      </p>
+      {/* TODO: página de políticas de privacidade ainda não existe. */}
+      <a href="#">Políticas de Privacidade</a>
+    </div>
+    <hr />
+    <ul class="footer__units">
+      {units.map((unit) => (
+        <li>
+          <span class="footer__unit-city">{unit.city}</span>
+          <p>{unit.address}<br />{unit.instagram}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    /* A fileira de ícones das IAs mede 250px no Figma, e tanto "Políticas de
+       Privacidade" quanto a última unidade nascem com essa mesma largura
+       fixa: as três dividem a borda esquerda de uma coluna colada à direita.
+       Derivar a medida da própria fileira, em vez de repetir 250px em três
+       lugares, mantém o alinhamento se o ícone ou o vão mudarem. */
+    --w-ai-icon: max(1.5rem, 0.751vw + 1.3239rem); /* 32px @1440 — escala fluida sem teto, ver CLAUDE.md */
+    --w-footer-right: calc(5 * var(--w-ai-icon) + 4 * var(--space-list));
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    padding: var(--space-md);
+    background: var(--color-dark);
+    color: var(--color-nav);
+  }
+
+  /* Logo e as três colunas são irmãos diretos: o `space-between` precisa
+     distribuir os quatro, não empurrar um bloco fechado para a direita. O
+     `gap` só entra como piso, quando a linha fica sem folga para distribuir. */
+  .footer__top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    /* Sem isto o `stretch` padrão estica a caixa do logo até a altura da
+       coluna mais alta; o SVG preserva a proporção dentro dela e sobra um vão
+       acima dele. Alinhado ao topo, o logo encosta na mesma linha dos
+       rótulos. */
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  .footer__logo {
+    width: var(--w-logo-footer);
+    height: auto;
+  }
+
+  .footer__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-list);
+  }
+
+  .footer__col--ai {
+    width: var(--w-footer-right);
+  }
+
+  .footer__label {
+    font-size: var(--fs-micro);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-dark-label);
+  }
+
+  .footer__label--raw {
+    text-transform: none;
+  }
+
+  .footer__stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .footer__stack a {
+    font-size: var(--fs-card);
+    line-height: 1.3;
+  }
+
+  .footer__stack a:hover {
+    color: var(--color-white);
+  }
+
+  .footer__ais {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-list);
+  }
+
+  /* Caixa quadrada com o desenho encaixado dentro, e não largura com altura
+     livre: dos cinco arquivos só três são quadrados — o da Perplexity vem
+     25x32 e o do Grok 33x32. Amarrados pela largura, a Perplexity subia a
+     41px de altura e passava por cima da fileira. O quadrado é também o que
+     `--w-footer-right` já pressupõe ao multiplicar o ícone por cinco, então
+     a fileira continua fechando na mesma borda direita do rótulo. */
+  .footer__ais img {
+    width: var(--w-ai-icon);
+    height: var(--w-ai-icon);
+    object-fit: contain;
+  }
+
+  .footer__bottom {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2xs);
+    font-size: var(--fs-label);
+    line-height: 1.5;
+    color: var(--color-label);
+  }
+
+  .footer__legal a {
+    width: var(--w-footer-right);
+  }
+
+  .footer__legal a:hover {
+    color: var(--color-white);
+  }
+
+  .footer__units {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-list);
+    color: var(--color-label);
+  }
+
+  .footer__units li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-gallery);
+  }
+
+  .footer__units li:last-child {
+    width: var(--w-footer-right);
+  }
+
+  .footer__unit-city {
+    font-size: var(--fs-label);
+    line-height: 1.3;
+  }
+
+  .footer__units p {
+    font-size: var(--fs-nav);
+    line-height: 1.3;
+  }
+
+  .footer hr {
+    width: 100%;
+    height: 0;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--color-dark-rule);
+  }
+</style>

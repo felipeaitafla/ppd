@@ -1,0 +1,38 @@
+---
+/* Componente "BTN" do Figma (node 45:43): seta diagonal + texto em linha,
+   gap 8px, ícone de 9px, Poppins 16px/400 em #A8A8A8. É um desenho só —
+   as instâncias antigas espalhadas pelas seções (seta de 17px, gap 4px,
+   texto menor e mais escuro) são o que ele veio substituir.
+   Sem href renderiza <p>: o endereço da matriz usa o mesmo traço visual
+   sem ser um link. */
+import ArrowIcon from './ArrowIcon.astro';
+
+interface Props {
+  href?: string;
+}
+
+const { href } = Astro.props;
+---
+
+{href ? (
+  <a href={href} class="btn"><ArrowIcon /><slot /></a>
+) : (
+  <p class="btn"><ArrowIcon /><slot /></p>
+)}
+
+<style>
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: max(.375rem, 0.188vw + .331rem); /* 8px @1440 — escala fluida sem teto, ver CLAUDE.md */
+    font-size: var(--fs-card);
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: -0.03em;
+    color: var(--color-label);
+  }
+
+  a.btn:hover {
+    color: var(--color-black);
+  }
+</style>

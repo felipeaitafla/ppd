@@ -1,0 +1,263 @@
+---
+import { Image } from 'astro:assets';
+import Button from './Button.astro';
+import locator from '../assets/apple-locator.png';
+---
+
+{/* O print da busca da Apple não entra no tamanho final: ele chega maior,
+    por cima do título da própria seção, e encolhe até encaixar no lugar que
+    o layout guarda para ele. As três etapas do Figma (`49:464`) são a mesma
+    seção com o print em 1212px, 1008px e 880px de largura — e nas três a
+    borda de BAIXO dele está no mesmo ponto (884px do topo da seção, medido
+    para o print ESTÁTICO original). É isso que dá o efeito: o print cresce
+    para cima e para os lados a partir de uma borda que não sai do lugar,
+    então o excedente cai justamente sobre o título, e some de lá sozinho
+    quando a escala volta a 1. O vídeo que substituiu o print tem outra
+    proporção (1616×968, contra 1329×910 da imagem), então esse ponto exato
+    já não bate mais — a mecânica continua correta porque o script mede a
+    geometria em tempo real, só a composição fica um pouco diferente do
+    Figma original. */}
+<section class="proof" id="autorizada" data-encaixe>
+  <div class="proof__head">
+    <span class="proof__label">Verificados pela maçã</span>
+    <h2>Revenda Autorizada Apple</h2>
+  </div>
+
+  {/* Imagem e vídeo empilhados, mesmo padrão do Hero: a imagem é a base,
+      sempre presente; o vídeo entra por cima só para quem não pediu menos
+      movimento (a fonte só carrega sob essa media query — ver comentário
+      equivalente em Hero.astro). Quem tem `prefers-reduced-motion: reduce`
+      vê o print parado, exatamente como antes de existir vídeo aqui.
+
+      `data-print` migrou da imagem para este envoltório: é ele que o script
+      mede e escala agora, porque há dois elementos empilhados, não um só. */}
+  <div class="proof__shot" data-print>
+    {/* `sizes` descreve o tamanho MÁXIMO em que o print é pintado, não o
+        encaixado: no meio do percurso ele ocupa 1212px em 1440 de tela, e
+        pedir a variante de 880 deixaria o texto do print borrado justo no
+        trecho em que ele é o maior elemento da página. Abaixo de 1440 o teto
+        é a largura da tela — ver o corte da escala no script. */}
+    <Image
+      src={locator}
+      alt="Busca oficial de revendedores da Apple mostrando a Pede Pro Dindo entre os resultados"
+      width={1329}
+      widths={[480, 768, 1080, 1329]}
+      sizes="(min-width: 90rem) 1212px, 100vw"
+      format="webp"
+      quality={80}
+      loading="lazy"
+      class="proof__still"
+    />
+    <video class="proof__clip" autoplay muted loop playsinline aria-hidden="true">
+      <source src="/video/autorizada.mp4" media="(prefers-reduced-motion: no-preference)" type="video/mp4" />
+    </video>
+  </div>
+
+  {/* TODO: URL real da busca de revendedores da Apple. */}
+  <Button href="#">Fazer a pesquisa</Button>
+</section>
+
+<style>
+  /* O Figma resolve a medida com padding lateral fixo; aqui vira uma coluna
+     centrada de largura fluida, senão em telas estreitas o padding comeria o
+     conteúdo inteiro. */
+  .proof {
+    /* A escala de onde o print parte, e o único número de desenho de toda a
+       animação: 1212 ÷ 880, as duas larguras que o Figma dá à mesma imagem
+       na primeira e na última etapa.
+
+       É um teto, não uma promessa. Ele só cabe onde a tela é larga o
+       bastante — em 1440 o print cresce até 1212 e ainda sobram 114px de
+       cada lado, mas numa tela de 1100 a mesma razão jogaria as bordas para
+       fora da janela e abriria barra horizontal. Quem corta é o script, que
+       é quem sabe a largura real da janela; onde o corte pega, o maior
+       tamanho passa a ser a sangria de ponta a ponta. */
+    --escala-cheia: 1.3773;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    max-width: var(--w-proof);
+    margin-inline: auto;
+    padding: var(--space-lg) var(--space-md);
+    background: var(--color-white);
+  }
+
+  .proof__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-list);
+    text-align: center;
+  }
+
+  .proof__label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-label);
+  }
+
+  .proof__head h2 {
+    font-size: var(--fs-h2);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .proof__shot {
+    position: relative;
+    width: var(--w-locator);
+    max-width: 100%;
+    /* Substitui o `height: auto` de quando só havia uma imagem: com dois
+       filhos absolutos (imagem + vídeo), nada aqui contribui para a altura
+       sozinho — a proporção do vídeo (1616×968) precisa ser declarada. */
+    aspect-ratio: 1616 / 968;
+    overflow: hidden;
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius);
+  }
+
+  /* Imagem embaixo, sempre; vídeo por cima, só para quem não pediu menos
+     movimento. Preenchem o mesmo retângulo — a proporção de cada arquivo
+     não precisa bater com a do outro, `cover` resolve. */
+  .proof__still,
+  .proof__clip {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Reforço ao `media` da fonte: garante que o movimento suma mesmo se
+     algum navegador ignorar o atributo e carregar o vídeo assim mesmo. */
+  @media (prefers-reduced-motion: reduce) {
+    .proof__clip {
+      display: none;
+    }
+  }
+
+  /* Escalar é decisão do script — ele é quem sabe se o movimento foi pedido
+     ou dispensado, e o quanto a tela comporta. Sem a classe isto é uma
+     imagem comum, no tamanho final, e a seção é uma seção como as outras.
+
+     `transform` não ocupa espaço: o excedente é pintado por cima do título
+     sem empurrar nada, e a altura da seção é a mesma do começo ao fim do
+     percurso. Pintar por cima também sai de graça — a imagem tem transform,
+     e isso basta para ela vir depois do texto na ordem de pintura.
+
+     Sem `will-change`: promover a camada rasteriza o print numa escala só e
+     estica o resto do caminho, e num print cheio de texto miúdo isso
+     aparece. Repintar a cada quadro é mais caro e é o que o mantém legível.
+
+     Os valores de reserva são o que segura os dois caminhos sem movimento:
+     sem JS e com movimento reduzido nada é publicado, a conta inteira dá 1,
+     e o print fica parado no tamanho encaixado. */
+  .proof.is-encaixando .proof__shot {
+    transform: scale(calc(1 + (var(--escala, 1) - 1) * (1 - var(--avanco, 1))));
+    transform-origin: bottom center;
+  }
+</style>
+
+<script>
+  /* O print encolhe na medida em que se rola: o quanto já se andou do
+     percurso vira a fração encaixada, e o CSS transforma essa fração em
+     escala.
+
+     É posição, não evento: ninguém intercepta roda nem toque, a rolagem
+     continua linear e a rolagem suave do Lenis segue intacta.
+
+     O percurso vai do instante em que o topo da seção encosta na borda de
+     baixo da tela até o instante em que a borda de baixo do print encosta
+     nessa mesma borda — ou seja, dura o tanto que separa esses dois pontos
+     dentro da seção, medido, não escolhido. O fim cai onde tem que cair: é
+     exatamente quando o print inteiro acaba de entrar na tela que ele
+     termina de encaixar. */
+
+  /* Uma imagem crescendo por cima do texto é movimento grande, do tipo que
+     incomoda de verdade quem pediu para reduzir: aí o print entra no tamanho
+     final e não se mexe. */
+  const menosMovimento = matchMedia('(prefers-reduced-motion: reduce)');
+
+  const fracao = (n: number) => Math.min(Math.max(n, 0), 1);
+
+  document.querySelectorAll<HTMLElement>('[data-encaixe]').forEach((secao) => {
+    const print = secao.querySelector<HTMLElement>('[data-print]');
+    if (!print) return;
+
+    let tela = 0;
+    let percurso = 0;
+
+    const medir = () => {
+      secao.classList.remove('is-encaixando');
+      secao.style.removeProperty('--escala');
+      secao.style.removeProperty('--avanco');
+
+      if (menosMovimento.matches) {
+        percurso = 0;
+        return;
+      }
+
+      /* Com a classe e as duas propriedades fora, o que se lê abaixo é a
+         geometria sem escala nenhuma — a do lugar em que o print encaixa. */
+      const caixa = print.getBoundingClientRect();
+      /* `clientWidth` e não `innerWidth`: a diferença entre os dois é a
+         barra de rolagem, e é justamente ela que decide se o print sangrado
+         cabe ou transborda um fio para o lado. */
+      const janela = document.documentElement.clientWidth;
+
+      /* A decisão de desenho é do CSS; o que o script acrescenta é o limite
+         que só ele conhece. */
+      const cheia =
+        parseFloat(getComputedStyle(secao).getPropertyValue('--escala-cheia')) || 1;
+      const escala = caixa.width ? Math.min(cheia, janela / caixa.width) : 1;
+
+      /* Nada a encolher: em tela estreita o print já ocupa a largura toda no
+         tamanho final, e crescer só o jogaria para fora da janela. */
+      if (escala <= 1) {
+        percurso = 0;
+        return;
+      }
+
+      percurso = caixa.bottom - secao.getBoundingClientRect().top;
+      if (!percurso) return;
+
+      tela = window.innerHeight;
+      secao.style.setProperty('--escala', escala.toFixed(4));
+      secao.classList.add('is-encaixando');
+      acompanhar();
+    };
+
+    const acompanhar = () => {
+      if (!percurso) return;
+      /* `top` é o quanto falta para o topo da seção chegar ao topo da tela;
+         uma tela menos isso é o quanto já se andou — negativo antes da hora,
+         e a fração corta. */
+      const andado = tela - secao.getBoundingClientRect().top;
+      secao.style.setProperty('--avanco', fracao(andado / percurso).toFixed(4));
+    };
+
+    /* A medição força layout; num `resize` contínuo isso é caro, e o quadro
+       seguinte é cedo o bastante para ninguém perceber. */
+    let agendada = 0;
+    const remedir = () => {
+      cancelAnimationFrame(agendada);
+      agendada = requestAnimationFrame(medir);
+    };
+
+    window.addEventListener('scroll', acompanhar, { passive: true });
+    window.addEventListener('resize', remedir);
+    menosMovimento.addEventListener('change', remedir);
+
+    /* O percurso depende da altura do título, que muda sozinha: quando a
+       fonte termina de carregar, quando a tela muda de largura, quando o
+       navegador reflui por conta própria. Medir uma vez na carga erraria nos
+       três casos — o observador cobre todos, e a primeira medida também vem
+       dele, no instante em que começa a observar. Escalar o print não mexe
+       no layout, então ele não se realimenta. */
+    new ResizeObserver(remedir).observe(secao);
+  });
+</script>

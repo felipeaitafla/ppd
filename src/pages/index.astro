@@ -1,8 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Hero from '../components/Hero.astro';
-import Intro from '../components/Intro.astro';
+import Abertura from '../components/Abertura.astro';
+import Revelacao from '../components/Revelacao.astro';
 import CircularEconomy from '../components/CircularEconomy.astro';
+import Stores from '../components/Stores.astro';
+import Testimonials from '../components/Testimonials.astro';
+import AppleVerified from '../components/AppleVerified.astro';
+import Instagram from '../components/Instagram.astro';
+import Faq from '../components/Faq.astro';
+import Footer from '../components/Footer.astro';
 ---
 
 <Layout
@@ -10,8 +16,33 @@ import CircularEconomy from '../components/CircularEconomy.astro';
   description="A primeira Revenda Autorizada da Apple no Brasil especializada em economia circular. Compre, troque ou venda iPhones seminovos revisados e com garantia."
 >
   <main>
-    <Hero />
-    <Intro />
-    <CircularEconomy />
+    {/* Hero e manifesto entram juntos: a abertura é que prende os dois. E o
+        que vier logo abaixo dela sobe por cima do manifesto na saída — a
+        abertura se encarrega disso sozinha, então a ordem daqui é o que
+        decide quem faz essa travessia. Hoje quem faz é a economia circular,
+        primeira camada da revelação. */}
+    <Abertura />
+
+    {/* Outro par que só existe junto: a economia circular tapa as unidades e
+        sai da frente delas na rolagem. A revelação é que faz a montagem — as
+        duas seções não sabem uma da outra. */}
+    <Revelacao alvo="unidades">
+      <CircularEconomy slot="tampa" />
+      <Stores slot="fundo" />
+    </Revelacao>
+
+    <Testimonials />
+    <AppleVerified />
+    <Instagram />
   </main>
+
+  {/* O FAQ tapa o rodapé e sai da frente dele na rolagem — igual à de
+      economia circular/unidades, mas mais leve (profundidade 0.6, contra
+      o teto 1 do padrão), porque esta é só a transição normal de fim de
+      página. Nenhuma das duas seções sabe da outra; ver "Vocabulário de
+      efeitos de rolagem" no CLAUDE.md. */}
+  <Revelacao alvo="rodape" profundidade={0.6} corVao="var(--color-dark)">
+    <Faq slot="tampa" />
+    <Footer slot="fundo" />
+  </Revelacao>
 </Layout>

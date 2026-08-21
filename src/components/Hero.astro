@@ -1,14 +1,13 @@
 ---
 import { Image } from 'astro:assets';
-import heroBg from '../assets/hero-bg.png';
+import heroBg from '../assets/hero-bg.jpg';
 import ppdLogo from '../assets/ppd-apple-logo-white.png';
 import badge from '../assets/assinatura-h-white.png';
+import { navLinks, instagramUrl, whatsappUrl } from '../data/site';
 
-const navLinks = [
-  { label: 'Sobre', href: '#' },
-  { label: 'Unidades', href: '#' },
-  { label: 'Produtos', href: '#' },
-  { label: 'Trabalhe conosco', href: '#' },
+const social = [
+  { label: 'Instagram', href: instagramUrl, icon: '/assets/icon-instagram.svg' },
+  { label: 'WhatsApp', href: whatsappUrl, icon: '/assets/icon-whatsapp.svg' },
 ];
 ---
 
@@ -25,28 +24,92 @@ const navLinks = [
       quality={70}
       class="hero__bg"
     />
+    {/*
+      Uma fonte por faixa de viewport: o navegador baixa só a que casa com
+      o `media` (verificado no navegador — nenhuma requisição extra).
+      `prefers-reduced-motion: no-preference` em todas faz com que, para
+      quem pediu menos movimento, nenhuma fonte case: o vídeo não é
+      baixado e a imagem acima permanece.
+      Ordem do menor para o maior: se algum navegador ignorar `media`,
+      ele cai no 720p — degradação barata, não quebrada.
+      A quarta camada (2160p) só serve quem passa de 1440px de largura —
+      a maioria do desktop já para na de 1440p; 2160p é para quem tem
+      janela genuinamente larga (monitor grande, ultrawide), não todo
+      mundo com tela Full HD.
+    */}
+    <video
+      class="hero__video"
+      autoplay
+      muted
+      loop
+      playsinline
+      aria-hidden="true"
+    >
+      <source
+        src="/video/hero-720p.mp4"
+        media="(prefers-reduced-motion: no-preference) and (max-width: 720px)"
+        type="video/mp4"
+      />
+      <source
+        src="/video/hero-1080p.mp4"
+        media="(prefers-reduced-motion: no-preference) and (max-width: 1080px)"
+        type="video/mp4"
+      />
+      <source
+        src="/video/hero-1440p.mp4"
+        media="(prefers-reduced-motion: no-preference) and (max-width: 1440px)"
+        type="video/mp4"
+      />
+      <source
+        src="/video/hero-2160p.mp4"
+        media="(prefers-reduced-motion: no-preference)"
+        type="video/mp4"
+      />
+    </video>
     <div class="hero__gradient"></div>
   </div>
 
   <div class="hero__inner">
     <nav class="hero__nav" aria-label="Navegação principal">
+      {/* A assinatura troca de canto entre as faixas: topo no mobile,
+          rodapé do hero no desktop. Só uma das duas está no DOM visível
+          por vez — a outra sai da árvore com `display: none`. */}
+      <Image
+        src={badge}
+        alt="Revendedor autorizado Apple"
+        width={396}
+        height={126}
+        format="webp"
+        quality={80}
+        class="hero__badge-top"
+      />
+
       <ul class="hero__links">
         {navLinks.map((item) => (
           <li><a href={item.href}>{item.label}</a></li>
         ))}
       </ul>
+
       <ul class="hero__social">
-        <li>
-          <a href="#" aria-label="Instagram">
-            <img src="/assets/icon-instagram.svg" alt="" width="19" height="19" />
-          </a>
-        </li>
-        <li>
-          <a href="#" aria-label="WhatsApp">
-            <img src="/assets/icon-whatsapp.svg" alt="" width="19" height="19" />
-          </a>
-        </li>
+        {social.map((item) => (
+          <li>
+            <a href={item.href} aria-label={item.label}>
+              <span class="icon" style={`--src: url(${item.icon})`}></span>
+            </a>
+          </li>
+        ))}
       </ul>
+
+      <button
+        type="button"
+        class="hero__burger"
+        aria-expanded="false"
+        aria-controls="menu-mobile"
+        aria-label="Abrir menu"
+        data-menu-open
+      >
+        <span></span><span></span><span></span>
+      </button>
     </nav>
 
     <div class="hero__footer">
@@ -72,12 +135,63 @@ const navLinks = [
   </div>
 </section>
 
+<div class="drawer" id="menu-mobile" hidden>
+  <div class="drawer__top">
+    <Image
+      src={badge}
+      alt="Revendedor autorizado Apple"
+      width={396}
+      height={126}
+      format="webp"
+      quality={80}
+      class="drawer__badge"
+    />
+    <button
+      type="button"
+      class="drawer__close"
+      aria-label="Fechar menu"
+      data-menu-close
+    >
+      <img src="/assets/icon-close.svg" alt="" width="22" height="23" />
+    </button>
+  </div>
+
+  <nav aria-label="Menu">
+    <ul class="drawer__links">
+      {navLinks.map((item) => (
+        <li><a href={item.href}>{item.label}</a></li>
+      ))}
+      <li class="drawer__social">
+        {social.map((item) => (
+          <a href={item.href} aria-label={item.label}>
+            <span class="icon icon--lg" style={`--src: url(${item.icon})`}></span>
+          </a>
+        ))}
+      </li>
+    </ul>
+  </nav>
+
+  <div class="drawer__foot">
+    <Image
+      src={ppdLogo}
+      alt="Pede Pro Dindo"
+      width={900}
+      height={632}
+      format="webp"
+      quality={80}
+      class="drawer__brand"
+    />
+  </div>
+</div>
+
 <style>
   .hero {
     position: relative;
+    z-index: 0;
     display: flex;
     flex-direction: column;
-    min-height: clamp(35rem, 54vw, 48.5625rem);
+    height: 100vh;
+    height: 100svh;
     color: var(--color-white);
     overflow: hidden;
   }
@@ -94,13 +208,29 @@ const navLinks = [
     object-fit: cover;
   }
 
+  .hero__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Reforço ao `media` das fontes: garante que o movimento suma mesmo se
+     algum navegador ignorar o atributo e carregar o vídeo assim mesmo. */
+  @media (prefers-reduced-motion: reduce) {
+    .hero__video {
+      display: none;
+    }
+  }
+
   .hero__gradient {
     position: absolute;
     inset: 0;
     background: linear-gradient(
       180deg,
       rgba(0, 0, 0, 0.83) 0%,
-      rgba(0, 0, 0, 0.63) 50%,
+      rgba(0, 0, 0, 0.33) 50%,
       rgba(0, 0, 0, 0.83) 100%
     );
   }
@@ -120,7 +250,6 @@ const navLinks = [
 
   .hero__nav {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-sm);
@@ -129,24 +258,53 @@ const navLinks = [
   .hero__links {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-xs);
+    gap: max(1rem, 1.878vw + .5599rem); /* 36px @1440 — escala fluida sem teto, ver CLAUDE.md */
   }
 
   .hero__links a {
     font-size: var(--fs-nav);
-    font-weight: 500;
-    line-height: 1.5;
+    line-height: 1.3;
+    color: var(--color-nav);
   }
 
   .hero__social {
     display: flex;
     align-items: center;
     gap: var(--space-2xs);
+    color: var(--color-text-soft);
   }
 
-  .hero__social img {
-    width: 1.1875rem;
-    height: 1.1875rem;
+  /* Máscara em vez de `<img>`: o mesmo arquivo serve o hero (cinza) e o
+     menu mobile (claro) só herdando a cor do contexto. */
+  .icon {
+    display: block;
+    width: max(1rem, 0.282vw + .934rem); /* 19px @1440 — escala fluida sem teto, ver CLAUDE.md */
+    aspect-ratio: 1;
+    background-color: currentColor;
+    -webkit-mask: var(--src) no-repeat center / contain;
+    mask: var(--src) no-repeat center / contain;
+  }
+
+  .hero__burger {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    width: 29px;
+    padding: 6px 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .hero__burger span {
+    height: 2px;
+    background: var(--color-white);
+  }
+
+  .hero__badge-top {
+    display: none;
+    width: clamp(5.5rem, 23.7vw, 8rem); /* 110px @464 */
+    height: auto;
   }
 
   .hero__footer {
@@ -159,12 +317,152 @@ const navLinks = [
   }
 
   .hero__brand {
-    width: clamp(12.5rem, 31.25vw, 28.125rem);
+    width: var(--w-brand);
     height: auto;
   }
 
   .hero__badge {
-    width: clamp(8rem, 13.75vw, 12.375rem);
+    width: var(--w-badge);
+    height: auto;
+  }
+
+  /* Mudança de comportamento: os seis links + ícones deixam de caber numa
+     linha, então o menu vira gaveta e a assinatura sobe para o topo. */
+  @media (max-width: 47.99rem) {
+    .hero__links,
+    .hero__social,
+    .hero__badge {
+      display: none;
+    }
+
+    .hero__burger {
+      display: flex;
+    }
+
+    .hero__badge-top {
+      display: block;
+    }
+
+    .hero__brand {
+      width: clamp(13rem, 75vw, 22rem); /* 348px @464 */
+    }
+  }
+
+  .drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--color-black);
+    color: var(--color-nav);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .drawer[hidden] {
+    display: none;
+  }
+
+  .drawer__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+  }
+
+  .drawer__badge {
+    width: clamp(5.5rem, 23.7vw, 8rem); /* 110px @464 */
+    height: auto;
+  }
+
+  .drawer__close {
+    padding: 6px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .drawer__links {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .drawer__links li {
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--color-nav-rule);
+  }
+
+  .drawer__links a {
+    font-size: var(--fs-nav-drawer);
+    line-height: 1.3;
+  }
+
+  .drawer__social {
+    display: flex;
+    gap: 18px;
+  }
+
+  .icon--lg {
+    width: 22px;
+  }
+
+  .drawer__brand {
+    width: clamp(6rem, 26.3vw, 9rem); /* 122px @464 */
     height: auto;
   }
 </style>
+
+<script>
+  /* JS porque uma gaveta em tela cheia precisa de estado compartilhado
+     entre botão e painel (`aria-expanded`), fechar no Esc e devolver o
+     foco — nada disso o CSS alcança sozinho. */
+  const drawer = document.getElementById('menu-mobile');
+  const abrir = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+  const fechar = document.querySelector<HTMLButtonElement>('[data-menu-close]');
+
+  if (drawer && abrir && fechar) {
+    const desktop = matchMedia('(min-width: 48rem)');
+
+    const set = (aberto: boolean) => {
+      drawer.hidden = !aberto;
+      abrir.setAttribute('aria-expanded', String(aberto));
+      /* Sem isto a página continua rolando atrás da gaveta. */
+      document.body.style.overflow = aberto ? 'hidden' : '';
+      (aberto ? fechar : abrir).focus();
+    };
+
+    abrir.addEventListener('click', () => set(true));
+    fechar.addEventListener('click', () => set(false));
+
+    /* Navegar para uma âncora da própria página não recarrega nada, então
+       a gaveta ficaria aberta por cima do destino. */
+    drawer.querySelectorAll('a').forEach((link) =>
+      link.addEventListener('click', () => set(false))
+    );
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !drawer.hidden) set(false);
+    });
+
+    /* Girar o aparelho para paisagem passa do breakpoint e o menu de
+       desktop reaparece — a gaveta não pode continuar por cima. */
+    desktop.addEventListener('change', () => {
+      if (desktop.matches && !drawer.hidden) set(false);
+    });
+  }
+
+  /* O parallax do hero saiu daqui quando o manifesto passou a entrar pela
+     esquerda: ele existia para o hero subir a 30% da velocidade da página
+     enquanto a seção seguinte deslizava por cima na vertical. Agora o hero
+     fica preso e é coberto de lado (ver `Abertura.astro`) — deslocá-lo só
+     abriria um vão na parte que o manifesto ainda não cobriu.
+
+     O movimento em si não morreu, mudou de camada: é o manifesto que sobe a
+     30% enquanto a economia circular passa por cima, na saída da abertura.
+     O hero, embaixo dele, continua parado. */
+</script>

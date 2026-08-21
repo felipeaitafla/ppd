@@ -7,27 +7,115 @@
   --color-black: #000000;
   --color-white: #ffffff;
   --color-bg-alt: #ebebeb;
+  --color-bg-dark: #040404; /* fundo das seções pretas */
   --color-label: #a8a8a8;
   --color-text-muted: #666666;
+  --color-text-soft: #a1a1a1;
+  --color-ink-soft: #646464; /* nomes, links de apoio, pill ativa */
+  --color-card: #f6f6f6;
+  --color-placeholder: #e6e6e6; /* quadrado vazio da grade do Instagram */
+  --color-rule: #d5d5d5;
+  --color-rule-faint: #f0f0f0; /* régua sob cada unidade */
+  --color-pill: #b8b8b8;
+  --color-pill-line: #f4f4f4;
+
+  /* Contexto escuro: economia circular, FAQ, rodapé e menu mobile sobre foto. */
+  --color-dark: #141414;
+  --color-nav: #dddddd; /* links de navegação sobre foto ou escuro */
+  --color-dark-text: #8b8b8b; /* corpo de texto e traço de ícone sobre o preto */
+  --color-dark-label: #464646; /* rótulos do rodapé, sobre #141414 */
+  /* O rótulo do FAQ é mais claro que o do rodapé porque mora sobre #040404 e
+     não sobre #141414: mesma lógica de contraste, valores opostos. */
+  --color-faq-label: #6c6c6c;
+  /* Pedido do Felipe: as perguntas e a pílula da pergunta aberta usam este
+     cinza claro, não o branco puro do resto do site. */
+  --color-faq-question: #eaeaea;
+  --color-dark-rule: #3a3a3a;
+  --color-nav-rule: #2a2a2a;
+  /* A 4/255 de --color-nav-rule; os dois pedem uma unificação que passa pelo
+     Hero, fora do escopo de quem escreveu isto aqui. */
+  --color-dark-rule-faint: #262626; /* régua entre perguntas, sobre o preto */
 
   --font-body: 'Poppins', system-ui, sans-serif;
 
-  /* Fluid tokens: clamp(min, value/1440 * 100vw, value-at-1440) */
-  --fs-nav: clamp(0.8125rem, 0.972vw, 0.875rem);
-  --fs-h1: clamp(1.625rem, 3.194vw, 2.875rem);
-  --fs-h2: clamp(1.5rem, 2.639vw, 2.375rem);
-  --fs-card: clamp(0.9375rem, 1.111vw, 1rem);
-  --fs-label: clamp(0.6875rem, 0.833vw, 0.75rem);
+  /* Escala fluida sem teto, ancorada em duas larguras compartilhadas: 375px
+     (piso) e 1440px (o frame do Figma — o termo do meio bate o valor do
+     Figma exatamente aí). TODO token fluido do arquivo bate o próprio piso
+     em 375px e o próprio valor de Figma em 1440px — a mesma dupla para
+     todos, então nada "para de escalar" numa largura diferente do resto.
+     Acima de 1440px continua escalando na mesma proporção, sem limite — um
+     monitor 4K (3840px, 2,67× de 1440) mostra a composição inteira 2,67×
+     maior, preservando a proporção exata do Figma, não uma versão "presa"
+     no tamanho de 1440 com vazio ao redor.
 
-  --space-2xs: clamp(0.5rem, 0.833vw, 0.75rem);
-  --space-xs: clamp(0.75rem, 1.25vw, 1.125rem);
-  --space-sm: clamp(1.25rem, 2.222vw, 2rem);
-  --space-md: clamp(1.5rem, 4.444vw, 4rem);
-  --space-hero-top: clamp(1.25rem, 3.056vw, 2.75rem);
-  --space-lg: clamp(3rem, 8.889vw, 8rem);
-  --space-xl: clamp(2rem, 6.667vw, 6rem);
+     Fórmula para um token novo, dado o piso F e o valor do Figma V (rem):
+       K = (V − F) / 0.665625      // (1440 − 375) / 1600
+       B = F − 0.234375·K          // 375 / 1600
+       max(F, K·vw + B·rem)
+     Arredondar K a 3 casas, B a 4 — mesma precisão do resto do arquivo.
 
-  --page-max: 1440px;
+     Tipografia de display escala forte com a viewport; texto corrido
+     escala de leve, com piso de leitura — corpo de texto não pode
+     encolher na mesma proporção que um título. */
+  --fs-h1: max(2.125rem, 2.254vw + 1.5968rem); /* 58px @1440 */
+  --fs-h2: max(1.75rem, 1.315vw + 1.4419rem); /* 42px @1440 */
+  --fs-unit: max(1.125rem, 0.282vw + 1.059rem); /* 21px @1440 */
+  --fs-question: max(1.0625rem, 0.282vw + .9965rem); /* 20px @1440 */
+  --fs-card: max(.9375rem, 0.094vw + .9155rem); /* 16px @1440 */
+  --fs-nav: max(.8125rem, 0.094vw + .7905rem); /* 14px @1440 */
+  --fs-label: max(.6875rem, 0.094vw + .6655rem); /* 12px @1440 */
+  --fs-micro: max(.625rem, 0.094vw + .603rem); /* 11px @1440 */
+
+  /* Único tamanho ancorado no frame mobile do Figma (464px), não em 1440:
+     só aparece dentro do menu mobile, que nunca é exibido em desktop. Mantém
+     teto (clamp, não max) de propósito — um menu mobile não existe em 4K, o
+     "sem teto" acima é só para o desktop. */
+  --fs-nav-drawer: clamp(1.25rem, 5.172vw, 1.75rem); /* 24px @464 */
+
+  /* Espaçamentos: mesma fórmula do bloco --fs-* acima (piso em 375px, valor
+     do Figma em 1440px, sem teto). */
+  --space-3xs: 0.25rem; /* 4px — piso e valor de Figma já eram o mesmo número; nunca escalou de verdade */
+  --space-gallery: max(.375rem, 0.188vw + .331rem); /* 8px @1440 */
+  --space-rule: max(.5rem, 0.188vw + .456rem); /* 10px @1440 */
+  --space-2xs: max(.5rem, 0.376vw + .412rem); /* 12px @1440 */
+  --space-xs: max(.75rem, 0.563vw + .618rem); /* 18px @1440 */
+  --space-sm: max(1.25rem, 1.127vw + .9859rem); /* 32px @1440 */
+  /* Respiro dos quatro lados da pílula da pergunta aberta. Em 16px a conta
+     fecha sozinha — 20px de corpo x 1.5 de entrelinha + 32 = os 62px de altura
+     do Figma —, então a pílula não precisa de altura fixa e cresce se a
+     pergunta quebrar em duas linhas. */
+  --space-faq-pill: max(.75rem, 0.376vw + .662rem); /* 16px @1440 */
+  --space-hero-top: max(1.25rem, 2.254vw + .7218rem); /* 44px @1440 */
+  --space-list: max(1rem, 0.751vw + .8239rem); /* 24px @1440 */
+  --space-block: max(1.75rem, 1.878vw + 1.3099rem); /* 48px @1440 */
+  --space-faq-row: max(2rem, 4.131vw + 1.0317rem); /* 76px @1440 */
+  --space-md: max(1.5rem, 3.756vw + .6197rem); /* 64px @1440 */
+  --space-xl: max(2rem, 6.009vw + .5915rem); /* 96px @1440 */
+  --space-lg: max(3rem, 7.512vw + 1.2394rem); /* 128px @1440 */
+
+  /* Larguras de bloco: mesma fórmula, sem teto — texto reflui na caixa,
+     não pode ficar presa no tamanho de 1440 em monitor grande. */
+  --w-offers: max(11rem, 7.324vw + 9.2835rem); /* 254px @1440 */
+  --w-brand: max(11rem, 25.728vw + 4.9701rem); /* 450px @1440 */
+  --w-badge: max(7rem, 8.075vw + 5.1074rem); /* 198px @1440 */
+  /* Teto fixo, não escala fluida: são colunas centradas que devem ocupar a
+     largura toda quando ela é menor que o teto. Com `vw` a coluna encolhe
+     junto com a tela e sobra margem morta dos dois lados no celular. */
+  --w-proof: 63rem; /* 1008px = 880px de conteúdo + padding lateral */
+  --w-locator: 55rem; /* 880px — o print encaixado, no fim da animação */
+  --w-insta: 62rem; /* 992px = 864px de grade + padding lateral */
+
+  --w-faq-head: max(11rem, 12.488vw + 8.0731rem); /* 309px @1440 */
+  --w-faq-body: max(20rem, 36.244vw + 11.5053rem); /* 706px @1440 */
+
+  --w-card: max(16rem, 11.268vw + 13.3592rem); /* 376px @1440 */
+  --w-logo-footer: max(9rem, 8.826vw + 6.9313rem); /* 238px @1440 */
+  --w-icon: max(.4375rem, 0.188vw + .3935rem); /* 9px @1440 */
+
+  /* Raio não escala com a viewport: 12px lê como 12px em qualquer tela. */
+  --radius: 0.75rem;
+
+  --page-max: 120rem;
 }
 
 *,
@@ -70,6 +158,27 @@ ul {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* A camada do parallax. Mora aqui, e não no bloco da abertura, porque é uma
+   relação entre componentes — estilo com escopo não atravessa essa
+   fronteira. Presa, a abertura mantém o quadro `sticky`, e `sticky` pinta
+   acima de todo bloco não posicionado que venha depois: sem isto a seção
+   seguinte subiria POR BAIXO do manifesto na saída, invisível o caminho
+   todo. Uma camada acima é o que a deixa cobrir.
+
+   Vale para todas as seções abaixo dela, e não só para a que cobre: parado
+   no fim do trilho, o quadro ainda ocupa uma tela de página, e a seção que
+   cobre pode ser mais curta que uma tela — o que sobra do quadro alcança a
+   seção seguinte.
+
+   A classe vem do script da abertura, e não de um seletor de irmão daqui,
+   porque é a mesma decisão que prende o quadro: sem JS, ou com movimento
+   reduzido, não há quadro por cima de ninguém e as seções voltam a
+   empilhar sem ganhar camada nenhuma. */
+.is-sobre-abertura {
+  position: relative;
+  z-index: 1;
 }
 
 .visually-hidden {

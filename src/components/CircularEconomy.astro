@@ -15,22 +15,31 @@ const offers = [
 ];
 ---
 
-<section class="circular">
+<section class="circular" id="economia-circular">
   <div class="circular__top">
     <span class="circular__label">Economia circular</span>
-    <img
-      src="/assets/icon-circular.svg"
-      alt=""
-      width="26"
-      height="16"
+    {/* Inline, e não `<img>`, pelo mesmo motivo do ArrowIcon: o traço precisa
+        vir por herança. Sobre o fundo preto um hex cravado no arquivo some. */}
+    <svg
       class="circular__icon"
-    />
+      viewBox="0 0 28 18"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M9.92727 15.8702C9.07503 16.5994 7.9949 17.0092 6.87273 17.0291C5.63377 17.1475 4.39063 16.8503 3.33966 16.1846C2.28869 15.519 1.48977 14.5227 1.06909 13.3531C0.786036 12.5785 0.763636 10.9296 0.763636 10.9296C0.763636 10.9296 0.788073 9.28269 1.06909 8.50601C1.48977 7.33648 2.28869 6.34019 3.33966 5.67451C4.39063 5.00883 5.63377 4.71169 6.87273 4.83001C12.4727 4.83001 15.5273 17.0291 21.1273 17.0291C22.3662 17.1475 23.6094 16.8503 24.6603 16.1846C25.7113 15.519 26.5102 14.5227 26.9309 13.3531C27.214 12.5785 27.2364 10.9296 27.2364 10.9296C27.2364 10.9296 27.2119 9.28269 26.9309 8.50601C26.5102 7.33648 25.7113 6.34019 24.6603 5.67451C23.6094 5.00883 22.3662 4.71169 21.1273 4.83001H17.0545L21.1273 0.763636"
+        stroke="currentColor"
+        stroke-width="1.52727"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+    </svg>
   </div>
 
   <div class="circular__content">
     <h2 class="circular__headline">
-      <strong>A partir da economia circular,</strong> democratizamos o acesso a dispositivos
-      de alto nível com celulares <strong>seminovos, revisados e com garantia.</strong>
+      <strong>A partir da economia circular,</strong> democratizamos o acesso <br />
+      a dispositivos de alto nível <br />
+      com celulares <strong>seminovos, revisados e com garantia.</strong>
     </h2>
 
     <ul class="circular__offers">
@@ -48,8 +57,8 @@ const offers = [
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
-    padding: var(--space-md);
-    background: var(--color-bg-alt);
+    padding: var(--space-lg);
+    background: var(--color-bg-dark);
   }
 
   .circular__top {
@@ -69,20 +78,29 @@ const offers = [
 
   .circular__icon {
     flex-shrink: 0;
+    width: max(1.375rem, 0.376vw + 1.287rem); /* 26px @1440 — escala fluida sem teto, ver CLAUDE.md */
+    height: auto;
+    color: var(--color-dark-text);
   }
 
   .circular__content {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
     gap: var(--space-xl);
   }
 
+  /* Mudança de comportamento: as duas colunas só coexistem com espaço
+     para a coluna de cards manter medida de leitura. */
+  @media (min-width: 60rem) {
+    .circular__content {
+      grid-template-columns: 1fr var(--w-offers);
+    }
+  }
+
   .circular__headline {
-    flex: 1 1 26rem;
-    font-size: var(--fs-h2);
+    font-size: var(--fs-h1);
     line-height: 1.25;
     font-weight: 400;
-    color: var(--color-black);
+    color: var(--color-white);
   }
 
   .circular__headline strong {
@@ -93,18 +111,16 @@ const offers = [
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
-    flex: 1 1 16rem;
-    max-width: 19.4375rem;
   }
 
   .circular__offers p {
     font-size: var(--fs-card);
     line-height: 1.5;
-    color: var(--color-text-muted);
+    color: var(--color-dark-text);
   }
 
   .circular__offers strong {
     font-weight: 600;
-    color: var(--color-black);
+    color: var(--color-white);
   }
 </style>
