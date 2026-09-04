@@ -22,7 +22,12 @@
   /* Contexto escuro: economia circular, FAQ, rodapé e menu mobile sobre foto. */
   --color-dark: #141414;
   --color-nav: #dddddd; /* links de navegação sobre foto ou escuro */
-  --color-dark-text: #8b8b8b; /* corpo de texto e traço de ícone sobre o preto */
+  /* Cinza médio de corpo de texto. Nasceu para o contexto escuro (FAQ) e
+     hoje também é o texto das ofertas de economia circular, que inverteu
+     para branco — por isso o nome não fala mais em claro nem em escuro.
+     Sobre branco ele dá 3,0:1, abaixo dos 4,5:1 da WCAG AA; é o valor do
+     Figma, e o débito está anotado nas pendências. */
+  --color-text-mid: #8b8b8b;
   --color-dark-label: #464646; /* rótulos do rodapé, sobre #141414 */
   /* O rótulo do FAQ é mais claro que o do rodapé porque mora sobre #040404 e
      não sobre #141414: mesma lógica de contraste, valores opostos. */
@@ -95,9 +100,7 @@
 
   /* Larguras de bloco: mesma fórmula, sem teto — texto reflui na caixa,
      não pode ficar presa no tamanho de 1440 em monitor grande. */
-  --w-offers: max(11rem, 7.324vw + 9.2835rem); /* 254px @1440 */
-  --w-brand: max(11rem, 25.728vw + 4.9701rem); /* 450px @1440 */
-  --w-badge: max(7rem, 8.075vw + 5.1074rem); /* 198px @1440 */
+  --w-offers: max(11rem, 16.056vw + 7.2369rem); /* 347px @1440 */
   /* Teto fixo, não escala fluida: são colunas centradas que devem ocupar a
      largura toda quando ela é menor que o teto. Com `vw` a coluna encolhe
      junto com a tela e sobra margem morta dos dois lados no celular. */
@@ -160,7 +163,11 @@ ul {
   list-style: none;
 }
 
-/* A camada do parallax. Mora aqui, e não no bloco da abertura, porque é uma
+/* Inerte desde 2026-09-03: a abertura saiu da página junto com o manifesto,
+   e nada mais aplica esta classe. Fica de pé porque é contrato dela — quem
+   voltar a importar `Abertura.astro` precisa da regra no mesmo instante.
+
+   A camada do parallax. Mora aqui, e não no bloco da abertura, porque é uma
    relação entre componentes — estilo com escopo não atravessa essa
    fronteira. Presa, a abertura mantém o quadro `sticky`, e `sticky` pinta
    acima de todo bloco não posicionado que venha depois: sem isto a seção

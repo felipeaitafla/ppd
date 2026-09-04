@@ -1,16 +1,19 @@
 /* O que dois ou mais componentes precisam ler igual. Menu aparece no hero e
-   no rodapé; o WhatsApp, no ícone do hero, no menu mobile e na faixa de CTA;
+   no rodapé; o WhatsApp, no ícone do hero e no menu mobile;
    as unidades, no acordeão de Unidades e no rodapé — declarar em cada um
    garantiria que um dia divergissem. */
 
+/* Quatro itens, e não seis: "Manifesto" saiu junto com a seção — o texto
+   dele agora é o próprio hero, e um link para o topo da página não é item de
+   menu. "Blog" saiu por decisão do Felipe (2026-09-03): o item só volta
+   quando existir destino, em vez de ficar de enfeite apontando para `#`. O
+   `header-scroll` do Figma ainda desenha os dois; quem for implementá-lo lê
+   esta lista, não o frame. */
 export const navLinks = [
-  { label: 'Manifesto', href: '#manifesto' },
   { label: 'Economia Circular', href: '#economia-circular' },
   { label: 'Unidades', href: '#unidades' },
   { label: 'Autorizada', href: '#autorizada' },
   { label: 'FAQ', href: '#faq' },
-  /* TODO: Blog não tem seção nem página desenhada no Figma. */
-  { label: 'Blog', href: '#' },
 ];
 
 /* TODO: número e mensagem são placeholders. O número é deliberadamente

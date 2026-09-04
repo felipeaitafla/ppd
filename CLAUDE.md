@@ -31,6 +31,12 @@ confundir uma técnica com outra.
 ### Abertura — entra na lateral, presa, sai em parallax
 Referência: `src/components/Abertura.astro`.
 
+**Fora da página desde 2026-09-03**: o manifesto saiu do site e a abertura
+ficou sem o segundo andar. `Abertura.astro` e `Intro.astro` continuam no
+repositório, sem nenhuma página que os importe, como implementação de
+referência — tudo o que está descrito abaixo segue valendo para quem for
+reusar a técnica com outro par de seções.
+
 - **Pin:** sim — o quadro (`.abertura__quadro`) trava com `position: sticky`
   enquanto duas seções se revezam por cima dele.
 - **Quem fica parada / quem anda:** a primeira seção (hoje o Hero) fica
@@ -105,7 +111,9 @@ Referência: `src/components/AppleVerified.astro` (já nomeado no código:
   segunda camada.
 
 ### Leque de palavras — revelação palavra a palavra (consumidor, não autônomo)
-Referência: `src/components/Intro.astro`. **Nome cunhado agora** — o código
+Referência: `src/components/Intro.astro` — também fora da página desde
+2026-09-03, pelo mesmo motivo da Abertura, que era quem publicava o
+`--avanco` que ele lia. **Nome cunhado agora** — o código
 não batiza o efeito inteiro, só descreve o resultado ("abre o leque",
 `Intro.astro:85`). Trocar por outro termo se este não pegar.
 
@@ -164,7 +172,7 @@ mobile do Figma (464px) — um menu mobile nunca existe em desktop, então o
 
 Placeholders que estão no ar no protótipo e não podem passar para produção.
 _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
-**Última atualização: 2026-08-21.**
+**Última atualização: 2026-09-03.**
 
 ### Contato
 
@@ -228,9 +236,26 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   Quando as publicações chegarem, cada quadrado vira link com legenda e o
   atributo sai. Decidir também de onde vêm: seis arquivos no CMS ou a API do
   Instagram.
-- [ ] **Blog não tem destino** — o menu (hero e rodapé) lista o item, mas não
-  existe seção nem página desenhada para ele no Figma. Definir se vira seção
-  da one-page ou página à parte. Fonte: `navLinks` em `src/data/site.ts`.
+- [ ] **Blog não tem destino** — o item saiu dos menus em 2026-09-03, a pedido
+  do Felipe: ficava apontando para `#`, de enfeite. Não existe seção nem
+  página desenhada para ele no Figma. Definir se vira seção da one-page ou
+  página à parte e devolver o item a `navLinks`, em `src/data/site.ts`. O
+  frame `header-scroll` do Figma ainda desenha o item.
+- [ ] **`header-scroll` (`49:508`) não foi implementado** — barra fixa de
+  16px/64px com `backdrop-filter: blur(16px)`, logo `ppd` preto (95×32),
+  os links e os dois ícones sociais. Fica para depois por decisão do Felipe
+  (2026-09-03). Quem for implementar: os links vêm de `navLinks`, não do
+  frame — lá ainda estão "Manifesto" e "Blog", os dois já removidos do menu.
+- [ ] **Frame mobile do hero está desatualizado** — `54:797` ainda mostra a
+  composição antiga (assinatura no topo, hambúrguer, logo grande embaixo) e
+  não tem o texto que desceu do manifesto para o hero. O código segue o
+  desktop: em qualquer largura o hero mostra headline e subtexto, e o logo
+  grande saiu dele (continua na gaveta e no rodapé). Decisão do Felipe em
+  2026-09-03 — quando o frame mobile for redesenhado, conferir.
+- [ ] **Texto das ofertas de economia circular em `#8b8b8b` sobre branco** dá
+  3,0:1, abaixo dos 4,5:1 da WCAG AA para texto normal. É o valor do Figma
+  (`--color-text-mid`, que também serve o FAQ, onde o fundo é preto e o
+  contraste fecha). O mínimo sobre branco seria `#767676`.
 - [ ] **Links `href="#"` restantes** — grupo de ofertas da matriz
   (`Stores.astro`), "Acessar Google Review" (`Testimonials.astro`), "Fazer a
   pesquisa" da busca da Apple (`AppleVerified.astro`) e "Políticas de

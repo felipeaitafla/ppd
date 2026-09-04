@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Abertura from '../components/Abertura.astro';
+import Hero from '../components/Hero.astro';
 import Revelacao from '../components/Revelacao.astro';
 import CircularEconomy from '../components/CircularEconomy.astro';
 import Stores from '../components/Stores.astro';
@@ -16,16 +16,17 @@ import Footer from '../components/Footer.astro';
   description="A primeira Revenda Autorizada da Apple no Brasil especializada em economia circular. Compre, troque ou venda iPhones seminovos revisados e com garantia."
 >
   <main>
-    {/* Hero e manifesto entram juntos: a abertura é que prende os dois. E o
-        que vier logo abaixo dela sobe por cima do manifesto na saída — a
-        abertura se encarrega disso sozinha, então a ordem daqui é o que
-        decide quem faz essa travessia. Hoje quem faz é a economia circular,
-        primeira camada da revelação. */}
-    <Abertura />
+    {/* O hero entra sozinho e rola 1:1: o manifesto saiu do site (Figma,
+        2026-09-03) e o texto dele desceu para dentro do próprio hero, então
+        a abertura — que existia para prender um enquanto o outro passava por
+        cima — ficou sem o segundo andar e saiu da página. `Abertura.astro` e
+        `Intro.astro` seguem no repositório, sem ninguém que os importe, como
+        implementação de referência do efeito (ver CLAUDE.md). */}
+    <Hero />
 
-    {/* Outro par que só existe junto: a economia circular tapa as unidades e
-        sai da frente delas na rolagem. A revelação é que faz a montagem — as
-        duas seções não sabem uma da outra. */}
+    {/* Um par que só existe junto: a economia circular tapa as unidades e sai
+        da frente delas na rolagem. A revelação é que faz a montagem — as duas
+        seções não sabem uma da outra. */}
     <Revelacao alvo="unidades">
       <CircularEconomy slot="tampa" />
       <Stores slot="fundo" />
