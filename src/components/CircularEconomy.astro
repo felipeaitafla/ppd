@@ -202,7 +202,29 @@ const offers = [
      ao mesmo tempo (aqui, ≥90rem). Declarar isto dentro do `@media` lá em
      cima (onde mora o `grid-template-columns`) perderia sempre para estas
      regras base, que vêm depois — foi exatamente esse bug na primeira
-     tentativa. */
+     tentativa.
+
+     `min-width` no headline: sem isto, o `auto` do Grid poderia espremer a
+     trilha abaixo do `max-content` do item sob pressão (o mínimo automático
+     que o Grid respeita por padrão é o `min-content`, a palavra mais larga
+     — bem menor que o texto travado pede). `min-width: max-content` trava a
+     trilha no tamanho pedido; se um dia não couber, quem cede é o vão (até
+     o piso `--space-sm`) ou, no limite, a própria grade transborda — nunca
+     o texto.
+
+     `.circular__offers` teve o MESMO sintoma por um motivo diferente, bug
+     encontrado depois de publicar a troca de fonte: acima de ~2019px a
+     oferta "Compre" ganhava uma terceira linha sozinha, quebrando o
+     `<br class="quebra">`, mesmo com a trilha do Grid já travada no tamanho
+     certo (`min-width` não bastou). A causa não é o Grid — é que 21.688em
+     era um encaixe justo (a folga original, "1,5% sobre a maior linha", já
+     avisava disso) calibrado para o alcance pequeno de `--fs-card`; em
+     `cqi` o corpo passa longe desse alcance (43px em 3840px, contra uns
+     18px que `--fs-card` chegaria lá), e nesse tamanho o avanço dos glifos
+     — que nunca escala perfeitamente linear com o corpo — passou a comer
+     mais que a folga tinha. 22.3em (testado até 4500px) devolve a margem;
+     21.688em continua valendo abaixo de 90rem, onde `--fs-card` nunca chega
+     perto desse alcance. */
   @media (min-width: 90rem) {
     .circular__headline {
       /* 58 ÷ 1312 × 100 = 4.4207 — o corpo do Figma em 1440px sobre a
@@ -211,12 +233,15 @@ const offers = [
          convergem ali por definição; a partir daí cresce com o container em
          vez de com a viewport. */
       font-size: 4.4207cqi;
+      min-width: max-content;
     }
 
     .circular__offers {
       /* 16 ÷ 1312 × 100 = 1.2195 — mesmo raciocínio do headline, calibrado
          no corpo do Figma para o corpo do texto das ofertas. */
       font-size: 1.2195cqi;
+      width: 22.3em;
+      min-width: 22.3em;
     }
   }
 
