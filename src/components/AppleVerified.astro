@@ -6,17 +6,24 @@ import locator from '../assets/apple-locator.png';
 
 {/* O print da busca da Apple não entra no tamanho final: ele chega maior,
     por cima do título da própria seção, e encolhe até encaixar no lugar que
-    o layout guarda para ele. As três etapas do Figma (`49:464`) são a mesma
-    seção com o print em 1212px, 1008px e 880px de largura — e nas três a
-    borda de BAIXO dele está no mesmo ponto (884px do topo da seção, medido
-    para o print ESTÁTICO original). É isso que dá o efeito: o print cresce
-    para cima e para os lados a partir de uma borda que não sai do lugar,
-    então o excedente cai justamente sobre o título, e some de lá sozinho
-    quando a escala volta a 1. O vídeo que substituiu o print tem outra
-    proporção (1616×968, contra 1329×910 da imagem), então esse ponto exato
-    já não bate mais — a mecânica continua correta porque o script mede a
-    geometria em tempo real, só a composição fica um pouco diferente do
-    Figma original. */}
+    o layout guarda para ele. Cresce para cima e para os lados a partir de
+    uma borda de baixo que não sai do lugar, então o excedente cai
+    justamente sobre o título, e some de lá sozinho quando a escala volta
+    a 1.
+
+    O tamanho de partida é a largura da janela, ponta a ponta — pedido do
+    Felipe em 2026-09-04. O Figma desenha outra coisa: as três etapas de
+    `49:464` param em 1212px numa tela de 1440, com 114px de respiro de cada
+    lado. Sangrar até a borda estica mais o começo do percurso (1.64 contra
+    1.38 em 1440), e como a origem é a borda de baixo, esse a mais sobe: o
+    print passa a cobrir o título e o rótulo inteiros e, no primeiro sexto
+    do percurso, a encostar na seção de cima. Isso é o pedido, não efeito
+    colateral.
+
+    O vídeo que substituiu o print tem outra proporção (1616×968, contra
+    1329×910 da imagem), então as medidas do Figma já não batiam mesmo — a
+    mecânica continua correta porque o script mede a geometria em tempo
+    real. */}
 <section class="proof" id="autorizada" data-encaixe>
   <div class="proof__head">
     <span class="proof__label">Verificados pela maçã</span>
@@ -33,16 +40,19 @@ import locator from '../assets/apple-locator.png';
       mede e escala agora, porque há dois elementos empilhados, não um só. */}
   <div class="proof__shot" data-print>
     {/* `sizes` descreve o tamanho MÁXIMO em que o print é pintado, não o
-        encaixado: no meio do percurso ele ocupa 1212px em 1440 de tela, e
-        pedir a variante de 880 deixaria o texto do print borrado justo no
-        trecho em que ele é o maior elemento da página. Abaixo de 1440 o teto
-        é a largura da tela — ver o corte da escala no script. */}
+        encaixado — pedir a variante de 880 deixaria o texto borrado justo no
+        trecho em que ele é o maior elemento da página. Como o topo do
+        percurso agora sangra de ponta a ponta, esse máximo é a largura da
+        janela em qualquer resolução.
+        O arquivo tem 1329px de largura, então a partir daí ele é ampliado —
+        o pedido de uma captura em retina, já anotado nas pendências, ficou
+        mais urgente com a sangria. */}
     <Image
       src={locator}
       alt="Busca oficial de revendedores da Apple mostrando a Pede Pro Dindo entre os resultados"
       width={1329}
       widths={[480, 768, 1080, 1329]}
-      sizes="(min-width: 90rem) 1212px, 100vw"
+      sizes="100vw"
       format="webp"
       quality={80}
       loading="lazy"
@@ -61,19 +71,14 @@ import locator from '../assets/apple-locator.png';
   /* O Figma resolve a medida com padding lateral fixo; aqui vira uma coluna
      centrada de largura fluida, senão em telas estreitas o padding comeria o
      conteúdo inteiro. */
+  /* Não há mais número de desenho nenhum nesta animação: a escala de
+     partida é inteiramente derivada — a largura da janela dividida pela
+     largura encaixada do print —, e quem a calcula é o script, que é quem
+     sabe a largura real da janela. O `--escala-cheia: 1.3773` que morava
+     aqui (1212 ÷ 880, do Figma) era um teto; ele saiu quando a sangria de
+     ponta a ponta virou o pedido, e com ele saiu o único lugar em que a
+     animação dependia de uma medida escolhida à mão. */
   .proof {
-    /* A escala de onde o print parte, e o único número de desenho de toda a
-       animação: 1212 ÷ 880, as duas larguras que o Figma dá à mesma imagem
-       na primeira e na última etapa.
-
-       É um teto, não uma promessa. Ele só cabe onde a tela é larga o
-       bastante — em 1440 o print cresce até 1212 e ainda sobram 114px de
-       cada lado, mas numa tela de 1100 a mesma razão jogaria as bordas para
-       fora da janela e abriria barra horizontal. Quem corta é o script, que
-       é quem sabe a largura real da janela; onde o corte pega, o maior
-       tamanho passa a ser a sangria de ponta a ponta. */
-    --escala-cheia: 1.3773;
-
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -179,7 +184,8 @@ import locator from '../assets/apple-locator.png';
 
   /* Uma imagem crescendo por cima do texto é movimento grande, do tipo que
      incomoda de verdade quem pediu para reduzir: aí o print entra no tamanho
-     final e não se mexe. */
+     final e não se mexe. Com a sangria de ponta a ponta ele ficou ainda
+     maior no começo do percurso, o que só reforça a decisão. */
   const menosMovimento = matchMedia('(prefers-reduced-motion: reduce)');
 
   const fracao = (n: number) => Math.min(Math.max(n, 0), 1);
@@ -209,11 +215,10 @@ import locator from '../assets/apple-locator.png';
          cabe ou transborda um fio para o lado. */
       const janela = document.documentElement.clientWidth;
 
-      /* A decisão de desenho é do CSS; o que o script acrescenta é o limite
-         que só ele conhece. */
-      const cheia =
-        parseFloat(getComputedStyle(secao).getPropertyValue('--escala-cheia')) || 1;
-      const escala = caixa.width ? Math.min(cheia, janela / caixa.width) : 1;
+      /* Sangria de ponta a ponta: a escala de partida é a que faz o print
+         medir exatamente a janela. Não há teto por cima disso — o teto que
+         existia (`--escala-cheia`, do Figma) saiu em 2026-09-04. */
+      const escala = caixa.width ? janela / caixa.width : 1;
 
       /* Nada a encolher: em tela estreita o print já ocupa a largura toda no
          tamanho final, e crescer só o jogaria para fora da janela. */

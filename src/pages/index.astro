@@ -24,25 +24,26 @@ import Footer from '../components/Footer.astro';
         implementação de referência do efeito (ver CLAUDE.md). */}
     <Hero />
 
-    {/* Um par que só existe junto: a economia circular tapa as unidades e sai
-        da frente delas na rolagem. A revelação é que faz a montagem — as duas
-        seções não sabem uma da outra. */}
-    <Revelacao alvo="unidades">
-      <CircularEconomy slot="tampa" />
-      <Stores slot="fundo" />
-    </Revelacao>
+    {/* Passagem normal, sem efeito: as duas rolam 1:1, uma atrás da outra.
+        A revelação em camadas que morava aqui saiu em 2026-09-04, a pedido do
+        Felipe — desde que a economia circular virou branca, tampa e fundo
+        tinham a mesma cor e o que se via era um texto branco escorregando
+        sobre outro, sem a borda que dava sentido ao efeito. */}
+    <CircularEconomy />
+    <Stores />
 
     <Testimonials />
     <AppleVerified />
     <Instagram />
   </main>
 
-  {/* O FAQ tapa o rodapé e sai da frente dele na rolagem — igual à de
-      economia circular/unidades, mas mais leve (profundidade 0.6, contra
-      o teto 1 do padrão), porque esta é só a transição normal de fim de
-      página. Nenhuma das duas seções sabe da outra; ver "Vocabulário de
-      efeitos de rolagem" no CLAUDE.md. */}
-  <Revelacao alvo="rodape" profundidade={0.6} corVao="var(--color-dark)">
+  {/* O FAQ tapa o rodapé e sai da frente dele na rolagem — a única
+      revelação em camadas que restou na página, e de propósito mais leve
+      que o padrão (profundidade 0.6, contra o teto 1), porque esta é só a
+      transição normal de fim de página. Aqui a camada continua legível
+      porque as duas seções são escuras em tons diferentes. Nenhuma das duas
+      sabe da outra; ver "Vocabulário de efeitos de rolagem" no CLAUDE.md. */}
+  <Revelacao alvo="rodape" profundidade={0.6} corVao="var(--color-bg-dark)">
     <Faq slot="tampa" />
     <Footer slot="fundo" />
   </Revelacao>

@@ -2,20 +2,37 @@
 /* Cada oferta ganhou ícone no Figma (2026-09-03). São `<img>`, e não SVG
    inline como o do antigo rótulo da seção: o traço é preto sobre branco e
    fica preto — nada aqui precisa herdar cor de contexto. */
+
+/* `linhas` são as duas linhas de cada oferta no Figma, lidas do render dos
+   frames `84:57`, `84:59` e `84:61`. Ficam separadas no dado, e não num
+   texto corrido, porque o `<br>` entre elas é o que segura a quebra em
+   qualquer resolução; mexer no texto obriga a reexportar o frame. */
 const offers = [
   {
     label: 'Compre',
-    text: 'iPhones seminovos revisados por especialistas, com até 24 meses de garantia.',
+    linhas: [
+      'iPhones seminovos revisados por',
+      'especialistas, com até 24 meses de garantia.',
+    ],
     icon: '/assets/icon-compre.svg',
   },
   {
     label: 'Troque',
-    text: 'seu modelo atual pagando apenas a diferença. Avaliamos na hora.',
+    /* Quebra antes que as outras duas porque a caixa desta é 315px, e não
+       347: no Figma o frame `84:59` tem largura fixa, enquanto `84:57` e
+       `84:61` são `fill` da coluna. */
+    linhas: [
+      'seu modelo atual pagando',
+      'apenas a diferença. Avaliamos na hora.',
+    ],
     icon: '/assets/icon-troque.svg',
   },
   {
     label: 'Venda',
-    text: 'seu celular para a Pede Pro Dindo, avaliação e pagamento realizados na hora.',
+    linhas: [
+      'seu celular para a Pede Pro Dindo,',
+      'avaliação e pagamento realizados na hora.',
+    ],
     icon: '/assets/icon-venda.svg',
   },
 ];
@@ -30,17 +47,23 @@ const offers = [
     {/* Headline antes das ofertas no HTML — é o título da seção, e quem lê
         por leitor de tela ou sem CSS a encontra primeiro. A troca de lado
         acontece só na grade, no desktop. */}
-    <h2 class="circular__headline">
-      <strong>A partir da economia circular,</strong> democratizamos o acesso <br />
-      a dispositivos de alto nível <br />
-      com celulares <strong>seminovos, revisados e com garantia.</strong>
-    </h2>
+    {/* As cinco linhas do nó `84:55`, lidas do render do Figma. Duas são
+        quebras manuais dele (depois de "acesso" e de "nível"); as outras
+        duas o Poppins faz sozinho na caixa de 833px a 58px — mas em lugares
+        que o navegador não repete, porque compõe a mesma frase ~4% mais
+        larga. Todas viram `<br>`: assim não dependem nem da largura da
+        coluna, que muda com a resolução, nem de os dois renderizadores
+        concordarem. Abaixo de 48rem elas somem e o texto quebra sozinho. */}
+    <h2 class="circular__headline"><strong>A partir da economia circular,</strong> <br class="quebra" />democratizamos o acesso <br class="quebra" />a dispositivos de alto nível <br class="quebra" />com celulares <strong>seminovos, <br class="quebra" />revisados e com garantia.</strong></h2>
 
     <ul class="circular__offers">
       {offers.map((offer) => (
         <li>
           <img src={offer.icon} alt="" width="24" height="24" class="circular__icon" />
-          <p><strong>{offer.label}</strong> {offer.text}</p>
+          <p>
+            <strong>{offer.label}</strong> {offer.linhas[0]}
+            <br class="quebra" /> {offer.linhas[1]}
+          </p>
         </li>
       ))}
     </ul>
@@ -53,19 +76,45 @@ const offers = [
     background: var(--color-white);
   }
 
+  /* `minmax(0, 1fr)`, e não o `auto` implícito: a headline abaixo pede
+     `width: max-content`, e uma trilha `auto` cresceria junto com ela — o
+     `max-width: 100%` dela mediria a trilha inflada e não clamparia nada.
+     Some no mobile, onde as quebras saem e a frase vira uma linha só de dois
+     mil e poucos pixels. */
   .circular__content {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-block);
   }
 
-  /* Mudança de comportamento: as duas colunas só coexistem com espaço para a
-     coluna de ofertas manter medida de leitura. Acima disso a headline vai
-     para a direita, como no Figma, e as ofertas ficam centradas na altura
-     dela. */
-  @media (min-width: 60rem) {
+  /* Mudança de comportamento: as duas colunas do Figma (ofertas de 347px e
+     a headline, que aqui pede 866px) só cabem lado a lado a partir de
+     ~1320px de viewport. O corte é 90rem porque 1440px é o frame do Figma —
+     ali a composição precisa ser a dele — e porque em 1344px o vão já
+     cairia para 45px, apertado demais para o que o Figma desenha com 132.
+     Antes o corte era 60rem, e entre 960px e 1440px a coluna da direita
+     ficava mais estreita que a headline: o texto ganhava linha, que é
+     exatamente o que esta seção não pode fazer. Empilhado ele cabe com
+     folga desde 768px (pede 640px numa coluna de 690px), então abaixo de
+     90rem a página empilha e as quebras do Figma continuam de pé com a
+     letra no tamanho da escala fluida.
+
+     Acima de 90rem a headline vai para a direita, como no Figma, e as
+     ofertas ficam centradas na altura dela. As duas trilhas são `auto` —
+     cada uma mede o próprio conteúdo — e o que sobra vira vão, que é o
+     `space-between` do frame `84:54`. O vão é o amortecedor desta seção:
+     como a headline sai ~33px mais larga aqui que no Figma, em 1440px ele
+     fecha em 99px onde o Figma desenha 132. É onde a diferença de
+     composição some sem mexer em corpo nem em quebra; as duas colunas
+     continuam encostadas nas bordas do respiro, como no Figma.
+     `--space-sm` é só o piso do vão, para as colunas nunca se encostarem.
+     A coluna das ofertas mede-se em `em` do corpo do texto (ver abaixo) —
+     não mais pelo token `--w-offers`, que saiu do `global.css`. */
+  @media (min-width: 90rem) {
     .circular__content {
-      grid-template-columns: var(--w-offers) minmax(0, 1fr);
-      gap: var(--space-lg);
+      grid-template-columns: auto auto;
+      justify-content: space-between;
+      column-gap: var(--space-sm);
       align-items: center;
     }
 
@@ -78,18 +127,18 @@ const offers = [
     }
   }
 
-  /* Largura em `em`, como no hero: ela escala junto com a própria fonte, e a
-     caixa do Figma (833px a 58px = 14.362em) se reproduz em qualquer
-     resolução. As duas quebras marcadas no HTML são as do Figma; a terceira
-     ("com celulares seminovos, / revisados e com garantia.") é a quebra
-     natural dentro desta largura — o Figma também a deixa acontecer sozinha.
-
-     Abaixo de ~1400px a coluna da grade fica mais estreita que esta medida e
-     o texto ganha uma linha a mais: os tokens fluidos não são proporcionais
-     (têm um termo constante), então a fonte encolhe mais devagar que a
-     coluna. É reflow, não corte. */
+  /* Mesmo tratamento do hero: as cinco linhas estão travadas no HTML, então
+     a caixa só precisa não ser mais estreita que a maior delas.
+     `width: max-content` a cola na maior linha — 14.927em, "A partir da
+     economia circular," — e `max-width: 100%` impede o vazamento. São 866px
+     a 58px contra os 833px da caixa do Figma; com o texto à esquerda a
+     diferença fica toda na borda direita, que é ar, e o vão da grade a
+     absorve. Não há teto de corpo em `cqi` aqui como no `h1` do hero:
+     empilhada até 90rem e lado a lado depois, a coluna sempre sobra sobre
+     essa medida, inclusive em 4K. */
   .circular__headline {
-    max-width: 14.362em;
+    width: max-content;
+    max-width: 100%;
     font-size: var(--fs-h1);
     line-height: 1.25;
     font-weight: 400;
@@ -100,10 +149,22 @@ const offers = [
     font-weight: 600;
   }
 
+  /* A coluna do Figma tem 347px a 16px de corpo — 21.688em. Em `em`, e não
+     no `vw` do antigo `--w-offers`, porque é a razão caixa/letra que decide
+     onde as duas linhas de cada oferta quebram: fixa a razão e a quebra para
+     de se mexer com a resolução. Por isso o corpo do texto sobe para cá, e o
+     `<p>` apenas herda. Sobra 1,5% sobre a maior linha — folga suficiente
+     para o avanço dos glifos não escalar exatamente com o corpo e ainda
+     assim ninguém quebrar sozinho.
+     `max-width: 100%` é para o mobile, onde a coluna é mais estreita que
+     isso e o texto volta a quebrar à vontade. */
   .circular__offers {
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
+    width: 21.688em;
+    max-width: 100%;
+    font-size: var(--fs-card);
   }
 
   .circular__offers li {
@@ -118,7 +179,6 @@ const offers = [
   }
 
   .circular__offers p {
-    font-size: var(--fs-card);
     line-height: 1.5;
     color: var(--color-text-mid);
   }
@@ -126,5 +186,13 @@ const offers = [
   .circular__offers strong {
     font-weight: 600;
     color: var(--color-black);
+  }
+
+  /* Mesma regra do hero, pelo mesmo motivo: a composição de 1440px não cabe
+     numa coluna de celular. */
+  @media (max-width: 47.99rem) {
+    .quebra {
+      display: none;
+    }
   }
 </style>

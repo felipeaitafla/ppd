@@ -1,7 +1,7 @@
 ## Development
 
 When starting the dev server, use background mode:
-
+  
 ```
 astro dev --background
 ```
@@ -69,8 +69,14 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   branca de 62px, e o `+`/`−` saiu: agora a pílula é o único sinal de estado,
   decisão tomada sabendo que, fechadas, as oito linhas não denunciam que abrem.
   As oito perguntas de `faq.ts` não mudaram — só a moldura. Fica um débito de
-  acessibilidade: o rótulo em `#6C6C6C` sobre `#040404` dá 3,9:1, abaixo dos
-  4,5:1 da WCAG AA para texto normal; o mínimo nesse fundo é `#767676`.
+  acessibilidade: o rótulo em `#6C6C6C` piorou com a inversão de fundos de
+  2026-09-04 — sobre o `#0C0C0C` do FAQ (o `#141414` que veio do rodapé,
+  escurecido no mesmo dia a pedido do Felipe) dá 3,72:1, contra 3,9:1 sobre
+  o `#040404` de antes, e os dois estão abaixo dos 4,5:1 da WCAG AA para
+  texto normal. O mínimo nesse fundo é `#7A7A7A`.
+  O rótulo do rodapé (`#464646`) andou no sentido contrário, de 1,95:1 para
+  2,17:1 — longe do AA nos dois casos, e continua sendo o pior contraste do
+  site.
 - [x] ~~**Seção `insta` não existe no código**~~ — resolvida em 2026-08-21.
   O frame `54:723` virou `Instagram.astro`, entre `autorizada` e `faq`, com o
   gabarito do `autorizada`: coluna centrada, 128px de respiro, fundo branco.

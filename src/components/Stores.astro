@@ -30,10 +30,10 @@ const photos = [
 ];
 ---
 
-{/* Sem `id`: o alvo do link "Unidades" vive em `Revelacao.astro`, que é quem
-    sabe onde esta seção para quando termina de ser revelada — o motivo está
-    comentado lá. */}
-<section class="stores">
+{/* O `id` voltou para cá em 2026-09-04, quando a revelação saiu da passagem
+    da economia circular para esta seção: sem camada nenhuma andando, a seção
+    está sempre onde o fluxo a coloca, e o alvo do menu pode ser ela mesma. */}
+<section class="stores" id="unidades">
   <div class="stores__gallery" data-gallery>
     {photos.map((photo, position) => (
       <figure
@@ -95,16 +95,12 @@ const photos = [
     /* Respiro vertical dobrado (128px) contra os 64px das laterais. O mesmo
        par vale em Depoimentos e no FAQ: as três seções de conteúdo longo
        ficam com a mesma moldura, e a diferença entre elas passa a ser o
-       fundo, não o espaçamento. Aqui há um motivo a mais — esta seção é
-       revelada por baixo da economia circular, e sem o respiro de cima a
-       primeira foto nasceria colada na tampa. */
+       fundo, não o espaçamento. O respiro de cima também é o que separa a
+       primeira foto do texto da economia circular, que agora encosta nesta
+       seção sem efeito nenhum no meio. */
     padding: var(--space-lg) var(--space-md);
-    /* O branco é o mesmo do corpo da página, então não muda nada à vista —
-       mas esta seção é a camada de baixo da revelação, e passa um bom trecho
-       parada atrás da economia circular. Fundo opaco é o que separa as duas;
-       sem ele as duas apareceriam de uma vez, misturadas. Desde que a
-       economia circular também virou branca, esse fundo é a única coisa que
-       segura a separação — antes a tampa era preta e se anunciava sozinha. */
+    /* Declarado, e não herdado do corpo da página: é o mesmo branco, mas
+       esta seção não pode depender de quem está atrás dela para ter fundo. */
     background: var(--color-white);
   }
 

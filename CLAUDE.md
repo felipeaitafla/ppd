@@ -168,6 +168,49 @@ Menu mobile (dentro de `@media (max-width: 47.99rem)`) e
 mobile do Figma (464px) — um menu mobile nunca existe em desktop, então o
 "sem teto" deste vocabulário não se aplica a eles.
 
+## Quebras de linha travadas no Figma
+
+Hero e economia circular reproduzem, em qualquer largura de desktop, as
+mesmas quebras de linha do frame de 1440px. Escala fluida sozinha não dá
+conta disso — ela mantém a proporção do corpo, não a razão entre a caixa e a
+letra —, então o mecanismo é outro, em três partes:
+
+1. **Cada quebra vira `<br class="quebra">` no HTML.** As manuais do Figma e
+   as que o Poppins faz sozinho dentro da caixa desenhada, sem distinção: o
+   navegador não pode ficar escolhendo. Abaixo de 48rem a classe some
+   (`display: none`) e o texto volta a quebrar à vontade — a composição de
+   1440px não cabe num celular. **O espaço antes de cada `<br>` não é
+   enfeite**: é o que mantém a frase inteira quando a quebra sai de cena.
+2. **As linhas vêm do render do Figma, não de reproduzir a caixa dele.** Este
+   é o ponto que custou uma entrega errada: exportar o frame como imagem
+   (`download_figma_images`) e ler as linhas ali. Montar a caixa do Figma no
+   navegador e deixar o Poppins quebrar dá **outras** quebras — o navegador
+   compõe a mesma frase 3–4% mais larga que o Figma (o `h1` do hero pede
+   928px onde o Figma desenha 898). Também não dá para confiar na largura do
+   frame pai: no Figma cada item pode ter a sua, e a segunda oferta da
+   economia circular quebra antes porque o frame dela tem 315px, não os 347
+   da coluna.
+3. **A caixa cede, as linhas mandam** (`width: max-content` +
+   `max-width: 100%`). A caixa cola na maior linha e fica maior que a do
+   Figma nesses 3–4%; como o texto é alinhado à esquerda, o que se vê são as
+   mesmas linhas no mesmo x e a sobra vai para a borda direita, que é ar.
+   Largura em `em` **não** basta: o avanço dos glifos não escala exatamente
+   com o corpo, e a caixa em `em` já deixou o `h1` do hero ganhar uma
+   palavra na primeira linha a 768px.
+4. **A coluna nunca pode ser mais estreita que a maior linha.** Onde a conta
+   não fecha sozinha, alguém cede:
+   - **o vão** — na economia circular as duas colunas são trilhas `auto` com
+     `justify-content: space-between`, como o frame do Figma, e a folga da
+     composição sai do vão (99px em 1440px, onde o Figma desenha 132);
+   - **o layout** — a mesma seção só monta as duas colunas a partir de 90rem;
+   - **o corpo**, por último — `min(var(--fs-h1), 6.2cqi)` no `h1` do hero,
+     que morde 0,1% abaixo de 770px e ~11% acima de ~3390px, onde
+     `--page-max` trava a coluna em 1920px e a fonte continua crescendo.
+
+**Consequência prática: mexer no texto quebra o acordo.** Trocar uma palavra
+obriga a reexportar o frame do Figma, reler as linhas e refazer os `<br>` —
+e, se a maior linha mudar de tamanho, também os coeficientes `cqi`.
+
 ## Pendências antes de produção
 
 Placeholders que estão no ar no protótipo e não podem passar para produção.
@@ -221,8 +264,14 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   branca de 62px, e o `+`/`−` saiu: agora a pílula é o único sinal de estado,
   decisão tomada sabendo que, fechadas, as oito linhas não denunciam que abrem.
   As oito perguntas de `faq.ts` não mudaram — só a moldura. Fica um débito de
-  acessibilidade: o rótulo em `#6C6C6C` sobre `#040404` dá 3,9:1, abaixo dos
-  4,5:1 da WCAG AA para texto normal; o mínimo nesse fundo é `#767676`.
+  acessibilidade: o rótulo em `#6C6C6C` piorou com a inversão de fundos de
+  2026-09-04 — sobre o `#0C0C0C` do FAQ (o `#141414` que veio do rodapé,
+  escurecido no mesmo dia a pedido do Felipe) dá 3,72:1, contra 3,9:1 sobre
+  o `#040404` de antes, e os dois estão abaixo dos 4,5:1 da WCAG AA para
+  texto normal. O mínimo nesse fundo é `#7A7A7A`.
+  O rótulo do rodapé (`#464646`) andou no sentido contrário, de 1,95:1 para
+  2,17:1 — longe do AA nos dois casos, e continua sendo o pior contraste do
+  site.
 - [x] ~~**Seção `insta` não existe no código**~~ — resolvida em 2026-08-21.
   O frame `54:723` virou `Instagram.astro`, entre `autorizada` e `faq`, com o
   gabarito do `autorizada`: coluna centrada, 128px de respiro, fundo branco.
@@ -255,7 +304,8 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
 - [ ] **Texto das ofertas de economia circular em `#8b8b8b` sobre branco** dá
   3,0:1, abaixo dos 4,5:1 da WCAG AA para texto normal. É o valor do Figma
   (`--color-text-mid`, que também serve o FAQ, onde o fundo é preto e o
-  contraste fecha). O mínimo sobre branco seria `#767676`.
+  contraste fecha, hoje sobre `#0C0C0C`). O mínimo sobre branco seria
+  `#767676`.
 - [ ] **Links `href="#"` restantes** — grupo de ofertas da matriz
   (`Stores.astro`), "Acessar Google Review" (`Testimonials.astro`), "Fazer a
   pesquisa" da busca da Apple (`AppleVerified.astro`) e "Políticas de

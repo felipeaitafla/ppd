@@ -9,11 +9,12 @@ interface Props {
   alvo: string;
 
   /* Sobrescreve o --profundidade padrão (1, o teto) declarado no <style>
-     abaixo. Opcional: quem não passar nada continua exatamente como antes
-     — o valor mora na folha de estilo, não aqui. Existe porque nem toda
-     revelação pede o mesmo peso: FAQ→Rodapé usa 0.6 de propósito, mais
-     leve que o teto, por ser só a transição normal de fim de página, ao
-     contrário da de economia circular/unidades (que fica no padrão). */
+     abaixo. Opcional: quem não passar nada fica no teto — o valor mora na
+     folha de estilo, não aqui. Existe porque nem toda revelação pede o
+     mesmo peso: o único uso vivo hoje, FAQ→Rodapé, passa 0.6 de propósito,
+     por ser só a transição normal de fim de página. O outro uso (economia
+     circular→unidades, no padrão) saiu da página em 2026-09-04, quando as
+     duas seções ficaram brancas e a borda que dava sentido à camada sumiu. */
   profundidade?: number;
 
   /* Cor do vão que a camada de baixo deixa embaixo de si perto do fim do
