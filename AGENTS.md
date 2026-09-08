@@ -118,10 +118,18 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   36×36, para exibição a 40px. Em tela de alta densidade ficam moles,
   principalmente o do Pedro. Puxar as fotos originais do Google Review.
 - [ ] **`src/assets/apple-locator.png` tem 1329×910** — é o recorte do Figma
-  na resolução em que o print foi tirado. Encaixado ele aparece a 880px, e no
-  ponto mais alto da animação a 1212px — nos dois casos abaixo de 1x em tela
-  de alta densidade, e é um print cheio de texto miúdo. Pedir uma captura em
-  retina (2424px de largura cobririam o maior tamanho a 2x).
+  na resolução em que o print foi tirado. Desde 2026-09-08 o tamanho
+  encaixado e o teto da animação são fluidos (80% da coluna disponível, sem
+  teto — ver `AppleVerified.astro`), então em telas largas o print amplia
+  além dos 1329px nativos mais cedo do que antes. Pedir uma captura em
+  retina resolve nos dois pontos.
+- [ ] **`public/video/autorizada.mp4` é um arquivo só, sem variantes por
+  resolução** — ao contrário do vídeo do hero (`hero-720p/1080p/1440p/
+  2160p.mp4`), que tem uma fonte por faixa de tela. Pedido do Felipe em
+  2026-09-08: ele vai mandar um vídeo novo, em qualidade melhor, para
+  gerarmos as mesmas quatro variantes daqui — mesmo tratamento de
+  conversão que já foi usado para o vídeo do hero (H.264 High/yuv420p, sem
+  áudio, `+faststart`, CRF calibrado por faixa).
 
 ### Antes do deploy de produção
 

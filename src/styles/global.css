@@ -103,11 +103,13 @@
 
   /* Larguras de bloco: mesma fórmula, sem teto — texto reflui na caixa,
      não pode ficar presa no tamanho de 1440 em monitor grande. */
-  /* Teto fixo, não escala fluida: são colunas centradas que devem ocupar a
+  /* Teto fixo, não escala fluida: é uma coluna centrada que deve ocupar a
      largura toda quando ela é menor que o teto. Com `vw` a coluna encolhe
-     junto com a tela e sobra margem morta dos dois lados no celular. */
-  --w-proof: 63rem; /* 1008px = 880px de conteúdo + padding lateral */
-  --w-locator: 55rem; /* 880px — o print encaixado, no fim da animação */
+     junto com a tela e sobra margem morta dos dois lados no celular.
+     `--w-proof`/`--w-locator` (autorizada/`AppleVerified.astro`) eram os
+     outros dois exemplos deste padrão; saíram em 2026-09-08 quando a seção
+     e o print passaram a crescer sem teto (pedido do Felipe), então hoje
+     `--w-insta` é o único caso que sobrou. */
   --w-insta: 62rem; /* 992px = 864px de grade + padding lateral */
 
   --w-faq-head: max(11rem, 12.488vw + 8.0731rem); /* 309px @1440 */

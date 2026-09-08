@@ -69,9 +69,14 @@ import locator from '../assets/apple-locator.png';
 </section>
 
 <style>
-  /* O Figma resolve a medida com padding lateral fixo; aqui vira uma coluna
-     centrada de largura fluida, senão em telas estreitas o padding comeria o
-     conteúdo inteiro. */
+  /* Sem `max-width`/`margin-inline`: até 2026-09-08 a seção travava em
+     `--w-proof` (1008px) e virava uma coluna centrada com teto fixo — o
+     mesmo problema que o hero teve com `--page-max` (ver comentário em
+     `Hero.astro`), aqui pedido junto com o ajuste de `.proof__shot` abaixo:
+     o print/vídeo precisava crescer sempre com a tela, e um pai travado
+     capava ele de volta pelo `max-width: 100%` assim que a seção parava de
+     crescer. Agora é só o padding fluido de sempre, igual ao resto do
+     site. */
   /* Não há número de desenho nenhum nesta animação: a escala de partida é
      inteiramente derivada em tempo real pelo script — o menor entre "cabe na
      janela" e "não passa do topo da própria seção" (ver comentário no topo
@@ -85,8 +90,6 @@ import locator from '../assets/apple-locator.png';
     align-items: center;
     gap: var(--space-md);
     width: 100%;
-    max-width: var(--w-proof);
-    margin-inline: auto;
     padding: var(--space-lg) var(--space-md);
     background: var(--color-white);
   }
@@ -113,10 +116,18 @@ import locator from '../assets/apple-locator.png';
     line-height: 1.25;
   }
 
+  /* Pedido do Felipe em 2026-09-08: tamanho padrão de 0.8 × a largura
+     disponível (a tela menos o respiro lateral fluido de sempre), sempre —
+     nunca para de crescer, ao contrário do antigo `--w-locator` (880px
+     fixo, herdado do Figma). `width: 80%` já é exatamente isso: com o
+     `max-width` da seção removido acima, "100%" aqui É "tela menos os dois
+     `--space-md`", então 80% dela é a conta pedida — sem token, sem `calc()`,
+     sem teto. É este valor (o do print ENCAIXADO, no fim da animação) que o
+     script lê em tempo real pra calcular a escala de partida; nada no script
+     muda. */
   .proof__shot {
     position: relative;
-    width: var(--w-locator);
-    max-width: 100%;
+    width: 80%;
     /* Substitui o `height: auto` de quando só havia uma imagem: com dois
        filhos absolutos (imagem + vídeo), nada aqui contribui para a altura
        sozinho — a proporção do vídeo (1616×968) precisa ser declarada. */

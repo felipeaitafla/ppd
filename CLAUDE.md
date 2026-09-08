@@ -164,8 +164,13 @@ decorativas de um componente só (ícone, gap, altura de avatar) ficam como
 padrões já convivem hoje, ver `Testimonials.astro` para exemplos dos dois.
 
 **Quando NÃO usar:** colunas centradas que devem ocupar a largura toda
-abaixo de um teto (`--w-proof`, `--w-locator`, `--w-insta`) ficam com
-`width` fixo, não fluido. Raio de borda (`--radius`) também não escala.
+abaixo de um teto (`--w-insta`) ficam com `width` fixo, não fluido.
+`--w-proof`/`--w-locator` (seção da Apple autorizada) eram os outros dois
+casos até 2026-09-08, quando saíram do site — a seção e o print passaram a
+crescer sem teto nenhum (`.proof` sem `max-width`, `.proof__shot` a 80%
+fluido da largura disponível), porque a pendência ali era o contrário: um
+elemento que devia SEMPRE crescer com a tela, nunca estacionar. Raio de
+borda (`--radius`) também não escala.
 Menu mobile (dentro de `@media (max-width: 47.99rem)`) e
 `--fs-nav-drawer` continuam usando `clamp()` COM teto, ancorados no frame
 mobile do Figma (464px) — um menu mobile nunca existe em desktop, então o
@@ -350,10 +355,18 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   36×36, para exibição a 40px. Em tela de alta densidade ficam moles,
   principalmente o do Pedro. Puxar as fotos originais do Google Review.
 - [ ] **`src/assets/apple-locator.png` tem 1329×910** — é o recorte do Figma
-  na resolução em que o print foi tirado. Encaixado ele aparece a 880px, e no
-  ponto mais alto da animação a 1212px — nos dois casos abaixo de 1x em tela
-  de alta densidade, e é um print cheio de texto miúdo. Pedir uma captura em
-  retina (2424px de largura cobririam o maior tamanho a 2x).
+  na resolução em que o print foi tirado. Desde 2026-09-08 o tamanho
+  encaixado e o teto da animação são fluidos (80% da coluna disponível, sem
+  teto — ver `AppleVerified.astro`), então em telas largas o print amplia
+  além dos 1329px nativos mais cedo do que antes. Pedir uma captura em
+  retina resolve nos dois pontos.
+- [ ] **`public/video/autorizada.mp4` é um arquivo só, sem variantes por
+  resolução** — ao contrário do vídeo do hero (`hero-720p/1080p/1440p/
+  2160p.mp4`), que tem uma fonte por faixa de tela. Pedido do Felipe em
+  2026-09-08: ele vai mandar um vídeo novo, em qualidade melhor, para
+  gerarmos as mesmas quatro variantes daqui — mesmo tratamento de
+  conversão que já foi usado para o vídeo do hero (H.264 High/yuv420p, sem
+  áudio, `+faststart`, CRF calibrado por faixa).
 
 ### Antes do deploy de produção
 
