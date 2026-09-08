@@ -131,6 +131,12 @@ const reviews = [
     display: flex;
     flex-direction: column;
     gap: var(--space-block);
+    /* Container de consulta para o `cqi` do `@media (min-width: 90rem)` lá
+       embaixo — mesmo mecanismo da economia circular, ver o comentário
+       longo ali. `.depos` não tem teto de largura (sem `max-width`), então
+       esta caixa já cresce quase 1:1 com a tela; é essa proporção que o
+       `cqi` lê. */
+    container-type: inline-size;
   }
 
   /* Prender é decisão do script — só ele sabe quanto excedente há para
@@ -300,6 +306,68 @@ const reviews = [
     height: max(2rem, 0.751vw + 1.8239rem);
     border-radius: 50%;
     object-fit: cover;
+  }
+
+  /* Pedido do Felipe em 2026-09-08, mesmo raciocínio e mesma técnica do
+     `@media (min-width: 90rem)` da economia circular (ver o comentário
+     longo em `CircularEconomy.astro`): os tokens `--fs-*`/`--w-card` usados
+     aqui crescem a uma taxa fixa (px por vw), mais devagar que `.depos__pino`
+     — que não tem teto e acompanha a tela quase 1:1 — então em telas muito
+     largas a proporção do design em 1440px se perde: os cartões (e o resto
+     da faixa) ficam pequenos demais sobre um vão de página crescente demais.
+     Cada valor abaixo é o mesmo do Figma em 1440px, só que expresso como
+     fração de `.depos__pino` (`valor ÷ 1312 × 100`, a largura do container
+     nesse instante) em vez de fração da viewport — daí em diante cresce com
+     o espaço disponível da seção, não com a tela. Bate exatamente com os
+     valores atuais em 1440px, por definição; abaixo de 90rem ninguém lê
+     `cqi` nenhum, e os tokens padrão (com piso próprio, essenciais no
+     celular) continuam mandando.
+
+     Precisa vir DEPOIS de toda regra base acima que mira os mesmos
+     seletores — `@media` não muda especificidade, só condição, e a regra
+     que vier por último no arquivo vence a cascata quando as duas se
+     aplicam (bug já visto uma vez na economia circular). */
+  @media (min-width: 90rem) {
+    .depos__label {
+      font-size: 0.9146cqi; /* 12 ÷ 1312 × 100 */
+    }
+
+    .depos__title h2 {
+      font-size: 3.2012cqi; /* 42 ÷ 1312 × 100 */
+    }
+
+    .depos__rating img {
+      height: 1.9817cqi; /* 26 ÷ 1312 × 100 */
+    }
+
+    .depos__stars {
+      height: 1.6768cqi; /* 22 ÷ 1312 × 100 */
+    }
+
+    .depos__cities li {
+      font-size: 1.0671cqi; /* 14 ÷ 1312 × 100 */
+    }
+
+    .depo {
+      /* Mesma proporção de `--w-card` (376px @1440), só que fração do
+         container. `flex-basis`, não o `flex` inteiro: `0 0` já está
+         definido na regra base e não muda. */
+      flex-basis: 28.6585cqi; /* 376 ÷ 1312 × 100 */
+    }
+
+    .depo__quote {
+      min-height: 17.6829cqi; /* 232 ÷ 1312 × 100 */
+      font-size: 1.2195cqi; /* 16 ÷ 1312 × 100 */
+    }
+
+    .depo__by {
+      font-size: 1.2195cqi; /* 16 ÷ 1312 × 100 */
+    }
+
+    .depo__avatar {
+      width: 3.0488cqi; /* 40 ÷ 1312 × 100 */
+      height: 3.0488cqi;
+    }
   }
 </style>
 
