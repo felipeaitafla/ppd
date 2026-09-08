@@ -80,11 +80,15 @@ const offers = [
      `width: max-content`, e uma trilha `auto` cresceria junto com ela — o
      `max-width: 100%` dela mediria a trilha inflada e não clamparia nada.
      Some no mobile, onde as quebras saem e a frase vira uma linha só de dois
-     mil e poucos pixels. */
+     mil e poucos pixels.
+     `container-type: inline-size` fica declarado aqui sempre, mesmo abaixo
+     de 90rem onde ninguém lê `cqi` deste container ainda — é inofensivo
+     empilhado, e evita repetir a declaração dentro do `@media` abaixo. */
   .circular__content {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-block);
+    container-type: inline-size;
   }
 
   /* Mudança de comportamento: as duas colunas do Figma (ofertas de 347px e
@@ -109,7 +113,24 @@ const offers = [
      continuam encostadas nas bordas do respiro, como no Figma.
      `--space-sm` é só o piso do vão, para as colunas nunca se encostarem.
      A coluna das ofertas mede-se em `em` do corpo do texto (ver abaixo) —
-     não mais pelo token `--w-offers`, que saiu do `global.css`. */
+     não mais pelo token `--w-offers`, que saiu do `global.css`.
+
+     Pedido do Felipe em 2026-09-08: em telas muito largas (>1920px) esse
+     vão de 99px vira uma sobra enorme (chega a ~1450px a 3840px de tela) —
+     `--fs-h1`/`--fs-card` crescem a uma TAXA fixa (px por vw), mais devagar
+     que a própria coluna, que cresce quase 1:1 com a tela; a cada vw a mais
+     o texto fica pra trás e o vão absorve a diferença. A correção troca a
+     FONTE do corpo, só aqui, de `var(--fs-h1)`/`var(--fs-card)` (a escala
+     fluida padrão do site) para `cqi` do próprio `.circular__content`
+     (`container-type` acima) — uma fração fixa da largura do container, não
+     mais da viewport. Como `--space-md` já deixa esse container crescer
+     quase proporcionalmente à tela, prender o corpo a ele em vez de à
+     viewport faz headline e ofertas crescerem no mesmo ritmo do espaço
+     disponível: a 3840px o vão cai para ~266px, na MESMA proporção de 99/1312
+     que ele já tinha em 1440px (calibrado para bater exatamente ali — ver
+     `.circular__headline`/`.circular__offers` abaixo). Abaixo de 90rem
+     ningém lê esses valores; o corpo continua o `--fs-h1`/`--fs-card` de
+     sempre. */
   @media (min-width: 90rem) {
     .circular__content {
       grid-template-columns: auto auto;
@@ -133,9 +154,10 @@ const offers = [
      economia circular," — e `max-width: 100%` impede o vazamento. São 866px
      a 58px contra os 833px da caixa do Figma; com o texto à esquerda a
      diferença fica toda na borda direita, que é ar, e o vão da grade a
-     absorve. Não há teto de corpo em `cqi` aqui como no `h1` do hero:
-     empilhada até 90rem e lado a lado depois, a coluna sempre sobra sobre
-     essa medida, inclusive em 4K. */
+     absorve. `font-size` aqui é a escala fluida padrão (`--fs-h1`); acima de
+     90rem um `@media` mais abaixo troca a fonte por `cqi` — ver ali por quê,
+     e por que essa troca precisa vir DEPOIS destas duas regras no arquivo,
+     não dentro do `@media` de cima. */
   .circular__headline {
     width: max-content;
     max-width: 100%;
@@ -165,6 +187,37 @@ const offers = [
     width: 21.688em;
     max-width: 100%;
     font-size: var(--fs-card);
+  }
+
+  /* Troca de fonte pedida pelo Felipe em 2026-09-08 (ver o comentário longo
+     em `.circular__content` acima): a partir de 90rem, quando as duas
+     colunas ficam lado a lado, o corpo do texto deixa de seguir a escala
+     fluida da viewport (`--fs-h1`/`--fs-card`) e passa a seguir `cqi` do
+     `.circular__content` — cresce junto com o espaço disponível, não com a
+     tela, e o vão para de engordar.
+     Precisa vir DEPOIS das duas regras base acima no arquivo: `@media` não
+     muda especificidade, só condição — como as duas regras (a de cima e
+     esta) têm a mesma especificidade e miram os mesmos seletores, quem
+     escreve por último no arquivo vence a cascata quando as duas se aplicam
+     ao mesmo tempo (aqui, ≥90rem). Declarar isto dentro do `@media` lá em
+     cima (onde mora o `grid-template-columns`) perderia sempre para estas
+     regras base, que vêm depois — foi exatamente esse bug na primeira
+     tentativa. */
+  @media (min-width: 90rem) {
+    .circular__headline {
+      /* 58 ÷ 1312 × 100 = 4.4207 — o corpo do Figma em 1440px sobre a
+         largura do container nesse mesmo instante (medida, não escolhida).
+         Bate exatamente com `var(--fs-h1)` em 1440px porque os dois
+         convergem ali por definição; a partir daí cresce com o container em
+         vez de com a viewport. */
+      font-size: 4.4207cqi;
+    }
+
+    .circular__offers {
+      /* 16 ÷ 1312 × 100 = 1.2195 — mesmo raciocínio do headline, calibrado
+         no corpo do Figma para o corpo do texto das ofertas. */
+      font-size: 1.2195cqi;
+    }
   }
 
   .circular__offers li {
