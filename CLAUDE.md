@@ -101,11 +101,14 @@ Referência: `src/components/AppleVerified.astro` (já nomeado no código:
 
 - **Pin:** não. Sem segunda camada, sem parallax — um elemento cresce ou
   encolhe (`transform: scale()`) conforme a seção entra na tela.
-- **Parâmetros a fixar antes de codar:** a escala de partida
-  (`--escala-cheia`, `AppleVerified.astro:58` — hoje 1.3773, derivada de
-  duas larguras do Figma, não escolhida a dedo) e o sentido (hoje: maior →
-  1); o script já limita a escala à largura da tela
-  (`AppleVerified.astro:172-174`) para não vazar barra horizontal.
+- **Parâmetros a fixar antes de codar:** a escala de partida não tem número
+  de desenho nenhum — desde 2026-09-08 é o menor entre dois cálculos que o
+  script faz em tempo real (`AppleVerified.astro:233-235`): "cabe na
+  largura da janela" e "o topo do elemento, crescendo a partir da borda de
+  baixo, não passa do topo da própria seção". O segundo existe porque uma
+  sangria de ponta a ponta sem teto (pedida em 2026-09-04) chegou a estourar
+  visualmente para cima da seção anterior — decisão revertida no mesmo dia
+  em que foi notada. O sentido do `scale()` continua maior → 1.
 - **Isso NÃO é** Revelação: lá são duas seções deslocando em Y por
   diferença de velocidade; aqui é um elemento só, num `scale()`, sem
   segunda camada.
