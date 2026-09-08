@@ -119,8 +119,6 @@
 
   /* Raio não escala com a viewport: 12px lê como 12px em qualquer tela. */
   --radius: 0.75rem;
-
-  --page-max: 120rem;
 }
 
 *,

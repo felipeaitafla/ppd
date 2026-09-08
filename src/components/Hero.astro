@@ -249,6 +249,15 @@ const social = [
     );
   }
 
+  /* Sem `max-width`/`margin-inline: auto`: até 2026-09-08 esta coluna travava
+     em `--page-max` (1920px) e virava uma faixa centralizada em telas
+     ultrawide, com o nav e o headline se afastando da borda esquerda em vez
+     de acompanhá-la — pedido do Felipe foi "obedecer o resto do site", que
+     não tem teto de página nenhum (Stores, Testimonials, Faq, Footer são só
+     `padding: var(--space-lg) var(--space-md)`, sem `max-width`). O respiro
+     lateral aqui é o mesmo `--space-md` fluido de sempre, e cada elemento de
+     texto segue com o próprio teto local (`max-width: 100%` no `h1`/`p`, o
+     `min(..., 6.2cqi)` abaixo). */
   .hero__inner {
     position: relative;
     z-index: 1;
@@ -256,8 +265,6 @@ const social = [
     flex-direction: column;
     flex: 1;
     width: 100%;
-    max-width: var(--page-max);
-    margin-inline: auto;
     padding: var(--space-hero-top) var(--space-md) var(--space-md);
     gap: var(--space-sm);
   }
@@ -375,14 +382,15 @@ const social = [
      quebrar por cima das quebras do Figma. 100 ÷ 15.995 = 6.25; 6.2 deixa
      0,8% de margem para o avanço dos glifos não escalar exatamente com o
      corpo.
-     Ele morde nas duas pontas, e quase nada no meio:
-     — abaixo de ~770px, onde a coluna é de 690px e a linha pede 685px (a
-       0,1% de corpo, invisível);
-     — acima de ~3390px, onde `--page-max` trava `.hero__inner` em 1920px
-       enquanto `--fs-h1` e `--space-md` seguem crescendo, e o respiro
-       lateral passa a comer a coluna (em 3840px são ~11% de corpo).
-     Entre um e outro quem vence o `min()` é `--fs-h1`, então o corpo é o
-     da escala fluida do CLAUDE.md, igual ao Figma em 1440px.
+     Hoje só morde perto de ~770px, onde a coluna é de 690px e a linha pede
+     685px (a 0,1% de corpo, invisível) — no resto da faixa quem vence o
+     `min()` é `--fs-h1`, então o corpo é o da escala fluida do CLAUDE.md,
+     igual ao Figma em 1440px. Até 2026-09-08 também mordia acima de
+     ~3390px, quando `--page-max` travava `.hero__inner` em 1920px e o
+     respiro lateral passava a comer a coluna; esse teto saiu (ver comentário
+     em `.hero__inner`) e o `min()` nunca mais precisa escolher o lado
+     `6.2cqi` lá em cima — fica inofensivo, não removido, porque a mordida de
+     baixo continua real.
      Fora do `@media` isto estragaria o mobile, onde a coluna é estreita e o
      teto puxaria a headline para uns 21px. */
   @media (min-width: 48rem) {

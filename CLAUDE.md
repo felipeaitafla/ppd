@@ -207,8 +207,12 @@ letra —, então o mecanismo é outro, em três partes:
      composição sai do vão (99px em 1440px, onde o Figma desenha 132);
    - **o layout** — a mesma seção só monta as duas colunas a partir de 90rem;
    - **o corpo**, por último — `min(var(--fs-h1), 6.2cqi)` no `h1` do hero,
-     que morde 0,1% abaixo de 770px e ~11% acima de ~3390px, onde
-     `--page-max` trava a coluna em 1920px e a fonte continua crescendo.
+     que morde 0,1% abaixo de 770px. Também mordia ~11% acima de ~3390px,
+     enquanto `--page-max` travava `.hero__inner` numa coluna centralizada de
+     1920px; esse teto saiu em 2026-09-08 (pedido do Felipe: o hero deve
+     seguir o resto do site, que não centraliza — só `padding` fluido, sem
+     `max-width` de página), então hoje a coluna acompanha a viewport até
+     onde a tela for larga, e essa mordida de cima não existe mais.
 
 **Consequência prática: mexer no texto quebra o acordo.** Trocar uma palavra
 obriga a reexportar o frame do Figma, reler as linhas e refazer os `<br>` —
