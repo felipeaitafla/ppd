@@ -267,10 +267,22 @@ const offers = [
   }
 
   /* Mesma regra do hero, pelo mesmo motivo: a composição de 1440px não cabe
-     numa coluna de celular. */
+     numa coluna de celular — as quebras do Figma saem e o texto flui sozinho.
+     Sem elas a headline vira um bloco de oito linhas curtas coladas nas
+     ofertas; o respiro do desktop (`--space-block` entre título e lista,
+     `--space-sm` entre ofertas) fica apertado nessa densidade, então abaixo
+     de 48rem os dois vãos abrem. */
   @media (max-width: 47.99rem) {
     .quebra {
       display: none;
+    }
+
+    .circular__content {
+      gap: var(--space-lg);
+    }
+
+    .circular__offers {
+      gap: var(--space-block);
     }
   }
 </style>
