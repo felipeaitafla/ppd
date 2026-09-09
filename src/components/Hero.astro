@@ -369,10 +369,18 @@ const social = [
     font-weight: 400;
   }
 
+  /* O subtexto do hero NÃO usa `--fs-card`: aquele token é corpo de texto
+     corrido e escala de leve (piso 15px muito perto dos 16px de 1440), então
+     ao lado do `h1` — que dispara com a viewport — ele parecia estacionado
+     em telas largas. Aqui o lead acompanha o título: escala proporcional ao
+     frame de 1440 (16px = 1.111vw), a proporção do Figma mantida em qualquer
+     largura de desktop, sem teto. Piso de 15px (`.9375rem`) para telas
+     estreitas — abaixo de 48rem o hero já troca para o layout mobile de
+     qualquer forma. */
   .hero__text p {
     width: max-content;
     max-width: 100%;
-    font-size: var(--fs-card);
+    font-size: max(.9375rem, 1.111vw); /* 16px @1440 — proporcional, ver comentário acima */
     line-height: 1.5;
   }
 
