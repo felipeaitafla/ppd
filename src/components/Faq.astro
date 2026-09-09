@@ -29,6 +29,9 @@ const schema = {
     <div class="faq__content">
       <h2 class="faq__headline">O que você precisa saber antes de comprar</h2>
 
+      {/* Régua cheia entre o título e a lista, como no frame do Figma. */}
+      <hr class="faq__rule" />
+
       <ul class="faq__list">
         {faq.map((item, index) => (
           <li>
@@ -52,9 +55,10 @@ const schema = {
     /* 128px em cima e embaixo, 64px nas laterais — o mesmo par de Unidades e
        Depoimentos. */
     padding: var(--space-lg) var(--space-md);
-    /* Invertido com o rodapé em 2026-09-04, a pedido do Felipe: o FAQ, que
-       era o quase-preto, ficou com o cinza, e o rodapé com o quase-preto. */
-    background: var(--color-dark);
+    /* Claro desde 2026-09-08: o Figma trouxe FAQ e rodapé para o mesmo
+       #F6F6F6 (`--color-card`), encerrando a fase escura da inversão de
+       2026-09-04. */
+    background: var(--color-card);
   }
 
   .faq__row {
@@ -94,13 +98,28 @@ const schema = {
      outra segura as duas linhas desenhadas enquanto a coluna couber — com uma
      medida em viewport a quebra voltaria a três em telas médias, onde o corpo
      encolhe mais devagar que a largura. 13.5em = 567px em 1440; a quebra boa
-     ("O que você precisa saber" / "antes de comprar") pede 530. */
+     ("O que você precisa saber" / "antes de comprar") pede 530.
+
+     O frame do Figma estreitou para 489px na revisão de 2026-09-08, mirando
+     "O que você precisa" / "saber antes de comprar" — mas essa quebra pede
+     um `<br>` manual (o navegador compõe "saber antes de comprar" mais largo
+     que "O que você precisa" e não quebra ali), e a headline do FAQ é de
+     propósito o caso que evita esse mecanismo. As duas linhas equivalentes
+     acima seguem valendo. */
   .faq__headline {
     max-width: 13.5em;
     font-size: var(--fs-h2);
     font-weight: 600;
     line-height: 1.25;
-    color: var(--color-white);
+    color: var(--color-black);
+  }
+
+  .faq__rule {
+    width: 100%;
+    height: 0;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--color-rule);
   }
 
   .faq__list {
@@ -117,7 +136,7 @@ const schema = {
      abaixo da pergunta fechada, 24px abaixo da resposta aberta. */
   .faq__item {
     padding-bottom: var(--space-2xs);
-    border-bottom: 1px solid var(--color-dark-rule-faint);
+    border-bottom: 1px solid var(--color-rule);
   }
 
   .faq__item[open] {
@@ -128,9 +147,11 @@ const schema = {
     display: flex;
     align-items: center;
     font-size: var(--fs-question);
-    font-weight: 600;
+    /* Fechada, a pergunta é Medium; aberta, sobe para SemiBold — o Figma não
+       desenha marcador nenhum, então o peso é o único sinal de estado. */
+    font-weight: 500;
     line-height: 1.5;
-    color: var(--color-faq-question);
+    color: var(--color-black);
     cursor: pointer;
     list-style: none;
   }
@@ -139,32 +160,53 @@ const schema = {
     display: none;
   }
 
-  /* Branco, não preto: sobre #040404 o anel preto não existe. */
   .faq__question:focus-visible {
-    outline: 2px solid var(--color-white);
+    outline: 2px solid var(--color-black);
     outline-offset: 4px;
   }
 
-  /* Aberta, a pergunta inverte para uma pílula branca. É o único sinal de
-     estado da seção — o Figma não desenha marcador em lugar nenhum, nem
-     fechado nem aberto. O texto recua para dentro da pílula; fechado ele
-     alinha com o título, e esse alinhamento vale o deslocamento. */
   .faq__item[open] .faq__question {
-    padding: var(--space-faq-pill);
-    border-radius: var(--radius);
-    background: var(--color-faq-question);
-    color: var(--color-black);
-  }
-
-  .faq__item[open] .faq__question:focus-visible {
-    outline-color: var(--color-black);
+    font-weight: 600;
   }
 
   .faq__answer {
-    margin-top: var(--space-list);
+    /* `padding`, não `margin`: o vão até a pergunta precisa ficar dentro da
+       caixa que a abertura recolhe, senão sobra uma faixa quando fechada. */
+    padding-top: var(--space-list);
     font-size: var(--fs-card);
     line-height: 1.5;
     color: var(--color-text-mid);
+  }
+
+  /* Abertura suave, sem JS: `::details-content` — a caixa que o navegador
+     mostra e esconde — vira uma grade de uma linha que cresce de 0fr a 1fr,
+     e `content-visibility` acompanha numa transição discreta para o texto
+     seguir visível enquanto recolhe. Navegador sem `::details-content`
+     (anterior a ~2025) ignora tudo isto e abre/fecha na hora, como antes. */
+  @media (prefers-reduced-motion: no-preference) {
+    .faq__item {
+      transition: padding-bottom 260ms ease;
+    }
+
+    .faq__item::details-content {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition:
+        grid-template-rows 260ms ease,
+        content-visibility 260ms allow-discrete;
+    }
+
+    .faq__item[open]::details-content {
+      grid-template-rows: 1fr;
+    }
+
+    /* `min-block-size: 0` deixa a linha 0fr chegar a zero de fato (sem ele a
+       faixa `auto` da grade segura a altura do conteúdo); `overflow` corta o
+       que passa da linha enquanto ela cresce. */
+    .faq__answer {
+      min-block-size: 0;
+      overflow: hidden;
+    }
   }
 
   /* `:global()` porque o conteúdo entra por `set:html`: os elementos vêm da
@@ -177,14 +219,19 @@ const schema = {
     margin-top: var(--space-2xs);
   }
 
+  /* Lista com marcador pendurado, como no frame. `display: flex` some com o
+     `::marker`, então aqui é bloco e o respiro entre itens sai da margem. */
   .faq__answer :global(ul) {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3xs);
+    padding-left: 1.4em;
+    list-style: disc;
   }
 
+  .faq__answer :global(li + li) {
+    margin-top: var(--space-3xs);
+  }
+
+  /* O Figma deixa o negrito na mesma cor do corpo — só o peso muda. */
   .faq__answer :global(strong) {
     font-weight: 600;
-    color: var(--color-white);
   }
 </style>

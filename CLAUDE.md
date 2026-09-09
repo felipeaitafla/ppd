@@ -61,6 +61,14 @@ reusar a técnica com outro par de seções.
 Referência: `src/components/Revelacao.astro`. Ver também a memória
 `reveal-em-camadas`.
 
+**Fora da página desde 2026-09-08**: era a transição FAQ → rodapé, a última
+que restava. O Figma trouxe as duas seções para o mesmo `#F6F6F6`, e sem a
+borda entre os tons a camada perde o sentido — a mesma razão que tirou a
+revelação de economia circular → unidades em 2026-09-04. `Revelacao.astro`
+segue no repositório, sem nenhuma página que o importe, como implementação
+de referência — igual à Abertura. O descrito abaixo vale para quem reusar a
+técnica com um par de seções de cores diferentes.
+
 - **Pin:** não — a ilusão de profundidade vem só da diferença de velocidade
   entre as duas camadas, nada trava a rolagem.
 - **Quem fica parada / quem anda:** NENHUMA fica parada. A `tampa` (slot
@@ -163,13 +171,15 @@ decorativas de um componente só (ícone, gap, altura de avatar) ficam como
 `max()` direto na propriedade, dentro do próprio `<style>` — os dois
 padrões já convivem hoje, ver `Testimonials.astro` para exemplos dos dois.
 
-**Quando NÃO usar:** colunas centradas que devem ocupar a largura toda
-abaixo de um teto (`--w-insta`) ficam com `width` fixo, não fluido.
-`--w-proof`/`--w-locator` (seção da Apple autorizada) eram os outros dois
-casos até 2026-09-08, quando saíram do site — a seção e o print passaram a
-crescer sem teto nenhum (`.proof` sem `max-width`, `.proof__shot` a 80%
-fluido da largura disponível), porque a pendência ali era o contrário: um
-elemento que devia SEMPRE crescer com a tela, nunca estacionar. Raio de
+**Quando NÃO usar:** hoje nenhuma coluna do site fica com `width` fixo em
+`rem`. `--w-proof`/`--w-locator` (seção da Apple autorizada) e depois
+`--w-insta` (grade do Instagram) eram os casos; todos caíram entre
+2026-09-08 e 09-09, a pedido do Felipe — a seção e o print da Apple passaram
+a crescer sem teto (`.proof` sem `max-width`, `.proof__shot` a 80% fluido da
+largura disponível), e a grade do Instagram virou `60vw` direto (os 864px em
+1440 do frame `84:174` são 60% da largura; abaixo de 60rem ocupa a largura
+toda, com teto de 36rem que casa com 60vw na troca). O princípio é o mesmo:
+a coluna cresce com a tela, nunca estaciona no tamanho de 1440. Raio de
 borda (`--radius`) também não escala.
 Menu mobile (dentro de `@media (max-width: 47.99rem)`) e
 `--fs-nav-drawer` continuam usando `clamp()` COM teto, ancorados no frame
@@ -223,6 +233,40 @@ letra —, então o mecanismo é outro, em três partes:
 obriga a reexportar o frame do Figma, reler as linhas e refazer os `<br>` —
 e, se a maior linha mudar de tamanho, também os coeficientes `cqi`.
 
+**Caso leve — o `h2` do Instagram** (`Instagram.astro`, frame `84:162`): um
+`<br class="quebra">` depois de "fique", e só. A caixa em `em` deixava a
+frase cair para três linhas (e os badges para duas) em telas largas; agora o
+`h2` preenche o `.insta__head`, que mede `max-content` — a fileira de badges,
+que é a linha mais larga —, e as duas linhas do título centralizam dentro
+dela. Sem `cqi`, sem trilha, sem vão: aqui a "coluna" que não pode ficar
+menor que a maior linha é o próprio bloco de cabeçalho, e `max-content`
+resolve.
+
+## Acordeões (`<details>`)
+
+Dois no site — FAQ (`Faq.astro`) e Unidades (`Stores.astro`) —, os dois
+`<details name>` puros: acordeão exclusivo sem uma linha de JS, e a resposta
+fica no HTML servido esteja a linha aberta ou fechada. Sem CMS ou toggle em
+script; ver as pendências para o que ainda falta em cada um.
+
+**Abertura suave (2026-09-09).** Os dois animam a altura no
+`::details-content` — a caixa que o navegador mostra/esconde — com a mesma
+receita, dentro de `@media (prefers-reduced-motion: no-preference)`:
+
+- `::details-content { display: grid; grid-template-rows: 0fr }` e
+  `[open]::details-content { grid-template-rows: 1fr }`, com `transition` de
+  260ms na trilha e em `content-visibility` (`allow-discrete`, para o
+  conteúdo seguir visível enquanto recolhe);
+- no filho único (`.faq__answer` / `.stores__unit-body`): `min-block-size: 0`
+  para a linha `0fr` chegar a zero, e `overflow` para cortar o excesso;
+- o vão até o cabeçalho virou `padding` (não `margin`) para ser recolhido
+  junto; em Unidades há um `padding-bottom` de 6px só para o anel de foco dos
+  links não bater na borda do corte.
+
+**Fallback:** navegador sem `::details-content` (anterior a ~2025) ignora o
+bloco todo e abre/fecha na hora — o comportamento que havia antes. Quem
+mexer num, replica no outro: a receita é idêntica de propósito.
+
 ## Pendências antes de produção
 
 Placeholders que estão no ar no protótipo e não podem passar para produção.
@@ -272,18 +316,34 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   em 2026-08-20. O frame `49:615` inverteu para escuro (`--color-bg-dark`), em
   duas colunas com gap de 76px: rótulo "perguntas frequentes" numa de 309px e a
   headline **"O que você precisa saber antes de comprar"** numa de 706px — o
-  código usava o texto do rótulo como título. A pergunta aberta virou pílula
-  branca de 62px, e o `+`/`−` saiu: agora a pílula é o único sinal de estado,
-  decisão tomada sabendo que, fechadas, as oito linhas não denunciam que abrem.
-  As oito perguntas de `faq.ts` não mudaram — só a moldura. Fica um débito de
-  acessibilidade: o rótulo em `#6C6C6C` piorou com a inversão de fundos de
-  2026-09-04 — sobre o `#0C0C0C` do FAQ (o `#141414` que veio do rodapé,
-  escurecido no mesmo dia a pedido do Felipe) dá 3,72:1, contra 3,9:1 sobre
-  o `#040404` de antes, e os dois estão abaixo dos 4,5:1 da WCAG AA para
-  texto normal. O mínimo nesse fundo é `#7A7A7A`.
-  O rótulo do rodapé (`#464646`) andou no sentido contrário, de 1,95:1 para
-  2,17:1 — longe do AA nos dois casos, e continua sendo o pior contraste do
-  site.
+  código usava o texto do rótulo como título. As oito perguntas de `faq.ts`
+  não mudaram — só a moldura.
+- [x] ~~**FAQ e rodapé escuros**~~ — revertido em 2026-09-08. A revisão do
+  Figma (canvas "Prototype", frames `84:183` e `84:215`) trouxe as duas
+  seções para o mesmo `#F6F6F6` (`--color-card`), encerrando a fase escura da
+  inversão de 2026-09-04. No FAQ: fundo claro, headline e perguntas em preto,
+  corpo em `--color-text-mid`, negrito na mesma cor (só o peso muda), pergunta
+  fechada em Medium e aberta em SemiBold. **A pílula branca da pergunta aberta
+  saiu** — sem marcador nenhum, o peso da fonte é o único sinal de estado.
+  Régua cheia (`#D5D5D5`) entre a headline e a lista, como no frame. No
+  rodapé: fundo claro, logo `fill="white"` levado a preto por
+  `filter: brightness(0)` (sem segundo asset). Cores afinadas em 2026-09-09
+  conforme o Figma: itens de Menu/Contato e os cinco ícones de IA em preto
+  (`filter: brightness(0)` nos ícones), rótulos/aviso legal/unidades em
+  `--color-footer-faint`, agora `#868686` (era `#BDBDBD`). A revelação
+  FAQ → rodapé saiu junto (ver "Vocabulário de efeitos de rolagem"). Os
+  tokens `--color-dark-label`, `--color-faq-question`, `--color-dark-rule`,
+  `--color-dark-rule-faint` e `--space-faq-pill` ficaram sem uso e foram
+  removidos.
+- [ ] **Contraste do FAQ e do rodapé claros** — valores do Figma, sobre o
+  `#F6F6F6`:
+  - rótulo do FAQ `#6C6C6C` → ~3,6:1, abaixo do AA (o mínimo nesse fundo
+    seria `#767676`);
+  - corpo das respostas do FAQ `#8B8B8B` (`--color-text-mid`) → ~3:1;
+  - rótulos, aviso legal e unidades do rodapé `#868686`
+    (`--color-footer-faint`) → ~3,5:1, abaixo do AA.
+  Os itens de Menu/Contato do rodapé, que eram cinza, passaram a preto na
+  revisão de 2026-09-09 e agora fecham o AA.
 - [x] ~~**Seção `insta` não existe no código**~~ — resolvida em 2026-08-21.
   O frame `54:723` virou `Instagram.astro`, entre `autorizada` e `faq`, com o
   gabarito do `autorizada`: coluna centrada, 128px de respiro, fundo branco.
@@ -315,8 +375,9 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   2026-09-03 — quando o frame mobile for redesenhado, conferir.
 - [ ] **Texto das ofertas de economia circular em `#8b8b8b` sobre branco** dá
   3,0:1, abaixo dos 4,5:1 da WCAG AA para texto normal. É o valor do Figma
-  (`--color-text-mid`, que também serve o FAQ, onde o fundo é preto e o
-  contraste fecha, hoje sobre `#0C0C0C`). O mínimo sobre branco seria
+  (`--color-text-mid`, que desde 2026-09-08 também serve as respostas do FAQ
+  e os itens de Menu/Contato do rodapé, os dois sobre o `#F6F6F6` claro —
+  contraste igualmente aquém, anotado acima). O mínimo sobre branco seria
   `#767676`.
 - [ ] **Links `href="#"` restantes** — grupo de ofertas da matriz
   (`Stores.astro`), "Acessar Google Review" (`Testimonials.astro`), "Fazer a

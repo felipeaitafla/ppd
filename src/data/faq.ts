@@ -18,10 +18,10 @@ export const faq: FaqItem[] = [
     answer: `
       <p>Todo seminovo PPD recebe uma classificação que descreve seu estado estético e funcional, para você saber exatamente o que está comprando:</p>
       <ul>
-        <li><strong>Excelente</strong> — não possui marcas de uso. Se houver, são leves e imperceptíveis.</li>
-        <li><strong>Bom</strong> — possui marcas de uso moderadas.</li>
-        <li><strong>Regular</strong> — possui marcas de uso consideráveis e/ou saúde de bateria mais baixa.</li>
-        <li><strong>Outlet</strong> — pode apresentar muitas marcas de uso, funções inoperantes e/ou peças substituídas, sempre com o aviso de peça não genuína informado antes da compra.</li>
+        <li><strong>Excelente:</strong> não possui marcas de uso. Se houver, são leves e imperceptíveis.</li>
+        <li><strong>Bom:</strong> possui marcas de uso moderadas.</li>
+        <li><strong>Regular:</strong> possui marcas de uso consideráveis e/ou saúde de bateria mais baixa.</li>
+        <li><strong>Outlet:</strong> pode apresentar muitas marcas de uso, funções inoperantes e/ou peças substituídas, sempre com o aviso de peça não genuína informado antes da compra.</li>
       </ul>
       <p>Independentemente da classificação, <strong>todos os modelos passam por revisão dos nossos especialistas, com mais de 40 itens testados em cada dispositivo, e contam com garantia.</strong> A classificação não diz respeito à qualidade da revisão — apenas ao estado estético e à autonomia da bateria de cada aparelho.</p>
     `,

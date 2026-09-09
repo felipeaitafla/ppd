@@ -40,7 +40,7 @@ const ais = [
 ];
 ---
 
-<footer class="footer">
+<footer class="footer" id="rodape">
   <div class="footer__top">
     <img
       src="/assets/ppd-logo-footer.svg"
@@ -124,29 +124,65 @@ const ais = [
     flex-direction: column;
     gap: var(--space-xl);
     padding: var(--space-md);
-    /* Ver a nota no fundo do FAQ: os dois trocaram de cor em 2026-09-04. */
-    background: var(--color-bg-dark);
-    color: var(--color-nav);
+    /* Claro desde 2026-09-08: o Figma trouxe FAQ e rodapé para o mesmo
+       #F6F6F6, encerrando a fase escura que começou na inversão de
+       2026-09-04. É o mesmo cinza de `--color-card`. */
+    background: var(--color-card);
+    /* Preto: os itens de Menu e Contato herdam esta cor, e a revisão do
+       Figma de 2026-09-09 os trouxe para `#000000` (antes eram cinza). Os
+       rótulos, o aviso legal e as unidades caem em `--color-footer-faint`. */
+    color: var(--color-black);
   }
 
-  /* Logo e as três colunas são irmãos diretos: o `space-between` precisa
-     distribuir os quatro, não empurrar um bloco fechado para a direita. O
-     `gap` só entra como piso, quando a linha fica sem folga para distribuir. */
+  /* Abaixo de 75rem o topo do rodapé é uma coluna só: logo, Menu, Contato e
+     as IAs empilham na borda esquerda, todos no mesmo x — antes o
+     `space-between` quebrava num 2×2 em que "Menu" e "Pergunte às IAs" caíam
+     em recuos diferentes (larguras de coluna diferentes, mas as duas coladas
+     à direita). O layout de quatro colunas do Figma só existe em 1440; fora
+     dele, empilhar é mais legível que espremer. */
   .footer__top {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    /* Sem isto o `stretch` padrão estica a caixa do logo até a altura da
-       coluna mais alta; o SVG preserva a proporção dentro dela e sobra um vão
-       acima dele. Alinhado ao topo, o logo encosta na mesma linha dos
-       rótulos. */
+    flex-direction: column;
     align-items: flex-start;
     gap: var(--space-md);
   }
 
+  /* Acima de 75rem o topo do rodapé vira grade: a primeira trilha mede
+     exatamente o recuo do corpo do FAQ (`--w-faq-head` + `--space-faq-row`,
+     menos o `column-gap` que vem logo depois), então "Menu" começa no mesmo x
+     das perguntas do FAQ — as duas seções têm o mesmo padding lateral
+     (`--space-md`) e nenhuma trava a largura, então os eixos batem. No frame
+     de 1440 esse alinhamento vinha por coincidência da distribuição do
+     `space-between` e se perdia assim que a largura mudava; agora é fixo.
+     Abaixo de 75rem as quatro colunas não cabem começando nesse recuo — o
+     layout foi desenhado em 1440. A última trilha (`1fr`) só existe para a
+     coluna das IAs encostar na borda direita (`justify-self: end`), como no
+     Figma. */
+  @media (min-width: 75rem) {
+    .footer__top {
+      display: grid;
+      grid-template-columns:
+        calc(var(--w-faq-head) + var(--space-faq-row) - var(--space-md))
+        max-content
+        max-content
+        1fr;
+      column-gap: var(--space-md);
+      align-items: start;
+    }
+
+    .footer__col--ai {
+      justify-self: end;
+    }
+  }
+
+  /* O arquivo é o mesmo logo `fill="white"` do rodapé escuro; sobre o fundo
+     claro ele vira preto por filtro, sem um segundo asset para manter em
+     sincronia. `brightness(0)` zera qualquer cor mantendo o alfa, então o
+     desenho todo fica sólido. */
   .footer__logo {
     width: var(--w-logo-footer);
     height: auto;
+    filter: brightness(0);
   }
 
   .footer__col {
@@ -164,7 +200,7 @@ const ais = [
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-dark-label);
+    color: var(--color-footer-faint);
   }
 
   .footer__label--raw {
@@ -182,8 +218,10 @@ const ais = [
     line-height: 1.3;
   }
 
+  /* Os itens já são pretos; o hover só os alivia um tom para marcar que
+     respondem ao ponteiro. */
   .footer__stack a:hover {
-    color: var(--color-white);
+    color: var(--color-ink-soft);
   }
 
   .footer__ais {
@@ -203,6 +241,10 @@ const ais = [
     width: var(--w-ai-icon);
     height: var(--w-ai-icon);
     object-fit: contain;
+    /* Os cinco arquivos são monocromáticos em #E8E8E3, para o rodapé escuro.
+       No claro a revisão do Figma de 2026-09-09 os deixa pretos, junto com o
+       logo e os itens de menu: `brightness(0)` zera a cor sem editar os SVGs. */
+    filter: brightness(0);
   }
 
   .footer__bottom {
@@ -219,23 +261,31 @@ const ais = [
     gap: var(--space-2xs);
     font-size: var(--fs-label);
     line-height: 1.5;
-    color: var(--color-label);
-  }
-
-  .footer__legal a {
-    width: var(--w-footer-right);
+    color: var(--color-footer-faint);
   }
 
   .footer__legal a:hover {
-    color: var(--color-white);
+    color: var(--color-black);
   }
 
+  /* Grade explícita abaixo de 75rem: as cinco unidades em três colunas de
+     largura igual, então a segunda coluna alinha em qualquer linha — "Santa
+     Rosa" (linha 1) na mesma vertical de "Santiago" (linha 2). O `flex` com
+     `space-between` de antes espalhava a última linha (duas unidades) nas
+     bordas, quebrando a coluna. Abaixo de 40rem a grade cai para uma coluna:
+     três unidades numa tela de celular ficam estreitas demais. */
   .footer__units {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: var(--space-list);
-    color: var(--color-label);
+    color: var(--color-footer-faint);
+  }
+
+  @media (min-width: 40rem) {
+    .footer__units {
+      grid-template-columns: repeat(3, 1fr);
+      column-gap: var(--space-md);
+    }
   }
 
   .footer__units li {
@@ -244,8 +294,23 @@ const ais = [
     gap: var(--space-gallery);
   }
 
-  .footer__units li:last-child {
-    width: var(--w-footer-right);
+  /* Em 1440 as cinco unidades voltam a ser uma fileira só, com a última
+     encostando na borda direita junto com a coluna das IAs e o link de
+     políticas (todas em `--w-footer-right`), como no Figma. */
+  @media (min-width: 75rem) {
+    .footer__units {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .footer__units li:last-child {
+      width: var(--w-footer-right);
+    }
+
+    .footer__legal a {
+      width: var(--w-footer-right);
+    }
   }
 
   .footer__unit-city {
@@ -263,6 +328,6 @@ const ais = [
     height: 0;
     margin: 0;
     border: 0;
-    border-top: 1px solid var(--color-dark-rule);
+    border-top: 1px solid var(--color-rule);
   }
 </style>

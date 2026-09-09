@@ -233,11 +233,39 @@ const photos = [
     display: flex;
     flex-direction: column;
     gap: var(--space-2xs);
-    margin-top: var(--space-list);
+    /* `padding`, não `margin`: o vão até o cabeçalho precisa ficar dentro da
+       caixa que a abertura recolhe, senão sobra uma faixa quando fechada. */
+    padding-top: var(--space-list);
     padding-left: var(--space-2xs);
     font-size: var(--fs-card);
     line-height: 1.5;
     color: var(--color-label);
+  }
+
+  /* Abertura suave, sem JS — mesma técnica do FAQ: `::details-content` vira
+     uma grade de uma linha que cresce de 0fr a 1fr, com `content-visibility`
+     em transição discreta para o conteúdo seguir visível enquanto recolhe.
+     Navegador sem `::details-content` abre/fecha na hora, como antes. */
+  @media (prefers-reduced-motion: no-preference) {
+    .stores__unit::details-content {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition:
+        grid-template-rows 260ms ease,
+        content-visibility 260ms allow-discrete;
+    }
+
+    .stores__unit[open]::details-content {
+      grid-template-rows: 1fr;
+    }
+
+    .stores__unit-body {
+      min-block-size: 0;
+      overflow: hidden;
+      /* respiro para o anel de foco dos links de endereço/Instagram não
+         bater na borda do corte quando a unidade está aberta. */
+      padding-bottom: 0.375rem;
+    }
   }
 </style>
 

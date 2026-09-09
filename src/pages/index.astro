@@ -1,7 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
-import Revelacao from '../components/Revelacao.astro';
 import CircularEconomy from '../components/CircularEconomy.astro';
 import Stores from '../components/Stores.astro';
 import Testimonials from '../components/Testimonials.astro';
@@ -37,14 +36,12 @@ import Footer from '../components/Footer.astro';
     <Instagram />
   </main>
 
-  {/* O FAQ tapa o rodapé e sai da frente dele na rolagem — a única
-      revelação em camadas que restou na página, e de propósito mais leve
-      que o padrão (profundidade 0.6, contra o teto 1), porque esta é só a
-      transição normal de fim de página. Aqui a camada continua legível
-      porque as duas seções são escuras em tons diferentes. Nenhuma das duas
-      sabe da outra; ver "Vocabulário de efeitos de rolagem" no CLAUDE.md. */}
-  <Revelacao alvo="rodape" profundidade={0.6} corVao="var(--color-bg-dark)">
-    <Faq slot="tampa" />
-    <Footer slot="fundo" />
-  </Revelacao>
+  {/* Passagem normal, sem efeito: a revelação em camadas que tapava o rodapé
+      com o FAQ saiu em 2026-09-08, quando o Figma trouxe as duas seções para
+      o mesmo cinza claro (#F6F6F6) — sem a borda entre os tons, a camada
+      perdia o sentido, exatamente como em economia circular → unidades em
+      2026-09-04. `Revelacao.astro` segue no repositório como implementação
+      de referência, sem ninguém que o importe. */}
+  <Faq />
+  <Footer />
 </Layout>

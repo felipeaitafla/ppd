@@ -1,4 +1,10 @@
 ---
+/* Fora da página desde 2026-09-08: era a transição FAQ → rodapé, que perdeu
+   o sentido quando o Figma trouxe as duas seções para o mesmo #F6F6F6 (sem
+   a borda entre os tons não há camada). O componente fica no repositório,
+   sem ninguém que o importe, como implementação de referência — igual à
+   Abertura. Ver "Vocabulário de efeitos de rolagem" no CLAUDE.md. */
+
 interface Props {
   /* O `id` que o menu procura para chegar à camada de baixo. Ele não pode
      morar na seção revelada: ela anda deslocada durante o percurso, e
@@ -11,10 +17,11 @@ interface Props {
   /* Sobrescreve o --profundidade padrão (1, o teto) declarado no <style>
      abaixo. Opcional: quem não passar nada fica no teto — o valor mora na
      folha de estilo, não aqui. Existe porque nem toda revelação pede o
-     mesmo peso: o único uso vivo hoje, FAQ→Rodapé, passa 0.6 de propósito,
-     por ser só a transição normal de fim de página. O outro uso (economia
-     circular→unidades, no padrão) saiu da página em 2026-09-04, quando as
-     duas seções ficaram brancas e a borda que dava sentido à camada sumiu. */
+     mesmo peso: o último uso, FAQ→Rodapé (fora da página desde 2026-09-08),
+     passava 0.6 de propósito, por ser só a transição normal de fim de
+     página. O uso anterior (economia circular→unidades, no padrão) saiu em
+     2026-09-04, quando as duas seções ficaram brancas e a borda que dava
+     sentido à camada sumiu. */
   profundidade?: number;
 
   /* Cor do vão que a camada de baixo deixa embaixo de si perto do fim do

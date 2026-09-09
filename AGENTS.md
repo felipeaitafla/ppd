@@ -65,18 +65,27 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   em 2026-08-20. O frame `49:615` inverteu para escuro (`--color-bg-dark`), em
   duas colunas com gap de 76px: rótulo "perguntas frequentes" numa de 309px e a
   headline **"O que você precisa saber antes de comprar"** numa de 706px — o
-  código usava o texto do rótulo como título. A pergunta aberta virou pílula
-  branca de 62px, e o `+`/`−` saiu: agora a pílula é o único sinal de estado,
-  decisão tomada sabendo que, fechadas, as oito linhas não denunciam que abrem.
-  As oito perguntas de `faq.ts` não mudaram — só a moldura. Fica um débito de
-  acessibilidade: o rótulo em `#6C6C6C` piorou com a inversão de fundos de
-  2026-09-04 — sobre o `#0C0C0C` do FAQ (o `#141414` que veio do rodapé,
-  escurecido no mesmo dia a pedido do Felipe) dá 3,72:1, contra 3,9:1 sobre
-  o `#040404` de antes, e os dois estão abaixo dos 4,5:1 da WCAG AA para
-  texto normal. O mínimo nesse fundo é `#7A7A7A`.
-  O rótulo do rodapé (`#464646`) andou no sentido contrário, de 1,95:1 para
-  2,17:1 — longe do AA nos dois casos, e continua sendo o pior contraste do
-  site.
+  código usava o texto do rótulo como título. As oito perguntas de `faq.ts`
+  não mudaram — só a moldura.
+- [x] ~~**FAQ e rodapé escuros**~~ — revertido em 2026-09-08. A revisão do
+  Figma (canvas "Prototype", frames `84:183` e `84:215`) trouxe as duas
+  seções para o mesmo `#F6F6F6` (`--color-card`), encerrando a fase escura da
+  inversão de 2026-09-04. FAQ: fundo claro, headline e perguntas pretas,
+  corpo em `--color-text-mid`, pergunta fechada Medium / aberta SemiBold — **a
+  pílula branca saiu**, o peso da fonte é o único sinal de estado. Régua
+  cheia (`#D5D5D5`) entre a headline e a lista. Rodapé: fundo claro, logo
+  levado a preto por `filter: brightness(0)`. Cores afinadas em 2026-09-09
+  conforme o Figma: itens de Menu/Contato e ícones de IA em preto
+  (`filter: brightness(0)` nos ícones), rótulos/legal/unidades em
+  `--color-footer-faint`, agora `#868686` (era `#BDBDBD`). A revelação
+  FAQ → rodapé saiu junto (`Revelacao.astro` fica como referência, sem uso).
+  Removidos os tokens `--color-dark-label`, `--color-faq-question`,
+  `--color-dark-rule`, `--color-dark-rule-faint`, `--space-faq-pill`.
+- [ ] **Contraste do FAQ e do rodapé claros** — valores do Figma sobre o
+  `#F6F6F6`: rótulo do FAQ `#6C6C6C` (~3,6:1) e respostas `#8B8B8B` (~3:1),
+  ambos abaixo do AA; rótulos/legal/unidades do rodapé `#868686` (~3,5:1),
+  abaixo do AA. Itens de Menu/Contato do rodapé passaram a preto em
+  2026-09-09 e fecham o AA.
 - [x] ~~**Seção `insta` não existe no código**~~ — resolvida em 2026-08-21.
   O frame `54:723` virou `Instagram.astro`, entre `autorizada` e `faq`, com o
   gabarito do `autorizada`: coluna centrada, 128px de respiro, fundo branco.

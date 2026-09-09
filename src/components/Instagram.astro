@@ -14,7 +14,13 @@ const posts = 6;
 <section class="insta" id="insta">
   <div class="insta__head">
     <a class="insta__handle" href={instagramUrl}>{instagramHandle}</a>
-    <h2>Siga-nos no Instagram e fique por dentro das novidades</h2>
+    {/* Quebra do frame `84:162` travada à mão, como no hero: a caixa em `em`
+        deixava a frase cair para três linhas (e os badges para duas) em
+        telas largas, onde o corpo cresce mais rápido que a razão caixa/letra.
+        Abaixo de 60rem — onde o cabeçalho deixa de medir `max-content` — o
+        `<br>` some e o texto quebra à vontade; o espaço depois dele é o que
+        mantém a frase inteira. */}
+    <h2>Siga-nos no Instagram e fique<br class="quebra" /> por dentro das novidades</h2>
 
     <ul class="insta__topics">
       {topics.map((topic) => <li>{topic}</li>)}
@@ -31,17 +37,15 @@ const posts = 6;
 
 <style>
   /* Mesmo gabarito da seção Autorizada — coluna centrada, 128px de respiro em
-     cima e embaixo. O Figma não põe padding lateral nenhum porque a grade tem
-     largura fixa; aqui ele entra para os quadrados não encostarem na borda
-     quando a tela é mais estreita que a grade. */
+     cima e embaixo. O Figma não põe padding lateral; aqui ele entra só para
+     os quadrados não encostarem na borda abaixo de 60rem, onde a grade passa
+     a ocupar a largura toda. */
   .insta {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: var(--space-md);
     width: 100%;
-    max-width: var(--w-insta);
-    margin-inline: auto;
     padding: var(--space-lg) var(--space-md);
     background: var(--color-white);
   }
@@ -51,7 +55,19 @@ const posts = 6;
     flex-direction: column;
     align-items: center;
     gap: var(--space-list);
+    width: 100%;
     text-align: center;
+  }
+
+  /* No desktop o bloco mede `max-content` — a fileira inteira de badges, a
+     linha mais larga — para não encolher até a maior linha do `h2` e forçar
+     os badges a quebrar; `h2` e badges centralizam dentro dela. Abaixo de
+     60rem volta a 100% e os badges quebram à vontade, como no mobile. */
+  @media (min-width: 60rem) {
+    .insta__head {
+      width: max-content;
+      max-width: 100%;
+    }
   }
 
   /* O rótulo da seção é o próprio handle, e é o único jeito de seguir o perfil
@@ -66,10 +82,6 @@ const posts = 6;
   }
 
   .insta__head h2 {
-    /* Teto em `em`, não em `rem`: são os 642px do Figma medidos no corpo de
-       42px, então a caixa escala junto com a fonte e a quebra em duas linhas
-       se mantém em qualquer viewport. */
-    max-width: 15.25em;
     font-size: var(--fs-h2);
     font-weight: 600;
     line-height: 1.25;
@@ -95,17 +107,40 @@ const posts = 6;
   }
 
   /* Três colunas em qualquer largura, e não duas no celular: é a grade do
-     Instagram, e ela só lê como feed em três. */
+     Instagram, e ela só lê como feed em três.
+
+     A partir de 60rem a grade mede 60vw — os 864px em 1440 do frame `84:174`,
+     que são 60% da largura —, crescendo com a tela sem teto, como o resto do
+     site desde 2026-09-08. Abaixo disso ocupa a largura toda (menos o respiro
+     lateral), com um teto de 36rem que casa com 60vw exatamente aos 60rem,
+     sem salto na troca. */
   .insta__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-2xs);
     width: 100%;
+    max-width: 36rem;
+  }
+
+  @media (min-width: 60rem) {
+    .insta__grid {
+      width: 60vw;
+      max-width: none;
+    }
   }
 
   .insta__post {
     aspect-ratio: 1;
     background: var(--color-placeholder);
     border-radius: var(--radius);
+  }
+
+  /* Abaixo de 60rem o cabeçalho volta a 100% e não há mais espaço garantido
+     para a linha "Siga-nos no Instagram e fique": a quebra manual sai e o
+     texto quebra sozinho na largura que houver. */
+  @media (max-width: 59.99rem) {
+    .quebra {
+      display: none;
+    }
   }
 </style>

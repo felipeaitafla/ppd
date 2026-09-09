@@ -7,8 +7,13 @@
   --color-black: #000000;
   --color-white: #ffffff;
   --color-bg-alt: #ebebeb;
-  --color-bg-dark: #040404; /* fundo do rodapé (era o do FAQ até 2026-09-04) */
+  --color-bg-dark: #040404; /* fundo de seção escura; sem uso desde 2026-09-08, quando o rodapé clareou */
   --color-label: #a8a8a8;
+  /* Rótulos, aviso legal e unidades do rodapé, sobre o #F6F6F6 claro. Valor
+     do Figma (`fill_7a902850`, #868686), ~3,5:1 — ainda abaixo do AA, mas a
+     revisão de 2026-09-09 tirou o #BDBDBD que dava 1,9:1. Débito nas
+     pendências do CLAUDE.md. */
+  --color-footer-faint: #868686;
   --color-text-muted: #666666;
   --color-text-soft: #a1a1a1;
   --color-ink-soft: #646464; /* nomes, links de apoio, pill ativa */
@@ -19,30 +24,20 @@
   --color-pill: #b8b8b8;
   --color-pill-line: #f4f4f4;
 
-  /* Contexto escuro: economia circular, FAQ, rodapé e menu mobile sobre foto. */
-  --color-dark: #0c0c0c; /* fundo do FAQ (era #141414, herdado do rodapé, até 2026-09-04) */
+  /* Contexto escuro: economia circular e menu mobile sobre foto. O FAQ e o
+     rodapé saíram do escuro em 2026-09-08 (Figma). */
+  --color-dark: #0c0c0c; /* fundo de seção escura; hoje só o `WhatsappCta` de referência o lê */
   --color-nav: #dddddd; /* links de navegação sobre foto ou escuro */
-  /* Cinza médio de corpo de texto. Nasceu para o contexto escuro (FAQ) e
-     hoje também é o texto das ofertas de economia circular, que inverteu
-     para branco — por isso o nome não fala mais em claro nem em escuro.
-     Sobre branco ele dá 3,0:1, abaixo dos 4,5:1 da WCAG AA; é o valor do
-     Figma, e o débito está anotado nas pendências. */
+  /* Cinza médio de corpo de texto. Nasceu para o FAQ escuro e hoje serve o
+     texto das ofertas de economia circular (sobre branco), a resposta do FAQ
+     e os itens de Menu/Contato do rodapé (sobre #F6F6F6) — por isso o nome
+     não fala mais em claro nem em escuro. Sobre claro dá ~3:1, abaixo dos
+     4,5:1 da WCAG AA; é o valor do Figma, e o débito está nas pendências. */
   --color-text-mid: #8b8b8b;
-  --color-dark-label: #464646; /* rótulos do rodapé, hoje sobre #040404 */
-  /* O rótulo do FAQ é mais claro que o do rodapé. A razão original era o
-     fundo — um vinha sobre #040404, o outro sobre #141414 —, e a inversão de
-     2026-09-04 trocou os dois de lugar sem mexer nos rótulos: hoje a
-     diferença é só de hierarquia, e os dois contrastes mudaram (ver
-     pendências). */
+  /* Rótulo do FAQ, sobre o #F6F6F6 claro. Valor do Figma (#6C6C6C), ~3,6:1:
+     abaixo do AA, anotado nas pendências. */
   --color-faq-label: #6c6c6c;
-  /* Pedido do Felipe: as perguntas e a pílula da pergunta aberta usam este
-     cinza claro, não o branco puro do resto do site. */
-  --color-faq-question: #eaeaea;
-  --color-dark-rule: #3a3a3a;
   --color-nav-rule: #2a2a2a;
-  /* A 4/255 de --color-nav-rule; os dois pedem uma unificação que passa pelo
-     Hero, fora do escopo de quem escreveu isto aqui. */
-  --color-dark-rule-faint: #262626; /* régua entre perguntas, hoje sobre #0c0c0c */
 
   --font-body: 'Poppins', system-ui, sans-serif;
 
@@ -88,11 +83,6 @@
   --space-2xs: max(.5rem, 0.376vw + .412rem); /* 12px @1440 */
   --space-xs: max(.75rem, 0.563vw + .618rem); /* 18px @1440 */
   --space-sm: max(1.25rem, 1.127vw + .9859rem); /* 32px @1440 */
-  /* Respiro dos quatro lados da pílula da pergunta aberta. Em 16px a conta
-     fecha sozinha — 20px de corpo x 1.5 de entrelinha + 32 = os 62px de altura
-     do Figma —, então a pílula não precisa de altura fixa e cresce se a
-     pergunta quebrar em duas linhas. */
-  --space-faq-pill: max(.75rem, 0.376vw + .662rem); /* 16px @1440 */
   --space-hero-top: max(1.25rem, 2.254vw + .7218rem); /* 44px @1440 */
   --space-list: max(1rem, 0.751vw + .8239rem); /* 24px @1440 */
   --space-block: max(1.75rem, 1.878vw + 1.3099rem); /* 48px @1440 */
@@ -102,15 +92,11 @@
   --space-lg: max(3rem, 7.512vw + 1.2394rem); /* 128px @1440 */
 
   /* Larguras de bloco: mesma fórmula, sem teto — texto reflui na caixa,
-     não pode ficar presa no tamanho de 1440 em monitor grande. */
-  /* Teto fixo, não escala fluida: é uma coluna centrada que deve ocupar a
-     largura toda quando ela é menor que o teto. Com `vw` a coluna encolhe
-     junto com a tela e sobra margem morta dos dois lados no celular.
-     `--w-proof`/`--w-locator` (autorizada/`AppleVerified.astro`) eram os
-     outros dois exemplos deste padrão; saíram em 2026-09-08 quando a seção
-     e o print passaram a crescer sem teto (pedido do Felipe), então hoje
-     `--w-insta` é o único caso que sobrou. */
-  --w-insta: 62rem; /* 992px = 864px de grade + padding lateral */
+     não pode ficar presa no tamanho de 1440 em monitor grande. Nenhuma
+     coluna usa mais um teto fixo em `rem`: `--w-proof`/`--w-locator`
+     (autorizada) saíram em 2026-09-08 e `--w-insta` (grade do Instagram)
+     virou `60vw` direto no componente logo depois, pelo mesmo motivo — a
+     coluna tem de crescer com a tela, não estacionar em 1440. */
 
   --w-faq-head: max(11rem, 12.488vw + 8.0731rem); /* 309px @1440 */
   --w-faq-body: max(20rem, 36.244vw + 11.5053rem); /* 706px @1440 */
