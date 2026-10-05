@@ -243,8 +243,13 @@ const social = [
      `--space-md` do próprio invólucro. */
   .hero__text {
     margin-top: auto;
-    display: flex;
-    flex-direction: column;
+    /* Grade de uma trilha que cola na maior linha do `h1` (`max-content`) e
+       cede se a coluna for menor (`minmax(0, …)`). O parágrafo entra com
+       `width: 0; min-width: 100%`: não conta para o tamanho da trilha e
+       depois estica até ela — ver `.hero__text p`. */
+    display: grid;
+    grid-template-columns: minmax(0, max-content);
+    justify-content: start;
     gap: var(--space-list);
     /* Container de consulta: é a largura daqui que o teto do `h1` lê em
        `cqi`, mais abaixo. */
@@ -283,22 +288,19 @@ const social = [
      estreitas — abaixo de 48rem o hero já troca para o layout mobile de
      qualquer forma.
 
-     `max-width: var(--titulo-largura, 100%)`: pedido do Felipe em
-     2026-09-17 foi prender a quebra do parágrafo (que não tem `<br>` travado
-     nenhum) no limite direito do título, e não no limite da coluna inteira.
-     Não dá para resolver só com `align-items: stretch` num pai
-     `width: max-content` — o parágrafo, sem quebra manual, contribui com a
-     LARGURA DO TEXTO INTEIRO NUMA LINHA SÓ para o cálculo do `max-content`
-     do pai (é assim que intrinsic sizing funciona: cada filho entra com o
-     próprio tamanho preferido), e em várias larguras de tela essa linha
-     única é mais larga que a maior linha do `h1` — foi tentado e o parágrafo
-     acabava esticando o próprio pai e vazando para além do título. A
-     variável vem do script abaixo, medindo o `h1` de verdade (a única fonte
-     confiável, já que o corpo dos dois escala em fórmulas diferentes —
-     `cqi` aqui, `vw` ali — e a relação entre as duas larguras muda com a
-     tela). Sem JS, cai no retrocesso: a coluna inteira, como antes. */
+     `width: 0; min-width: 100%`: pedido do Felipe em 2026-09-17 foi prender
+     a quebra do parágrafo (que não tem `<br>` travado nenhum) no limite
+     direito do título, e não no da coluna inteira. Um parágrafo normal
+     contribui com a LARGURA DO TEXTO INTEIRO NUMA LINHA SÓ para o
+     `max-content` do pai e esticaria a trilha além do `h1`. Com `width: 0`
+     ele contribui com zero; `min-width: 100%` (cíclico no cálculo da
+     trilha, resolvido depois) o estica até a largura que o `h1` definiu.
+     CSS puro, certo no primeiro quadro: antes, um script medindo o `h1`
+     (e remedindo quando a fonte chegava) fazia o lead reflowar 1–2s após a
+     carga. */
   .hero__text p {
-    max-width: var(--titulo-largura, 100%);
+    width: 0;
+    min-width: 100%;
     font-size: max(.9375rem, 1.111vw); /* 16px @1440 — proporcional, ver comentário acima */
     line-height: 1.5;
   }
@@ -367,30 +369,3 @@ const social = [
     }
   }
 </style>
-
-<script>
-  /* Hero sem parallax, de propósito. Ele já teve um (subia a 30% da rolagem);
-     o efeito passou para a camada do manifesto quando a abertura entrou, e com
-     o manifesto fora do site (2026-09-03) o hero voltou a ser uma seção comum,
-     que rola 1:1 como qualquer outra. `Abertura.astro` segue no repositório
-     como implementação de referência do efeito, sem página que a importe. */
-
-  /* `--titulo-largura` trava a quebra do parágrafo no limite direito do
-     `h1` — ver o comentário longo em `.hero__text p`. Medido, não calculado:
-     os dois corpos escalam em fórmulas diferentes (`cqi` no título, `vw` no
-     parágrafo), então só o `h1` de verdade, já layoutado, sabe a própria
-     largura em cada tela. */
-  const titulo = document.querySelector<HTMLElement>('.hero__text h1');
-  const texto = document.querySelector<HTMLElement>('.hero__text');
-
-  if (titulo && texto) {
-    const medirTitulo = () => {
-      texto.style.setProperty('--titulo-largura', `${titulo.getBoundingClientRect().width}px`);
-    };
-
-    /* Cobre resize da janela, troca de quebra (`.quebra`/`.quebra-mobile`) e
-       fonte terminando de carregar — tudo que muda a largura renderizada do
-       `h1` sem disparar um evento próprio. */
-    new ResizeObserver(medirTitulo).observe(titulo);
-  }
-</script>

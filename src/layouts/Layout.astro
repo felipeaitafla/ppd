@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import 'lenis/dist/lenis.css';
-import { getImage } from 'astro:assets';
+import { Font, getImage } from 'astro:assets';
 import SchemaOrg from '../components/SchemaOrg.astro';
 import shareSource from '../assets/hero-bg.jpg';
 
@@ -29,6 +29,7 @@ const shareUrl = new URL(share.src, Astro.site).href;
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <Font cssVariable="--font-poppins" preload />
     <link rel="canonical" href={canonical} />
     <link rel="sitemap" href="/sitemap.xml" />
 
