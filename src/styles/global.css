@@ -27,7 +27,6 @@
   /* Contexto escuro: economia circular e menu mobile sobre foto. O FAQ e o
      rodapé saíram do escuro em 2026-09-08 (Figma). */
   --color-dark: #0c0c0c; /* fundo de seção escura; hoje só o `WhatsappCta` de referência o lê */
-  --color-nav: #dddddd; /* links de navegação sobre foto ou escuro */
   /* Cinza médio de corpo de texto. Nasceu para o FAQ escuro e hoje serve o
      texto das ofertas de economia circular (sobre branco), a resposta do FAQ
      e os itens de Menu/Contato do rodapé (sobre #F6F6F6) — por isso o nome
@@ -37,7 +36,6 @@
   /* Rótulo do FAQ, sobre o #F6F6F6 claro. Valor do Figma (#6C6C6C), ~3,6:1:
      abaixo do AA, anotado nas pendências. */
   --color-faq-label: #6c6c6c;
-  --color-nav-rule: #2a2a2a;
 
   --font-body: 'Poppins', system-ui, sans-serif;
 
@@ -60,7 +58,12 @@
      Tipografia de display escala forte com a viewport; texto corrido
      escala de leve, com piso de leitura — corpo de texto não pode
      encolher na mesma proporção que um título. */
-  --fs-h1: max(2.125rem, 2.254vw + 1.5968rem); /* 58px @1440 */
+  /* Piso recalibrado em 2026-09-16 para o valor exato do frame mobile do
+     Figma (nó `126:157`, 32px) — antes era 34px, um chute anterior ao frame
+     mobile existir. A economia circular usa a MESMA técnica com piso
+     diferente (28px, nó `126:161`): os dois convergem para 58px em 1440px,
+     mas divergem abaixo disso, de propósito — ver `CircularEconomy.astro`. */
+  --fs-h1: max(2rem, 2.442vw + 1.4277rem); /* 58px @1440 */
   --fs-h2: max(1.75rem, 1.315vw + 1.4419rem); /* 42px @1440 */
   --fs-unit: max(1.125rem, 0.282vw + 1.059rem); /* 21px @1440 */
   --fs-question: max(1.0625rem, 0.282vw + .9965rem); /* 20px @1440 */
@@ -68,12 +71,6 @@
   --fs-nav: max(.8125rem, 0.094vw + .7905rem); /* 14px @1440 */
   --fs-label: max(.6875rem, 0.094vw + .6655rem); /* 12px @1440 */
   --fs-micro: max(.625rem, 0.094vw + .603rem); /* 11px @1440 */
-
-  /* Único tamanho ancorado no frame mobile do Figma (464px), não em 1440:
-     só aparece dentro do menu mobile, que nunca é exibido em desktop. Mantém
-     teto (clamp, não max) de propósito — um menu mobile não existe em 4K, o
-     "sem teto" acima é só para o desktop. */
-  --fs-nav-drawer: clamp(1.25rem, 5.172vw, 1.75rem); /* 24px @464 */
 
   /* Espaçamentos: mesma fórmula do bloco --fs-* acima (piso em 375px, valor
      do Figma em 1440px, sem teto). */
@@ -143,6 +140,14 @@ h1,
 h2,
 p {
   margin: 0;
+}
+
+/* Os `h3` do site moram dentro de `<summary>` (Unidades, FAQ) só pela
+   estrutura: quem desenha é a classe do `summary`, então o `h3` não traz
+   corpo, peso nem margem do navegador. */
+h3 {
+  margin: 0;
+  font: inherit;
 }
 
 ul {

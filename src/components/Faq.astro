@@ -3,7 +3,7 @@ import { faq } from '../data/faq';
 
 /* `<details>` e não um acordeão em JS: a resposta fica no HTML servido esteja
    a linha aberta ou fechada, então rastreador, leitor de tela e LLM leem as
-   oito respostas inteiras sem executar nada. `name` agrupa as oito num
+   nove respostas inteiras sem executar nada. `name` agrupa as nove num
    acordeão exclusivo, como em Unidades — sem uma linha de script. */
 
 /* O mesmo conteúdo, de novo, em JSON-LD: o `<details>` resolve quem lê a
@@ -35,11 +35,18 @@ const schema = {
       <ul class="faq__list">
         {faq.map((item, index) => (
           <li>
-            {/* A primeira nasce aberta: fechadas, as oito linhas leem como uma
+            {/* A primeira nasce aberta: fechadas, as nove linhas leem como uma
                 lista de links e nada denuncia que há resposta atrás. */}
             <details class="faq__item" name="faq" open={index === 0}>
-              <summary class="faq__question">{item.question}</summary>
-              <div class="faq__answer" set:html={item.answer} />
+              {/* `h3` dentro do `summary`, como em Unidades: a pergunta vira
+                  título sob o `h2` da seção. */}
+              <summary class="faq__question"><h3>{item.question}</h3></summary>
+              {/* `-answer` recolhe (max-height, sem padding próprio);
+                  `-inner` carrega o padding — ver o mesmo comentário em
+                  `.stores__unit-body`/`-inner` em Stores.astro. */}
+              <div class="faq__answer">
+                <div class="faq__answer-inner" set:html={item.answer} />
+              </div>
             </details>
           </li>
         ))}
@@ -49,6 +56,24 @@ const schema = {
 </section>
 
 <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+
+<script>
+  /* Altura real de cada resposta, guardada em `--resposta-altura` (ver o
+     comentário longo junto de `.faq__answer` no CSS): `scrollHeight` mede o
+     conteúdo de verdade mesmo com a caixa clicada em 0 pelo `max-height`.
+     Refeita no resize — a resposta quebra linha diferente em outra largura
+     — e depois que as fontes carregam, porque medir antes disso pega o
+     texto ainda no fallback, mais largo ou mais estreito que o Poppins
+     final. */
+  const definirAlturas = () => {
+    document.querySelectorAll<HTMLElement>('.faq__answer').forEach((resposta) => {
+      resposta.style.setProperty('--resposta-altura', `${resposta.scrollHeight}px`);
+    });
+  };
+  definirAlturas();
+  window.addEventListener('resize', definirAlturas);
+  document.fonts?.ready.then(definirAlturas);
+</script>
 
 <style>
   .faq {
@@ -169,69 +194,82 @@ const schema = {
     font-weight: 600;
   }
 
-  .faq__answer {
-    /* `padding`, não `margin`: o vão até a pergunta precisa ficar dentro da
-       caixa que a abertura recolhe, senão sobra uma faixa quando fechada. */
+  /* Padding mora aqui, não em `.faq__answer` (que é quem anima) — nenhuma
+     caixa encolhe abaixo do próprio padding, `max-height: 0` e tudo: um
+     `<div>` com `padding-top: 24px` sempre mede pelo menos 24px, porque
+     padding não é conteúdo que possa "acabar", é espaço fixo que a caixa
+     sempre reserva. Se o padding estivesse na caixa que recolhe, ela
+     travaria perto de 24px até `content-visibility` cortar de vez no fim da
+     transição — daí o soluço. Separando os dois, a caixa de fora chega a
+     0px de verdade e o padding vai com ela. */
+  .faq__answer-inner {
     padding-top: var(--space-list);
     font-size: var(--fs-card);
     line-height: 1.5;
     color: var(--color-text-mid);
   }
 
-  /* Abertura suave, sem JS: `::details-content` — a caixa que o navegador
-     mostra e esconde — vira uma grade de uma linha que cresce de 0fr a 1fr,
-     e `content-visibility` acompanha numa transição discreta para o texto
-     seguir visível enquanto recolhe. Navegador sem `::details-content`
-     (anterior a ~2025) ignora tudo isto e abre/fecha na hora, como antes. */
+  /* Abertura suave: `.faq__answer` (sem padding próprio, ver acima) anima
+     `max-height` de 0 até a altura de verdade (`--resposta-altura`, medida
+     no script) — não `grid-template-rows` fr, a receita antiga daqui e de
+     Unidades (trocada nos dois pelo mesmo motivo, ver o comentário lá):
+     este acordeão é exclusivo, então trocar de pergunta fecha uma e abre
+     outra ao MESMO tempo, e a fr trava perto do fim enquanto
+     `content-visibility` segue "visible" de propósito (para o texto
+     encolher junto em vez de sumir de uma vez) — visível bem mais aqui do
+     que numa pergunta sozinha, porque a vizinha está abrindo ao lado no
+     mesmo instante. `content-visibility` continua garantindo que a
+     resposta fechada não fique focável nem seja lida por leitor de tela.
+     Navegador sem `::details-content` (anterior a ~2025) ignora tudo isto e
+     abre/fecha na hora, como antes. */
   @media (prefers-reduced-motion: no-preference) {
     .faq__item {
       transition: padding-bottom 260ms ease;
     }
 
     .faq__item::details-content {
-      display: grid;
-      grid-template-rows: 0fr;
-      transition:
-        grid-template-rows 260ms ease,
-        content-visibility 260ms allow-discrete;
+      content-visibility: hidden;
+      transition: content-visibility 260ms allow-discrete;
     }
 
     .faq__item[open]::details-content {
-      grid-template-rows: 1fr;
+      content-visibility: visible;
     }
 
-    /* `min-block-size: 0` deixa a linha 0fr chegar a zero de fato (sem ele a
-       faixa `auto` da grade segura a altura do conteúdo); `overflow` corta o
-       que passa da linha enquanto ela cresce. */
     .faq__answer {
-      min-block-size: 0;
       overflow: hidden;
+      max-height: 0;
+      transition: max-height 260ms ease;
+    }
+
+    .faq__item[open] .faq__answer {
+      max-height: var(--resposta-altura, 40rem);
     }
   }
 
   /* `:global()` porque o conteúdo entra por `set:html`: os elementos vêm da
      string em `faq.ts` e nunca recebem o atributo de escopo do Astro, então
      um seletor descendente comum não os alcançaria. O escopo continua preso
-     ao `.faq__answer` à esquerda. */
-  .faq__answer :global(p + p),
-  .faq__answer :global(ul),
-  .faq__answer :global(ul + p) {
+     ao `.faq__answer-inner` à esquerda. */
+  .faq__answer-inner :global(p + p),
+  .faq__answer-inner :global(ul),
+  .faq__answer-inner :global(ul + p) {
     margin-top: var(--space-2xs);
   }
 
   /* Lista com marcador pendurado, como no frame. `display: flex` some com o
      `::marker`, então aqui é bloco e o respiro entre itens sai da margem. */
-  .faq__answer :global(ul) {
+  .faq__answer-inner :global(ul) {
     padding-left: 1.4em;
     list-style: disc;
   }
 
-  .faq__answer :global(li + li) {
+  .faq__answer-inner :global(li + li) {
     margin-top: var(--space-3xs);
   }
 
   /* O Figma deixa o negrito na mesma cor do corpo — só o peso muda. */
-  .faq__answer :global(strong) {
+  .faq__answer-inner :global(strong) {
     font-weight: 600;
   }
 </style>

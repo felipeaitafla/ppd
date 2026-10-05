@@ -3,36 +3,20 @@
    inline como o do antigo rótulo da seção: o traço é preto sobre branco e
    fica preto — nada aqui precisa herdar cor de contexto. */
 
-/* `linhas` são as duas linhas de cada oferta no Figma, lidas do render dos
-   frames `84:57`, `84:59` e `84:61`. Ficam separadas no dado, e não num
-   texto corrido, porque o `<br>` entre elas é o que segura a quebra em
-   qualquer resolução; mexer no texto obriga a reexportar o frame. */
 const offers = [
   {
     label: 'Compre',
-    linhas: [
-      'iPhones seminovos revisados por',
-      'especialistas, com até 24 meses de garantia.',
-    ],
+    texto: 'iPhones seminovos revisados por especialistas, com até 24 meses de garantia.',
     icon: '/assets/icon-compre.svg',
   },
   {
     label: 'Troque',
-    /* Quebra antes que as outras duas porque a caixa desta é 315px, e não
-       347: no Figma o frame `84:59` tem largura fixa, enquanto `84:57` e
-       `84:61` são `fill` da coluna. */
-    linhas: [
-      'seu modelo atual pagando',
-      'apenas a diferença. Avaliamos na hora.',
-    ],
+    texto: 'seu modelo atual pagando apenas a diferença. Avaliamos na hora.',
     icon: '/assets/icon-troque.svg',
   },
   {
     label: 'Venda',
-    linhas: [
-      'seu celular para a Pede Pro Dindo,',
-      'avaliação e pagamento realizados na hora.',
-    ],
+    texto: 'seu celular para a Pede Pro Dindo, avaliação e pagamento realizados na hora.',
     icon: '/assets/icon-venda.svg',
   },
 ];
@@ -47,22 +31,22 @@ const offers = [
     {/* Headline antes das ofertas no HTML — é o título da seção, e quem lê
         por leitor de tela ou sem CSS a encontra primeiro. A troca de lado
         acontece só na grade, no desktop. */}
-    {/* As cinco linhas do nó `84:55`, lidas do render do Figma. Duas são
-        quebras manuais dele (depois de "acesso" e de "nível"); as outras
-        duas o Poppins faz sozinho na caixa de 833px a 58px — mas em lugares
-        que o navegador não repete, porque compõe a mesma frase ~4% mais
-        larga. Todas viram `<br>`: assim não dependem nem da largura da
-        coluna, que muda com a resolução, nem de os dois renderizadores
-        concordarem. Abaixo de 48rem elas somem e o texto quebra sozinho. */}
-    <h2 class="circular__headline"><strong>A partir da economia circular,</strong> <br class="quebra" />democratizamos o acesso <br class="quebra" />a dispositivos de alto nível <br class="quebra" />com celulares <strong>seminovos, <br class="quebra" />revisados e com garantia.</strong></h2>
+    {/* Duas composições, mesma técnica do hero: as cinco linhas do nó `84:55`
+        (desktop, `.quebra`) e as seis do nó `126:161` (mobile,
+        `.quebra-mobile`), cada uma lida do render do próprio frame. Nenhuma
+        posição de quebra é compartilhada entre as duas faixas desta vez —
+        ao contrário do `h1` do hero, aqui os quatro pontos do desktop e os
+        cinco do mobile caem em lugares diferentes da frase, então todo
+        `<br>` tem uma das duas classes, nunca fica sem. Mexer no texto
+        obriga a reexportar os dois frames e refazer as duas listas. */}
+    <h2 class="circular__headline"><strong>A partir da economia <br class="quebra-mobile" />circular,</strong> <br class="quebra" />democratizamos <br class="quebra-mobile" />o acesso <br class="quebra" />a dispositivos de <br class="quebra-mobile" />alto nível <br class="quebra" />com celulares <br class="quebra-mobile" /><strong>seminovos, <br class="quebra" />revisados <br class="quebra-mobile" />e com garantia.</strong></h2>
 
     <ul class="circular__offers">
       {offers.map((offer) => (
         <li>
           <img src={offer.icon} alt="" width="24" height="24" class="circular__icon" />
           <p>
-            <strong>{offer.label}</strong> {offer.linhas[0]}
-            <br class="quebra" /> {offer.linhas[1]}
+            <strong>{offer.label}</strong> {offer.texto}
           </p>
         </li>
       ))}
@@ -117,20 +101,20 @@ const offers = [
 
      Pedido do Felipe em 2026-09-08: em telas muito largas (>1920px) esse
      vão de 99px vira uma sobra enorme (chega a ~1450px a 3840px de tela) —
-     `--fs-h1`/`--fs-card` crescem a uma TAXA fixa (px por vw), mais devagar
-     que a própria coluna, que cresce quase 1:1 com a tela; a cada vw a mais
-     o texto fica pra trás e o vão absorve a diferença. A correção troca a
-     FONTE do corpo, só aqui, de `var(--fs-h1)`/`var(--fs-card)` (a escala
-     fluida padrão do site) para `cqi` do próprio `.circular__content`
-     (`container-type` acima) — uma fração fixa da largura do container, não
-     mais da viewport. Como `--space-md` já deixa esse container crescer
-     quase proporcionalmente à tela, prender o corpo a ele em vez de à
-     viewport faz headline e ofertas crescerem no mesmo ritmo do espaço
-     disponível: a 3840px o vão cai para ~266px, na MESMA proporção de 99/1312
-     que ele já tinha em 1440px (calibrado para bater exatamente ali — ver
-     `.circular__headline`/`.circular__offers` abaixo). Abaixo de 90rem
-     ningém lê esses valores; o corpo continua o `--fs-h1`/`--fs-card` de
-     sempre. */
+     a fórmula fluida da headline e `--fs-card` crescem a uma TAXA fixa (px
+     por vw), mais devagar que a própria coluna, que cresce quase 1:1 com a
+     tela; a cada vw a mais o texto fica pra trás e o vão absorve a
+     diferença. A correção troca a FONTE do corpo, só aqui, da escala fluida
+     de viewport (`.circular__headline`/`var(--fs-card)`) para `cqi` do
+     próprio `.circular__content` (`container-type` acima) — uma fração fixa
+     da largura do container, não mais da viewport. Como `--space-md` já
+     deixa esse container crescer quase proporcionalmente à tela, prender o
+     corpo a ele em vez de à viewport faz headline e ofertas crescerem no
+     mesmo ritmo do espaço disponível: a 3840px o vão cai para ~266px, na
+     MESMA proporção de 99/1312 que ele já tinha em 1440px (calibrado para
+     bater exatamente ali — ver `.circular__headline`/`.circular__offers`
+     abaixo). Abaixo de 90rem ninguém lê esses valores; o corpo continua a
+     escala fluida de viewport de sempre. */
   @media (min-width: 90rem) {
     .circular__content {
       grid-template-columns: auto auto;
@@ -148,20 +132,27 @@ const offers = [
     }
   }
 
-  /* Mesmo tratamento do hero: as cinco linhas estão travadas no HTML, então
-     a caixa só precisa não ser mais estreita que a maior delas.
+  /* Mesmo tratamento do hero: as linhas estão travadas no HTML (cinco no
+     desktop, seis no mobile — ver o comentário junto do `<h2>`), então a
+     caixa só precisa não ser mais estreita que a maior delas.
      `width: max-content` a cola na maior linha — 14.927em, "A partir da
      economia circular," — e `max-width: 100%` impede o vazamento. São 866px
      a 58px contra os 833px da caixa do Figma; com o texto à esquerda a
      diferença fica toda na borda direita, que é ar, e o vão da grade a
-     absorve. `font-size` aqui é a escala fluida padrão (`--fs-h1`); acima de
-     90rem um `@media` mais abaixo troca a fonte por `cqi` — ver ali por quê,
-     e por que essa troca precisa vir DEPOIS destas duas regras no arquivo,
-     não dentro do `@media` de cima. */
+     absorve.
+     `font-size` NÃO usa `--fs-h1` (o token do hero) desde 2026-09-16: em
+     1440px os dois convergem para 58px — os frames de desktop das duas
+     seções batem nesse valor, por isso a fórmula abaixo usa o mesmo V — mas
+     no mobile o Figma desenha 32px para o hero (nó `126:157`) e 28px para
+     esta headline (nó `126:161`), tamanhos diferentes de propósito. Piso e
+     valor de Figma próprios, mesma fórmula do CLAUDE.md (K = (V−F)/0.665625,
+     B = F−0.234375·K). Acima de 90rem um `@media` mais abaixo troca a fonte
+     por `cqi` — ver ali por quê, e por que essa troca precisa vir DEPOIS
+     destas duas regras no arquivo, não dentro do `@media` de cima. */
   .circular__headline {
     width: max-content;
     max-width: 100%;
-    font-size: var(--fs-h1);
+    font-size: max(1.75rem, 2.817vw + 1.0898rem); /* 58px @1440, piso 28px @375 */
     line-height: 1.25;
     font-weight: 400;
     color: var(--color-black);
@@ -192,7 +183,7 @@ const offers = [
   /* Troca de fonte pedida pelo Felipe em 2026-09-08 (ver o comentário longo
      em `.circular__content` acima): a partir de 90rem, quando as duas
      colunas ficam lado a lado, o corpo do texto deixa de seguir a escala
-     fluida da viewport (`--fs-h1`/`--fs-card`) e passa a seguir `cqi` do
+     fluida de viewport (a fórmula própria da headline/`--fs-card`) e passa a seguir `cqi` do
      `.circular__content` — cresce junto com o espaço disponível, não com a
      tela, e o vão para de engordar.
      Precisa vir DEPOIS das duas regras base acima no arquivo: `@media` não
@@ -214,9 +205,9 @@ const offers = [
 
      `.circular__offers` teve o MESMO sintoma por um motivo diferente, bug
      encontrado depois de publicar a troca de fonte: acima de ~2019px a
-     oferta "Compre" ganhava uma terceira linha sozinha, quebrando o
-     `<br class="quebra">`, mesmo com a trilha do Grid já travada no tamanho
-     certo (`min-width` não bastou). A causa não é o Grid — é que 21.688em
+     oferta "Compre" ganhava uma terceira linha sozinha, mesmo com a trilha
+     do Grid já travada no tamanho certo (`min-width` não bastou). A causa
+     não é o Grid — é que 21.688em
      era um encaixe justo (a folga original, "1,5% sobre a maior linha", já
      avisava disso) calibrado para o alcance pequeno de `--fs-card`; em
      `cqi` o corpo passa longe desse alcance (43px em 3840px, contra uns
@@ -229,9 +220,9 @@ const offers = [
     .circular__headline {
       /* 58 ÷ 1312 × 100 = 4.4207 — o corpo do Figma em 1440px sobre a
          largura do container nesse mesmo instante (medida, não escolhida).
-         Bate exatamente com `var(--fs-h1)` em 1440px porque os dois
-         convergem ali por definição; a partir daí cresce com o container em
-         vez de com a viewport. */
+         Bate exatamente com o valor da regra base (e com `var(--fs-h1)` do
+         hero) em 1440px porque todos convergem ali por definição; a partir
+         daí cresce com o container em vez de com a viewport. */
       font-size: 4.4207cqi;
       min-width: max-content;
     }
@@ -266,15 +257,38 @@ const offers = [
     color: var(--color-black);
   }
 
-  /* Mesma regra do hero, pelo mesmo motivo: a composição de 1440px não cabe
-     numa coluna de celular — as quebras do Figma saem e o texto flui sozinho.
-     Sem elas a headline vira um bloco de oito linhas curtas coladas nas
-     ofertas; o respiro do desktop (`--space-block` entre título e lista,
-     `--space-sm` entre ofertas) fica apertado nessa densidade, então abaixo
-     de 48rem os dois vãos abrem. */
+  /* Escondida por padrão (desktop) — mesmo par de classes do hero
+     (`Hero.astro`), mas repetido aqui porque o `<style>` do Astro tem escopo
+     por componente: a regra de lá não alcança este arquivo. */
+  .quebra-mobile {
+    display: none;
+  }
+
+  /* Mesma técnica do hero: as quebras do desktop saem de cena e as do
+     mobile (`.quebra-mobile`, ver o `<h2>` acima) tomam o lugar. O respiro
+     do desktop (`--space-block` entre título e lista, `--space-sm` entre
+     ofertas) fica apertado na densidade do mobile, então abaixo de 48rem os
+     dois vãos abrem.
+
+     Teto de corpo do `h2`, mesma ideia do teto do `h1` do hero
+     (`Hero.astro`) — a maior linha mobile, "circular, democratizamos" (ou
+     "o acesso a dispositivos de", empatada), mede 13.003em (medido no
+     navegador). Ao piso de 28px ela pede ~366px onde a coluna tem 327px:
+     sem teto, quebra em duas por cima da quebra travada. 100 ÷ 13.003 =
+     7.691; 7.6 deixa ~1,2% de margem. `.circular__content` já declara
+     `container-type: inline-size` sempre (ver comentário lá em cima), então
+     o `cqi` já está disponível aqui sem precisar de nada novo. */
   @media (max-width: 47.99rem) {
     .quebra {
       display: none;
+    }
+
+    .quebra-mobile {
+      display: initial;
+    }
+
+    .circular__headline {
+      font-size: min(max(1.75rem, 2.817vw + 1.0898rem), 7.6cqi);
     }
 
     .circular__content {

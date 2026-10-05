@@ -3,19 +3,29 @@
    gap 8px, ícone de 9px, Poppins 16px/400 em #A8A8A8. É um desenho só —
    as instâncias antigas espalhadas pelas seções (seta de 17px, gap 4px,
    texto menor e mais escuro) são o que ele veio substituir.
-   Sem href renderiza <p>: o endereço da matriz usa o mesmo traço visual
-   sem ser um link. */
+   Sem href renderiza <p>: mesmo traço visual sem ser um link, para quando
+   o destino ainda não existe.
+   `newTab` abre em nova aba e avisa o leitor de tela — o aviso é texto
+   escondido, não visual, porque o Figma não desenha ícone para isso. */
 import ArrowIcon from './ArrowIcon.astro';
 
 interface Props {
   href?: string;
+  newTab?: boolean;
 }
 
-const { href } = Astro.props;
+const { href, newTab = false } = Astro.props;
 ---
 
 {href ? (
-  <a href={href} class="btn"><ArrowIcon /><slot /></a>
+  <a
+    href={href}
+    class="btn"
+    target={newTab ? '_blank' : undefined}
+    rel={newTab ? 'noopener noreferrer' : undefined}
+  >
+    <ArrowIcon /><slot />{newTab && <span class="visually-hidden"> (abre em nova aba)</span>}
+  </a>
 ) : (
   <p class="btn"><ArrowIcon /><slot /></p>
 )}

@@ -1,5 +1,5 @@
 ---
-import { navLinks, contactEmail, contactPhone, units } from '../data/site';
+import { navLinks, contactEmail, contactPhone, units, whatsappUrl } from '../data/site';
 
 /* A pergunta que os cinco ícones mandam para a IA. Escrita na voz de quem
    está do lado de fora decidindo se compra: é a dúvida do visitante, não um
@@ -63,7 +63,7 @@ const ais = [
       <span class="footer__label">Contato</span>
       <ul class="footer__stack">
         <li><a href={`mailto:${contactEmail}`}>{contactEmail}</a></li>
-        <li><a href={`tel:+${contactPhone.replace(/\D/g, '')}`}>{contactPhone}</a></li>
+        <li><a href={whatsappUrl}>{contactPhone}</a></li>
       </ul>
     </div>
 

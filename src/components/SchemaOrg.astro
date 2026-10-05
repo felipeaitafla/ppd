@@ -1,0 +1,82 @@
+---
+import { getImage } from 'astro:assets';
+import { units, instagramUrl, contactEmail, whatsappNumber } from '../data/site';
+import locator from '../assets/apple-locator.png';
+
+/* Quem é a empresa e onde ficam as lojas, em JSON-LD — o que buscador e IA
+   leem para responder "PPD em Santa Rosa" sem ter que adivinhar pelo layout.
+   O FAQ tem o seu próprio bloco, em `Faq.astro`.
+
+   `telephone` só na organização: é o WhatsApp de atendimento (`site.ts`),
+   e ninguém confirmou um número por unidade. Sem `aggregateRating`:
+   nota que o site declara sobre si mesmo o Google ignora, e as "+4000
+   avaliações" são do Google Review, não desta página. */
+const site = Astro.site!;
+const orgId = new URL('/#organizacao', site).href;
+
+const organization = {
+  '@type': 'Organization',
+  '@id': orgId,
+  name: 'Pede Pro Dindo',
+  alternateName: 'PPD',
+  url: site.href,
+  logo: new URL('/assets/ppd-logo-footer.svg', site).href,
+  email: contactEmail,
+  telephone: `+${whatsappNumber}`,
+  description:
+    'A primeira Revenda Autorizada da Apple no Brasil especializada em economia circular: iPhones seminovos revisados e com garantia.',
+  sameAs: [instagramUrl],
+};
+
+const website = {
+  '@type': 'WebSite',
+  '@id': new URL('/#site', site).href,
+  name: 'Pede Pro Dindo',
+  url: site.href,
+  inLanguage: 'pt-BR',
+  publisher: { '@id': orgId },
+};
+
+const stores = units.map((unit) => ({
+  '@type': 'ElectronicsStore',
+  name: `Pede Pro Dindo ${unit.city}`,
+  url: new URL('/#unidades', site).href,
+  hasMap: unit.mapsUrl,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: unit.address,
+    addressLocality: unit.city,
+    addressRegion: 'RS',
+    addressCountry: 'BR',
+  },
+  sameAs: [unit.instagramUrl],
+  parentOrganization: { '@id': orgId },
+}));
+
+/* A gravação da busca oficial de revendedores da Apple, em `AppleVerified.astro`.
+   O `<video>` é `aria-hidden` (é prova visual, não conteúdo), então este bloco
+   é o único lugar em que o buscador lê do que ele trata. Aponta para a variante
+   de maior resolução do desktop. A miniatura é o still do desktop — o último
+   quadro do próprio vídeo. */
+const thumbnail = await getImage({ src: locator, width: 1922, format: 'jpeg' });
+
+const video = {
+  '@type': 'VideoObject',
+  name: 'Pede Pro Dindo no localizador oficial da Apple',
+  description:
+    'Vídeo gravado no site oficial da Apple mostra a Pede Pro Dindo como revendedor autorizado, listada entre os locais de venda de iPhone no Brasil.',
+  thumbnailUrl: new URL(thumbnail.src, site).href,
+  contentUrl: new URL('/video/autorizada-1924.mp4', site).href,
+  uploadDate: '2026-09-30T00:00:00-03:00',
+  duration: 'PT11S',
+  inLanguage: 'pt-BR',
+  publisher: { '@id': orgId },
+};
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [organization, website, video, ...stores],
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />

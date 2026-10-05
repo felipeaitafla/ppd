@@ -1,19 +1,35 @@
 ---
 import { instagramHandle, instagramUrl } from '../data/site';
+import { getInstagramPosts } from '../data/instagram';
 
 /* Assuntos que o perfil publica, como no Figma. Não são filtros: a grade
    abaixo é uma só. */
 const topics = ['Dicas', 'Ofertas', 'Bastidores', 'Humor', 'Novidades Apple'];
 
-/* TODO: as seis últimas publicações do perfil. Enquanto elas não chegam, seis
-   quadrados cinzas — as duas fileiras de três do Figma — seguram a medida da
-   seção para o resto da página não mudar de altura quando o feed entrar. */
-const posts = 6;
+/* Seis últimas publicações reais da matriz, buscadas em tempo de build pela
+   Graph API (ver `src/data/instagram.ts`). Se a busca falhar — token
+   vencido, API fora do ar —, `posts` vem vazio e a grade cai para os seis
+   quadrados cinzas de reserva, que seguram a medida da seção. */
+const posts = await getInstagramPosts(6);
+
+/* A legenda vira o alt, limpa: sem emoji nem quebra de linha (que o leitor de
+   tela soletra ou engole) e cortada na última palavra inteira até 140
+   caracteres, em vez de no meio de uma. */
+const altFromCaption = (caption: string) => {
+  const clean = caption
+    .replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (clean.length <= 140) return clean;
+  return `${clean.slice(0, 140).replace(/\s+\S*$/, '')}…`;
+};
 ---
 
 <section class="insta" id="insta">
   <div class="insta__head">
-    <a class="insta__handle" href={instagramUrl}>{instagramHandle}</a>
+    <a class="insta__handle" href={instagramUrl} target="_blank" rel="noopener noreferrer">
+      {instagramHandle}<span class="visually-hidden"> (abre em nova aba)</span>
+    </a>
     {/* Quebra do frame `84:162` travada à mão, como no hero: a caixa em `em`
         deixava a frase cair para três linhas (e os badges para duas) em
         telas largas, onde o corpo cresce mais rápido que a razão caixa/letra.
@@ -27,12 +43,31 @@ const posts = 6;
     </ul>
   </div>
 
-  {/* Escondida de leitor de tela enquanto for placeholder: seis caixas vazias
-      não dizem nada a quem não as vê. Quando virarem publicações de verdade,
-      cada uma passa a ser um link com legenda e o atributo sai. */}
-  <div class="insta__grid" aria-hidden="true">
-    {Array.from({ length: posts }, () => <div class="insta__post" />)}
-  </div>
+  {posts.length > 0 ? (
+    <div class="insta__grid">
+      {posts.map((post) => (
+        <a
+          class="insta__post"
+          href={post.permalink}
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          <img
+            src={post.imageUrl}
+            alt={altFromCaption(post.caption) || `Publicação de ${instagramHandle} no Instagram`}
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+      ))}
+    </div>
+  ) : (
+    /* Escondida de leitor de tela: seis caixas vazias não dizem nada a quem
+       não as vê. Reserva de layout para quando a Graph API falhar. */
+    <div class="insta__grid" aria-hidden="true">
+      {Array.from({ length: 6 }, () => <div class="insta__post" />)}
+    </div>
+  )}
 </section>
 
 <style>
@@ -106,8 +141,9 @@ const posts = 6;
     border-radius: var(--radius);
   }
 
-  /* Três colunas em qualquer largura, e não duas no celular: é a grade do
-     Instagram, e ela só lê como feed em três.
+  /* Duas colunas no mobile; a partir de 60rem vira 3×2, como no frame `84:174`
+     do Figma (duas fileiras de três) — abaixo disso três colunas espremeriam
+     demais os seis quadrados na largura estreita.
 
      A partir de 60rem a grade mede 60vw — os 864px em 1440 do frame `84:174`,
      que são 60% da largura —, crescendo com a tela sem teto, como o resto do
@@ -116,7 +152,7 @@ const posts = 6;
      sem salto na troca. */
   .insta__grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-2xs);
     width: 100%;
     max-width: 36rem;
@@ -124,15 +160,27 @@ const posts = 6;
 
   @media (min-width: 60rem) {
     .insta__grid {
+      grid-template-columns: repeat(3, 1fr);
       width: 60vw;
       max-width: none;
     }
   }
 
+  /* 1080×1440: a proporção de retrato que a Meta aceita em publicações,
+     não o quadrado 1:1 do grid antigo do Instagram. */
   .insta__post {
-    aspect-ratio: 1;
+    display: block;
+    aspect-ratio: 1080 / 1440;
+    overflow: hidden;
     background: var(--color-placeholder);
     border-radius: var(--radius);
+  }
+
+  .insta__post img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   /* Abaixo de 60rem o cabeçalho volta a 100% e não há mais espaço garantido

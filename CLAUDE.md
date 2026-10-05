@@ -55,7 +55,9 @@ reusar a técnica com outro par de seções.
   MESMO componente porque uma precisa travar a rolagem; lá não há pino e as
   duas seções são independentes.
 - Protótipo abandonado (CSS `animation-timeline: scroll()` nativo, sem JS):
-  `src/pages/pv-px.astro` — histórico, não é a implementação atual.
+  `src/pages/_pv-px.astro` — histórico, não é a implementação atual. O `_`
+  no nome (2026-09-28) tira a página do build: antes ela era publicada em
+  `/pv-px/`, com título "pv", ao alcance de qualquer buscador.
 
 ### Revelação (em camadas) — sem pino, velocidades diferentes
 Referência: `src/components/Revelacao.astro`. Ver também a memória
@@ -93,8 +95,12 @@ linhas 49-52).
 - **Quem fica parada / quem anda:** a seção inteira fica presa na tela; o
   que anda é o conteúdo horizontal dentro dela — sem segunda seção, sem
   parallax, eixo de saída é X, não Y.
-- **Restrição:** só em `pointer: fine` e sem `prefers-reduced-motion`; em
-  touch vira carrossel nativo de swipe, sem pino.
+- **Restrição:** só em `pointer: fine`, sem `prefers-reduced-motion` e a
+  partir de 48rem (2026-09-17: uma janela estreita testada com mouse
+  também caía no pino, já que a checagem original só olhava o tipo de
+  ponteiro — abaixo do corte de sempre, é carrossel nativo de swipe, sem
+  pino, igual ao toque); em touch vira carrossel nativo de swipe, sem pino,
+  em qualquer largura.
 - **Parâmetros a fixar antes de codar:** quanto conteúdo horizontal existe
   (poucos itens não sobra trilho suficiente para o pino ser perceptível).
 - **Isso NÃO é** Abertura: os dois usam `sticky`, mas Abertura troca de
@@ -148,9 +154,7 @@ nunca quebram linha, nunca saltam de tamanho, e **nunca param de crescer**:
 a proporção do design em 1440 (o frame do Figma) se mantém em qualquer
 largura de desktop, inclusive 4K e além. Todo token fluido bate o próprio
 piso aos 375px e o valor exato do Figma aos 1440px — a mesma dupla para
-todos, então nada "para de escalar" numa largura diferente do resto. Fora
-do desktop (abaixo de ~48rem/768px), o menu mobile usa uma âncora própria,
-464px, e ali continua fazendo sentido ter um teto — ver nota no fim.
+todos, então nada "para de escalar" numa largura diferente do resto.
 
 **Pedir um valor novo:** "escala isso em fluido, valor X no Figma a
 1440px, piso Y" já basta.
@@ -181,24 +185,32 @@ largura disponível), e a grade do Instagram virou `60vw` direto (os 864px em
 toda, com teto de 36rem que casa com 60vw na troca). O princípio é o mesmo:
 a coluna cresce com a tela, nunca estaciona no tamanho de 1440. Raio de
 borda (`--radius`) também não escala.
-Menu mobile (dentro de `@media (max-width: 47.99rem)`) e
-`--fs-nav-drawer` continuam usando `clamp()` COM teto, ancorados no frame
-mobile do Figma (464px) — um menu mobile nunca existe em desktop, então o
-"sem teto" deste vocabulário não se aplica a eles.
+(Até 2026-09-30 havia uma exceção: o menu mobile e `--fs-nav-drawer` usavam
+`clamp()` com teto, ancorados no frame mobile de 464px. O menu saiu do site
+— ver a pendência do `header-scroll` — e o token foi junto.)
 
 ## Quebras de linha travadas no Figma
 
 Hero e economia circular reproduzem, em qualquer largura de desktop, as
-mesmas quebras de linha do frame de 1440px. Escala fluida sozinha não dá
-conta disso — ela mantém a proporção do corpo, não a razão entre a caixa e a
-letra —, então o mecanismo é outro, em três partes:
+mesmas quebras de linha do frame de 1440px — e, desde 2026-09-16, em
+qualquer largura de mobile, as do frame mobile (`126:157`/`126:158`/`126:161`
+do Figma, canvas "Mobile"). Escala fluida sozinha não dá conta disso — ela
+mantém a proporção do corpo, não a razão entre a caixa e a letra —, então o
+mecanismo é outro, em três partes:
 
-1. **Cada quebra vira `<br class="quebra">` no HTML.** As manuais do Figma e
-   as que o Poppins faz sozinho dentro da caixa desenhada, sem distinção: o
-   navegador não pode ficar escolhendo. Abaixo de 48rem a classe some
-   (`display: none`) e o texto volta a quebrar à vontade — a composição de
-   1440px não cabe num celular. **O espaço antes de cada `<br>` não é
-   enfeite**: é o que mantém a frase inteira quando a quebra sai de cena.
+1. **Cada quebra vira `<br>` no HTML, com uma classe por faixa.**
+   `class="quebra"` para as quebras do frame de 1440px (visível no desktop,
+   `display: none` abaixo de 48rem) e `class="quebra-mobile"` para as do
+   frame mobile (o oposto: `display: none` por padrão, visível só abaixo de
+   48rem — a regra base mora em cada componente que a usa, porque o
+   `<style>` do Astro é isolado por componente). Quando uma posição de
+   quebra é a MESMA nas duas composições (acontece no `h1` do hero, não na
+   economia circular), o `<br>` ali não leva classe nenhuma — fica sempre
+   visível, sem duplicar marcação para dizer a mesma coisa duas vezes. As
+   manuais do Figma e as que o Poppins faz sozinho dentro da caixa
+   desenhada não se distinguem: o navegador não pode ficar escolhendo.
+   **O espaço antes de cada `<br>` não é enfeite**: é o que mantém a frase
+   inteira quando a classe do lado errado o esconde.
 2. **As linhas vêm do render do Figma, não de reproduzir a caixa dele.** Este
    é o ponto que custou uma entrega errada: exportar o frame como imagem
    (`download_figma_images`) e ler as linhas ali. Montar a caixa do Figma no
@@ -230,8 +242,19 @@ letra —, então o mecanismo é outro, em três partes:
      onde a tela for larga, e essa mordida de cima não existe mais.
 
 **Consequência prática: mexer no texto quebra o acordo.** Trocar uma palavra
-obriga a reexportar o frame do Figma, reler as linhas e refazer os `<br>` —
-e, se a maior linha mudar de tamanho, também os coeficientes `cqi`.
+obriga a reexportar OS DOIS frames do Figma (desktop e mobile), reler as
+linhas e refazer os `<br>` das duas faixas — e, se a maior linha mudar de
+tamanho, também os coeficientes `cqi`.
+
+**O piso da escala fluida também vem do frame mobile, e pode divergir entre
+seções.** Hero (`h1`) e economia circular (`h2`) convergem para o mesmo
+corpo em 1440px (58px — os dois frames de desktop batem nesse valor), mas o
+Figma desenha tamanhos diferentes no mobile: 32px para o hero, 28px para a
+economia circular (de propósito, não por descuido). Por isso só o hero usa
+o token global `--fs-h1` (`global.css`); a economia circular tem a própria
+fórmula `max()` no `<style>` de `CircularEconomy.astro`, com o mesmo V
+(58px) e um piso F diferente (28px) — mesma álgebra da seção "Escala fluida"
+acima, as duas curvas só coincidem exatamente em 1440px.
 
 **Caso leve — o `h2` do Instagram** (`Instagram.astro`, frame `84:162`): um
 `<br class="quebra">` depois de "fique", e só. A caixa em `em` deixava a
@@ -271,21 +294,24 @@ mexer num, replica no outro: a receita é idêntica de propósito.
 
 Placeholders que estão no ar no protótipo e não podem passar para produção.
 _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
-**Última atualização: 2026-09-03.**
+**Última atualização: 2026-09-28.**
 
 ### Contato
 
-- [ ] **WhatsApp: número e mensagem padrão** em `src/data/site.ts`. O número
-  atual (`5500000000000`) é inválido de propósito, para nunca abrir conversa
-  com um desconhecido se escapar para produção. Alimenta o ícone do hero e o
-  menu mobile — trocar num lugar resolve os dois.
+- [ ] **WhatsApp: mensagem padrão** em `src/data/site.ts`. O número real
+  (`555533134188`, +55 55 3313-4188) entrou em 2026-09-30, no lugar do
+  placeholder inválido; a mensagem pronta ("Olá! Vi o site da Pede Pro Dindo
+  e quero saber mais.") segue a do protótipo, sem revisão. Alimenta o ícone
+  do topo e o telefone do rodapé — trocar num lugar resolve os dois.
 - [ ] **`WhatsappCta.astro` (faixa de CTA do rodapé) saiu da página** em
   2026-08-21, a pedido do Felipe ("não quero ela no site") — o componente
   continua no repo, com o asset `cta-whatsapp.png`, só não é mais importado
   em `index.astro`. Decidir se volta, muda de lugar, ou se componente e
   asset devem ser apagados de vez.
-- [ ] **Telefone de exibição do rodapé** (`55 9 99900 0000`) ainda é o
-  placeholder do Figma, em `src/data/site.ts`.
+- [x] ~~**Telefone de exibição do rodapé**~~ — resolvido em 2026-09-30. É o
+  número do WhatsApp (`55 3313 4188`, `contactPhone` em `src/data/site.ts`),
+  e o link do rodapé passou de `tel:` para `whatsappUrl`. Também entrou como
+  `telephone` da organização no JSON-LD.
 
 ### Conteúdo
 
@@ -297,14 +323,17 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   abreviados, vírgula antes do número) — o rodapé do Figma escrevia curto.
   Ijuí e Santiago vieram sem o tipo do logradouro; as duas são Rua,
   conferido no cadastro do CNPJ.
-- [ ] **Link do grupo de ofertas** — segue `href="#"` na matriz, e as outras
-  quatro nem mostram o botão até os links existirem. Campo `groupUrl` em
-  `src/data/site.ts`.
+- [x] ~~**Link do grupo de ofertas**~~ — resolvido em 2026-09-24. As cinco
+  unidades ganharam `groupUrl` em `src/data/site.ts`, cada uma com o link do
+  próprio grupo (`2gq3jya.s.gy/ofertas-iphone-<cidade>`) — o botão "Acessar
+  grupo de ofertas" agora aparece nas cinco, não só na matriz.
 - [ ] **Handles de Instagram das filiais** — `@pedeprodindo.sr`, `.ijui` e
   `.sb` vieram do Figma e ninguém abriu os perfis; só `.stgo` e o da matriz
   estão confirmados. O acordeão já linka os cinco (`instagram.com/<handle>`,
-  derivado em `site.ts`); no rodapé são texto puro, como no Figma. Conferir
-  os três antes de considerar o link bom.
+  derivado em `site.ts`); no rodapé são texto puro, como no Figma. Desde
+  2026-09-28 os cinco também entram como `sameAs` de cada loja no JSON-LD
+  (`SchemaOrg.astro`) — um perfil errado ali diz ao buscador que a loja é
+  outra conta. Conferir os três antes de considerar o link bom.
 - [x] ~~**FAQ não tinha destino**~~ — resolvido em 2026-08-20. A seção chegou
   no Figma (`49:615`), acima do rodapé, e virou `Faq.astro`; `navLinks` aponta
   para `#faq`. As oito perguntas e respostas vêm de `faq-ppd-seminovos.md`,
@@ -367,22 +396,39 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   os links e os dois ícones sociais. Fica para depois por decisão do Felipe
   (2026-09-03). Quem for implementar: os links vêm de `navLinks`, não do
   frame — lá ainda estão "Manifesto" e "Blog", os dois já removidos do menu.
-- [ ] **Frame mobile do hero está desatualizado** — `54:797` ainda mostra a
-  composição antiga (assinatura no topo, hambúrguer, logo grande embaixo) e
-  não tem o texto que desceu do manifesto para o hero. O código segue o
-  desktop: em qualquer largura o hero mostra headline e subtexto, e o logo
-  grande saiu dele (continua na gaveta e no rodapé). Decisão do Felipe em
-  2026-09-03 — quando o frame mobile for redesenhado, conferir.
+  **Desde 2026-09-30 o topo do hero não tem menu** (pedido do Felipe): só a
+  marca e os ícones de Instagram e WhatsApp, maiores (24px @1440). Os quatro
+  links saíram e, com eles, o menu mobile inteiro (☰ + gaveta + o script de
+  abrir/fechar), que só repetia links e ícones. `navLinks` segue vivo no
+  rodapé. Se o `header-scroll` vier, decidir antes se ele traz os links de
+  volta — o topo sem menu foi escolha, não esquecimento.
+- [x] ~~**Frame mobile do hero estava desatualizado**~~ — resolvido em
+  2026-09-16. O canvas "Mobile" do Figma (`54:795`) trouxe o frame redesenhado
+  (`126:109`: hero + economia circular, 400px) — headline e subtexto do hero
+  com quebras próprias do mobile (`.quebra-mobile`, ver "Quebras de linha
+  travadas no Figma"), sem logo grande no corpo do hero (só na gaveta e no
+  rodapé, como já era). O frame antigo `54:797`/`54:806` (com "Manifesto" e
+  "Blog", removidos do menu em 2026-09-03) segue no arquivo do Figma como
+  lixo histórico — não é mais referência.
+- [x] ~~**Assinatura do topo mobile/gaveta mostrava só o selo da Apple**~~ —
+  resolvido em 2026-09-16, a pedido do Felipe. `assinatura-h-white.png`
+  (apagado do repo) não tinha a marca "pede pro dindo" apesar do nome — só o
+  selo "Revendedor autorizado". Topo mobile (`.hero__logo`) e gaveta
+  (`.drawer__badge`) passaram a usar o mesmo SVG do desktop
+  (`logo-ppd-apple-white.svg`, lockup completo), cada um com seu teto de
+  tamanho (sem teto no topo mobile; `clamp()` a 464px na gaveta, como já era).
 - [ ] **Texto das ofertas de economia circular em `#8b8b8b` sobre branco** dá
   3,0:1, abaixo dos 4,5:1 da WCAG AA para texto normal. É o valor do Figma
   (`--color-text-mid`, que desde 2026-09-08 também serve as respostas do FAQ
   e os itens de Menu/Contato do rodapé, os dois sobre o `#F6F6F6` claro —
   contraste igualmente aquém, anotado acima). O mínimo sobre branco seria
   `#767676`.
-- [ ] **Links `href="#"` restantes** — grupo de ofertas da matriz
-  (`Stores.astro`), "Acessar Google Review" (`Testimonials.astro`), "Fazer a
-  pesquisa" da busca da Apple (`AppleVerified.astro`) e "Políticas de
-  Privacidade" (`Footer.astro`).
+- [ ] **Links `href="#"` restantes** — "Acessar Google Review"
+  (`Testimonials.astro`) e "Políticas de Privacidade" (`Footer.astro`). O
+  grupo de ofertas (`Stores.astro`) saiu daqui em 2026-09-24: as cinco
+  unidades têm link de verdade agora. "Fazer a pesquisa"
+  (`AppleVerified.astro`) saiu em 2026-09-30: aponta para
+  `locate.apple.com/br/pt/sales`.
 - [x] ~~**Destino dos ícones de IA no rodapé**~~ — resolvido em 2026-08-21.
   Os cinco abrem a plataforma com a mesma pergunta pronta, escrita na voz de
   um consumidor decidindo se compra e pedindo verificação da autorização
@@ -415,19 +461,33 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
 - [ ] **Avatares dos depoimentos vieram pequenos** — 72×72, e o do Pedro só
   36×36, para exibição a 40px. Em tela de alta densidade ficam moles,
   principalmente o do Pedro. Puxar as fotos originais do Google Review.
-- [ ] **`src/assets/apple-locator.png` tem 1329×910** — é o recorte do Figma
-  na resolução em que o print foi tirado. Desde 2026-09-08 o tamanho
-  encaixado e o teto da animação são fluidos (80% da coluna disponível, sem
-  teto — ver `AppleVerified.astro`), então em telas largas o print amplia
-  além dos 1329px nativos mais cedo do que antes. Pedir uma captura em
-  retina resolve nos dois pontos.
-- [ ] **`public/video/autorizada.mp4` é um arquivo só, sem variantes por
-  resolução** — ao contrário do vídeo do hero (`hero-720p/1080p/1440p/
-  2160p.mp4`), que tem uma fonte por faixa de tela. Pedido do Felipe em
-  2026-09-08: ele vai mandar um vídeo novo, em qualidade melhor, para
-  gerarmos as mesmas quatro variantes daqui — mesmo tratamento de
-  conversão que já foi usado para o vídeo do hero (H.264 High/yuv420p, sem
-  áudio, `+faststart`, CRF calibrado por faixa).
+- [x] ~~**`src/assets/apple-locator.png` tinha 1329×910**~~ — resolvido em
+  2026-09-30 junto com o item do still, abaixo: o arquivo agora tem os
+  1922×1148 da gravação (menos as duas colunas pretas). Acima disso ainda
+  amplia, mas a fonte não tem mais resolução — o mesmo teto do vídeo.
+- [x] ~~**`public/video/autorizada.mp4` era um arquivo só, sem variantes por
+  resolução**~~ — resolvido em 2026-09-30. O vídeo novo do desktop
+  (`apple-local.mp4`, gravação de tela 1924×1148, 11s, fora do git como os
+  outros brutos) virou `autorizada-1280.mp4` (até 1080px de janela) e
+  `autorizada-1924.mp4` (acima) — duas variantes e não as quatro do hero,
+  porque a fonte para em 1924px e 1440p/2160p seriam a mesma imagem
+  ampliada. Mesma receita do hero (H.264 High/yuv420p, sem áudio,
+  `+faststart`, CRF 23), 30fps constantes (a fonte era de taxa variável,
+  ~49fps médios). As duas colunas da direita da gravação são pretas (sobra
+  da captura) e saem no encode (`crop=1922:1148:0:0`): o arquivo "1924"
+  tem 1922px de largura, e o `aspect-ratio` do `.proof__shot` é 1922/1148.
+  Quem reencodar a partir do bruto repete o corte. O `.proof__shot` também
+  perdeu a borda de 1px, que aparecia como linha clara embaixo quando o
+  rodapé escuro da Apple chega na beirada. O clipe mobile
+  (`autorizada-mobile.mp4`, retrato 1170×2532, gravado no aparelho) não
+  mudou e não tem sobra nas bordas.
+- [x] ~~**Still do desktop (`apple-locator.png`) era de outra gravação**~~ —
+  resolvido em 2026-09-30. O print do Figma deu lugar ao último quadro do
+  `apple-local.mp4` (extraído da gravação bruta, não da variante
+  comprimida), mesmo nome de arquivo. Ele é o que aparece para quem tem
+  movimento reduzido, por baixo do vídeo enquanto carrega, e a miniatura do
+  `VideoObject` em `SchemaOrg.astro`. O quadro traz o cursor do mouse no
+  canto superior direito, fora da área da busca.
 
 ### Antes do deploy de produção
 
@@ -435,3 +495,20 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   "Estado atual". Vercel hoje é só o ambiente de aprovação.
 - [ ] Conectar o CMS e migrar o conteúdo hoje hard-coded nos componentes
   (textos, lista de unidades, fotos da galeria).
+- [ ] **Confirmar o domínio em `site`** (`astro.config.mjs`). Hoje é
+  `https://www.pedeprodindo.com.br`, presumido — o domínio ainda serve o
+  site antigo em Framer. Canonical, `og:url`/`og:image`, sitemap, a linha
+  `Sitemap:` do robots.txt e os `@id`/`url` do JSON-LD saem todos dele.
+- [ ] **Abrir o site para robôs no domínio de produção.** Auditoria de
+  2026-09-28: a URL da Vercel responde 302 para o login (Deployment
+  Protection) a qualquer visitante, robô ou não, e ainda manda
+  `X-Robots-Tag: noindex` — certo para a fase de aprovação, fatal se
+  sobreviver ao lançamento. No deploy: proteção só em "Preview Deployments",
+  e conferir em Firewall que Bot Protection e a regra "AI Bots" não barram
+  Googlebot, Bingbot, OAI-SearchBot, ChatGPT-User, GPTBot, Claude-SearchBot,
+  ClaudeBot e PerplexityBot (o `robots.txt`, gerado por
+  `src/pages/robots.txt.ts`, libera todos, cada um com grupo próprio).
+- [ ] **Imagem de compartilhamento (`og:image`) é provisória** — a foto do
+  hero (`hero-bg.jpg`) recortada em 1200×630 no build (`Layout.astro`). Uma
+  arte com a marca, desenhada no Figma, faria melhor; quando vier, troca o
+  import no `Layout`.

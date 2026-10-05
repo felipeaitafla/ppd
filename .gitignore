@@ -17,6 +17,9 @@ pnpm-debug.log*
 .env
 .env.production
 
+# credenciais soltas fora do .env (token da Graph API da Meta)
+graph-api.md
+
 # macOS-specific files
 .DS_Store
 
@@ -28,6 +31,10 @@ pnpm-debug.log*
 
 .vercel
 
-# fontes de vídeo brutas (ProRes, centenas de MB) — só os .mp4 transcodificados
-# em public/video/ vão pro site; o bruto fica local, fora do repositório.
+# fontes de vídeo brutas (ProRes, gravação de tela do aparelho — centenas de
+# MB) — só os .mp4 transcodificados em public/video/ vão pro site; o bruto
+# fica local, fora do repositório. `/*.mp4` tem a barra na frente para não
+# alcançar public/video/*.mp4, que É versionado.
 *.mov
+/*.mp4
+/*.MP4

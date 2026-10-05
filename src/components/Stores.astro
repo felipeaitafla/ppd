@@ -6,55 +6,162 @@ import loja1 from '../assets/loja-1.png';
 import loja2 from '../assets/loja-2.png';
 import loja3 from '../assets/loja-3.png';
 import loja4 from '../assets/loja-4.png';
+import santaRosa1 from '../assets/loja-santa-rosa-1.png';
+import santaRosa2 from '../assets/loja-santa-rosa-2.png';
+import santaRosa3 from '../assets/loja-santa-rosa-3.png';
+import santaRosa4 from '../assets/loja-santa-rosa-4.png';
+import ijui1 from '../assets/loja-ijui-1.png';
+import ijui2 from '../assets/loja-ijui-2.png';
+import ijui3 from '../assets/loja-ijui-3.png';
+import ijui4 from '../assets/loja-ijui-4.png';
+import saoBorja1 from '../assets/loja-sao-borja-1.png';
+import saoBorja2 from '../assets/loja-sao-borja-2.png';
+import saoBorja3 from '../assets/loja-sao-borja-3.png';
+import saoBorja4 from '../assets/loja-sao-borja-4.png';
+import santiago1 from '../assets/loja-santiago-1.png';
+import santiago2 from '../assets/loja-santiago-2.png';
+import santiago3 from '../assets/loja-santiago-3.png';
+import santiago4 from '../assets/loja-santiago-4.png';
 
 /* A ordem é a do Figma: a primeira ocupa o slot grande, as três seguintes
    a faixa de baixo. A rotação embaralha isso a cada ciclo, então toda foto
-   passa pelo slot grande — por isso todas são servidas no tamanho dele. */
-const photos = [
-  {
-    src: loja1,
-    alt: 'Salão da loja com parede de capas, fones e acessórios para iPhone',
-  },
-  {
-    src: loja2,
-    alt: 'Fachada de uma unidade Pede Pro Dindo',
-  },
-  {
-    src: loja3,
-    alt: 'Área de exposição da loja com aparelhos sobre as bancadas',
-  },
-  {
-    src: loja4,
-    alt: 'iPhones em exposição sobre a bancada de atendimento',
-  },
-];
+   passa pelo slot grande — por isso todas são servidas no tamanho dele.
+
+   Uma galeria por unidade, não mais uma só: cada cidade tem as próprias
+   quatro fotos, e a que aparece é a da unidade aberta no acordeão (ver
+   `.stores__gallery-wrap` e o script no fim do arquivo). Chave é o nome da
+   cidade, igual a `unit.city` em `src/data/site.ts`. */
+const galleryPhotos: Record<string, { src: ImageMetadata; alt: string }[]> = {
+  'Santo Ângelo': [
+    {
+      src: loja1,
+      alt: 'Fachada da loja ao entardecer, com o letreiro "Pede Pro Dindo" e a vitrine refletindo a rua',
+    },
+    {
+      src: loja2,
+      alt: 'Fachada de uma unidade Pede Pro Dindo',
+    },
+    {
+      src: loja3,
+      alt: 'Área de exposição da loja com aparelhos sobre as bancadas',
+    },
+    {
+      src: loja4,
+      alt: 'iPhones em exposição sobre a bancada de atendimento',
+    },
+  ],
+  'Santa Rosa': [
+    {
+      src: santaRosa1,
+      alt: 'Fachada da unidade com o letreiro azul "Pede Pro Dindo" e placa da Apple na calçada',
+    },
+    {
+      src: santaRosa2,
+      alt: 'Atendente no balcão da loja, com árvore decorativa e iPhones em exposição na parede',
+    },
+    {
+      src: santaRosa3,
+      alt: 'iPhones em exposição sobre o balcão, em diferentes cores',
+    },
+    {
+      src: santaRosa4,
+      alt: 'Parede com capas e acessórios para iPhone em exposição',
+    },
+  ],
+  Ijuí: [
+    {
+      src: ijui1,
+      alt: 'Fachada da unidade com a logo iluminada e cartazes de liquidação na vitrine',
+    },
+    {
+      src: ijui2,
+      alt: 'Salão da loja com mesas de madeira, poltronas e vista para a rua',
+    },
+    {
+      src: ijui3,
+      alt: 'iPhones em exposição sobre a mesa, em diferentes cores',
+    },
+    {
+      src: ijui4,
+      alt: 'Prateleira da loja com fones, caixas de som e acessórios',
+    },
+  ],
+  'São Borja': [
+    {
+      src: saoBorja1,
+      alt: 'Fachada da unidade com o letreiro "Pede Pro Dindo" e a vitrine iluminada',
+    },
+    {
+      src: saoBorja2,
+      alt: 'Mesa de atendimento com árvore decorativa e iPhones em exposição',
+    },
+    {
+      src: saoBorja3,
+      alt: 'iPhones em exposição sobre a mesa, em diferentes cores',
+    },
+    {
+      src: saoBorja4,
+      alt: 'Balcão com o logo "ppd" e prateleira de acessórios ao fundo',
+    },
+  ],
+  Santiago: [
+    {
+      src: santiago1,
+      alt: 'Parede com capas de iPhone em várias cores e acessórios em exposição',
+    },
+    {
+      src: santiago2,
+      alt: 'Detalhe do logo "ppd" na parede da loja',
+    },
+    {
+      src: santiago3,
+      alt: 'Corredor da loja com prateleiras de acessórios e mesa de atendimento',
+    },
+    {
+      src: santiago4,
+      alt: 'Prateleira com capas e acessórios em exposição',
+    },
+  ],
+};
 ---
 
 {/* O `id` voltou para cá em 2026-09-04, quando a revelação saiu da passagem
     da economia circular para esta seção: sem camada nenhuma andando, a seção
     está sempre onde o fluxo a coloca, e o alvo do menu pode ser ela mesma. */}
 <section class="stores" id="unidades">
-  <div class="stores__gallery" data-gallery>
-    {photos.map((photo, position) => (
-      <figure
-        class:list={['stores__slot', { 'stores__slot--lead': position === 0 }]}
-        data-slot
+  {/* Cinco galerias empilhadas no mesmo lugar, não uma: só a da unidade
+      aberta no acordeão fica com `.is-active` (sincronizado pelo índice —
+      ver o script no fim do arquivo), e a troca é um crossfade — mesma
+      linguagem da rotação de fotos abaixo, não um corte seco. */}
+  <div class="stores__gallery-wrap">
+    {units.map((unit, unitIndex) => (
+      <div
+        class:list={['stores__gallery', { 'is-active': unit.matriz }]}
+        data-gallery
+        data-gallery-index={unitIndex}
       >
-        {photos.map((item, index) => (
-          <Image
-            src={item.src}
-            alt={item.alt}
-            width={1440}
-            widths={[480, 768, 1080, 1440]}
-            sizes="(min-width: 60rem) 44vw, 92vw"
-            format="webp"
-            quality={70}
-            loading="lazy"
-            decoding="async"
-            class:list={['stores__photo', { 'is-active': index === position }]}
-          />
+        {galleryPhotos[unit.city].map((photo, position) => (
+          <figure
+            class:list={['stores__slot', { 'stores__slot--lead': position === 0 }]}
+            data-slot
+          >
+            {galleryPhotos[unit.city].map((item, index) => (
+              <Image
+                src={item.src}
+                alt={item.alt}
+                width={1440}
+                widths={[480, 768, 1080, 1440]}
+                sizes="(min-width: 60rem) 44vw, 92vw"
+                format="webp"
+                quality={70}
+                loading="lazy"
+                decoding="async"
+                class:list={['stores__photo', { 'is-active': index === position }]}
+              />
+            ))}
+          </figure>
         ))}
-      </figure>
+      </div>
     ))}
   </div>
 
@@ -65,20 +172,31 @@ const photos = [
     </div>
 
     <ul class="stores__list">
-      {units.map((unit) => (
+      {units.map((unit, unitIndex) => (
         <li>
-          {/* `details name` dá acordeão exclusivo sem uma linha de JS. */}
-          <details class="stores__unit" name="unidades" open={unit.matriz}>
+          {/* `details name` dá acordeão exclusivo sem uma linha de JS.
+              `data-unit-index` casa esta linha com a galeria do mesmo
+              índice em `.stores__gallery-wrap`. */}
+          <details class="stores__unit" name="unidades" open={unit.matriz} data-unit-index={unitIndex}>
             <summary class="stores__unit-head">
-              <span>{unit.label}</span>
+              {/* `h3` para o nome da unidade ser título (h2 "Visite a PPD
+                  mais próxima" → h3 por cidade) para quem lê a estrutura;
+                  herda fonte e margem zero de `global.css`. */}
+              <h3>{unit.label}</h3>
               <span class="stores__unit-mark" aria-hidden="true"></span>
             </summary>
+            {/* `-body` recolhe (max-height, sem padding próprio); `-inner`
+                carrega o padding. Padding não encolhe abaixo do próprio
+                valor mesmo com `max-height: 0` no elemento que o tem — por
+                isso ele mora num filho, não na caixa que anima. */}
             <div class="stores__unit-body">
-              <Button>{unit.address}</Button>
-              <Button href={unit.instagramUrl}>{unit.instagram}</Button>
-              {unit.groupUrl && (
-                <Button href={unit.groupUrl}>Acessar grupo de ofertas</Button>
-              )}
+              <div class="stores__unit-body-inner">
+                <Button href={unit.mapsUrl}>{unit.address}</Button>
+                <Button href={unit.instagramUrl} newTab>{unit.instagram}</Button>
+                {unit.groupUrl && (
+                  <Button href={unit.groupUrl} newTab>Acessar grupo de ofertas</Button>
+                )}
+              </div>
             </div>
           </details>
         </li>
@@ -115,10 +233,38 @@ const photos = [
   /* Três colunas com a foto grande atravessando as três: a altura de cada
      slot vem da proporção do Figma, então a galeria inteira acompanha a
      largura sem altura fixa em nenhum ponto. */
+  /* As cinco vivem empilhadas no mesmo lugar (ver comentário no HTML): só a
+     `.is-active` fica `position: relative` — é ela que dá altura à
+     `.stores__gallery-wrap`, já que as outras saem do fluxo. As demais ficam
+     `position: absolute` + `inset: 0`, encaixando exatamente na área que a
+     ativa define, com opacidade zero — por isso a troca de qual está ativa
+     é um crossfade (`opacity`), não um corte, e a caixa nunca pula de
+     tamanho: as cinco compartilham a mesma proporção fixa por slot. */
   .stores__gallery {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-gallery);
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 400ms ease;
+  }
+
+  .stores__gallery.is-active {
+    position: relative;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .stores__gallery-wrap {
+    position: relative;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stores__gallery {
+      transition: none;
+    }
   }
 
   .stores__slot {
@@ -189,6 +335,24 @@ const photos = [
     gap: var(--space-list);
   }
 
+  /* Mais respiro só no mobile (abaixo de 48rem, corte de sempre): empilhado
+     em coluna única, rótulo, título e as linhas do acordeão ficavam
+     espremidos uns nos outros; o desktop já tem folga própria ao lado da
+     galeria e os tokens base bastam. */
+  @media (max-width: 47.99rem) {
+    .stores__content {
+      gap: var(--space-xl);
+    }
+
+    .stores__head {
+      gap: var(--space-md);
+    }
+
+    .stores__list {
+      gap: var(--space-block);
+    }
+  }
+
   /* A régua é do próprio cabeçalho, não da lista: assim ela aparece igual na
      unidade aberta e na fechada, sem depender de qual é a última. */
   .stores__unit-head {
@@ -229,47 +393,76 @@ const photos = [
     content: '−';
   }
 
-  .stores__unit-body {
+  /* Padding mora aqui, não em `.stores__unit-body` (que é quem anima) —
+     nenhuma caixa encolhe abaixo do próprio padding, `max-height: 0` e tudo:
+     um `<div>` com `padding-top: 24px` sempre mede pelo menos 24px, porque
+     padding não é conteúdo que possa "acabar", é espaço fixo que a caixa
+     sempre reserva. Se o padding estivesse na caixa que recolhe, ela travaria
+     perto de 30px (padding-top + padding-bottom) até `content-visibility`
+     cortar de vez no fim da transição — daí o soluço. Separando os dois, a
+     caixa de fora chega a 0px de verdade e o padding vai com ela. */
+  .stores__unit-body-inner {
     display: flex;
     flex-direction: column;
     gap: var(--space-2xs);
-    /* `padding`, não `margin`: o vão até o cabeçalho precisa ficar dentro da
-       caixa que a abertura recolhe, senão sobra uma faixa quando fechada. */
     padding-top: var(--space-list);
     padding-left: var(--space-2xs);
+    padding-bottom: 0.375rem;
     font-size: var(--fs-card);
     line-height: 1.5;
     color: var(--color-label);
   }
 
-  /* Abertura suave, sem JS — mesma técnica do FAQ: `::details-content` vira
-     uma grade de uma linha que cresce de 0fr a 1fr, com `content-visibility`
-     em transição discreta para o conteúdo seguir visível enquanto recolhe.
-     Navegador sem `::details-content` abre/fecha na hora, como antes. */
+  /* Abertura suave: `.stores__unit-body` (sem padding próprio, ver acima)
+     anima `max-height` de 0 até a altura de verdade (`--corpo-altura`,
+     medida no script) — não `grid-template-rows` fr, a receita antiga daqui
+     e do FAQ (trocada nos dois pelo mesmo motivo, ver o comentário lá):
+     este acordeão é exclusivo, então abrir uma cidade fecha outra ao MESMO
+     tempo, e a fr trava perto do fim enquanto `content-visibility` segue
+     "visible" de propósito (para o texto encolher junto em vez de sumir de
+     uma vez) — visível bem mais aqui do que numa unidade sozinha, porque a
+     vizinha está abrindo ao lado no mesmo instante. `content-visibility`
+     continua garantindo que o conteúdo fechado não fique focável nem seja
+     lido por leitor de tela. */
   @media (prefers-reduced-motion: no-preference) {
     .stores__unit::details-content {
-      display: grid;
-      grid-template-rows: 0fr;
-      transition:
-        grid-template-rows 260ms ease,
-        content-visibility 260ms allow-discrete;
+      content-visibility: hidden;
+      transition: content-visibility 260ms allow-discrete;
     }
 
     .stores__unit[open]::details-content {
-      grid-template-rows: 1fr;
+      content-visibility: visible;
     }
 
     .stores__unit-body {
-      min-block-size: 0;
       overflow: hidden;
-      /* respiro para o anel de foco dos links de endereço/Instagram não
-         bater na borda do corte quando a unidade está aberta. */
-      padding-bottom: 0.375rem;
+      max-height: 0;
+      transition: max-height 260ms ease;
+    }
+
+    .stores__unit[open] .stores__unit-body {
+      max-height: var(--corpo-altura, 30rem);
     }
   }
 </style>
 
 <script>
+  /* Altura real de cada corpo do acordeão, guardada em `--corpo-altura`
+     (ver o comentário longo junto de `.stores__unit-body` no CSS acima):
+     `scrollHeight` mede o conteúdo de verdade mesmo com a caixa clicada em
+     0 pelo `max-height`. Refeita no resize — a quebra de linha do endereço
+     muda com a largura — e depois que as fontes carregam, porque medir
+     antes disso pega o texto ainda no fallback, mais largo ou mais estreito
+     que o Poppins final. */
+  const definirAlturas = () => {
+    document.querySelectorAll<HTMLElement>('.stores__unit-body').forEach((corpo) => {
+      corpo.style.setProperty('--corpo-altura', `${corpo.scrollHeight}px`);
+    });
+  };
+  definirAlturas();
+  window.addEventListener('resize', definirAlturas);
+  document.fonts?.ready.then(definirAlturas);
+
   /* JS porque a rotação é estado — que foto está em que slot — e o ciclo
      atravessa elementos diferentes; CSS não alcança. */
   const INTERVALO = 4000;
@@ -294,10 +487,12 @@ const photos = [
       });
     };
 
-    /* Fora da tela não há o que animar, e quem pediu menos movimento já vê
-       as quatro fotos de uma vez — parar não esconde nada dessa pessoa. */
+    /* Fora da tela não há o que animar, quem pediu menos movimento já vê
+       as quatro fotos de uma vez, e a galeria de uma unidade fechada não
+       deve rodar por baixo do crossfade — nenhuma dessas esconde nada de
+       quem está vendo, então parar é seguro nas três. */
     const sync = () => {
-      const rodar = visivel && !motion.matches;
+      const rodar = visivel && gallery.classList.contains('is-active') && !motion.matches;
       if (rodar && !timer) timer = setInterval(tick, INTERVALO);
       if (!rodar && timer) {
         clearInterval(timer);
@@ -314,5 +509,29 @@ const photos = [
     ).observe(gallery);
 
     motion.addEventListener('change', sync);
+
+    /* A troca de unidade muda a classe `is-active`, não a posição na tela
+       (ver comentário em `.stores__gallery-wrap`) — só um `MutationObserver`
+       no atributo `class` avisa este fechamento de que chegou sua vez de
+       rodar ou de parar. */
+    new MutationObserver(sync).observe(gallery, { attributes: true, attributeFilter: ['class'] });
+  });
+
+  /* Uma galeria por unidade (ver comentário em `.stores__gallery-wrap`):
+     ao abrir uma linha do acordeão, marca a galeria do mesmo índice como
+     `.is-active` e tira a marca das demais — a troca visual (crossfade) é
+     só CSS a partir daí. `toggle` dispara nas duas direções (abrindo e
+     fechando); só importa reagir a quem abriu — como o acordeão é
+     exclusivo, a que fechou nunca é a que deveria ficar ativa. */
+  const galerias = document.querySelectorAll<HTMLElement>('[data-gallery]');
+
+  document.querySelectorAll<HTMLDetailsElement>('[data-unit-index]').forEach((unidade) => {
+    unidade.addEventListener('toggle', () => {
+      if (!unidade.open) return;
+      const indice = unidade.dataset.unitIndex;
+      galerias.forEach((galeria) => {
+        galeria.classList.toggle('is-active', galeria.dataset.galleryIndex === indice);
+      });
+    });
   });
 </script>

@@ -213,6 +213,7 @@ const reviews = [
   .depos__cities {
     display: flex;
     flex-wrap: wrap;
+    gap: var(--space-list); /* 24px @1440 */
   }
 
   .depos__cities li {
@@ -230,6 +231,28 @@ const reviews = [
     background: var(--color-card);
     border-color: transparent;
     border-radius: var(--radius);
+  }
+
+  /* Mais respiro só no mobile (abaixo de 48rem, corte de sempre): na largura
+     estreita o cabeçalho inteiro (rótulo, título, nota, pastilhas, botão,
+     cartões) empilha em coluna única e ficava espremido; no desktop o layout
+     já tem folga própria e os tokens base bastam. */
+  @media (max-width: 47.99rem) {
+    .depos__pino {
+      gap: var(--space-xl);
+    }
+
+    .depos__body {
+      gap: var(--space-xl);
+    }
+
+    .depos__bar {
+      gap: var(--space-block);
+    }
+
+    .depos__cities {
+      gap: var(--space-2xs) var(--space-sm);
+    }
   }
 
   /* Cinco cartões de 376px não cabem em viewport nenhuma: a faixa rola na
@@ -344,6 +367,10 @@ const reviews = [
       height: 1.6768cqi; /* 22 ÷ 1312 × 100 */
     }
 
+    .depos__cities {
+      gap: 1.8293cqi; /* 24 ÷ 1312 × 100 */
+    }
+
     .depos__cities li {
       font-size: 1.0671cqi; /* 14 ÷ 1312 × 100 */
     }
@@ -384,10 +411,15 @@ const reviews = [
      que sempre foi. */
 
   /* Onde a trava não entra: no toque o dedo já arrasta a faixa direto, e
-     prender a página tomaria dele um gesto que funciona; e quem pediu menos
-     movimento não tem por que ganhar a página andando de lado. */
+     prender a página tomaria dele um gesto que funciona; quem pediu menos
+     movimento não tem por que ganhar a página andando de lado; e abaixo de
+     48rem (mesmo corte de sempre, ver CLAUDE.md) a seção é estreita demais
+     para valer o sequestro da rolagem — um mouse testando a versão mobile
+     numa janela estreita não deve ganhar o pino que só faz sentido em
+     desktop. */
   const ponteiroPreciso = matchMedia('(pointer: fine)');
   const menosMovimento = matchMedia('(prefers-reduced-motion: reduce)');
+  const desktop = matchMedia('(min-width: 48rem)');
 
   document.querySelectorAll<HTMLElement>('[data-secao]').forEach((secao) => {
     const trilho = secao.querySelector<HTMLElement>('[data-trilho]');
@@ -410,7 +442,7 @@ const reviews = [
       const excedente = faixa.scrollWidth - faixa.clientWidth;
       const alturaPino = pino.offsetHeight;
 
-      if (excedente < 1 || !ponteiroPreciso.matches || menosMovimento.matches) {
+      if (excedente < 1 || !ponteiroPreciso.matches || menosMovimento.matches || !desktop.matches) {
         percurso = 0;
         /* Volta ao primeiro cartão: sem a trava, uma faixa parada no meio do
            percurso só pareceria cortada. */
@@ -454,6 +486,7 @@ const reviews = [
     new ResizeObserver(remedir).observe(pino);
     ponteiroPreciso.addEventListener('change', remedir);
     menosMovimento.addEventListener('change', remedir);
+    desktop.addEventListener('change', remedir);
 
     medir();
   });

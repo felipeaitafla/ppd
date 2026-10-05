@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import Button from './Button.astro';
 import locator from '../assets/apple-locator.png';
+import locatorMobile from '../assets/apple-locator-mobile.png';
 ---
 
 {/* O print da busca da Apple não entra no tamanho final: ele chega maior,
@@ -21,10 +22,11 @@ import locator from '../assets/apple-locator.png';
     Como esse teto tende a ser bem menor que "ponta a ponta", o salto inicial
     ficou pequeno o bastante para não ler mais como bounce.
 
-    O vídeo que substituiu o print tem outra proporção (1616×968, contra
-    1329×910 da imagem), então as medidas do Figma já não batiam mesmo — a
-    mecânica continua correta porque o script mede a geometria em tempo
-    real. */}
+    O vídeo que substituiu o print tem outra proporção que o frame do Figma
+    (1922×1148, contra 1329×910), então as medidas do Figma já não batiam
+    mesmo — a mecânica continua correta porque o script mede a geometria em
+    tempo real. O still do desktop é o último quadro do próprio vídeo
+    (2026-09-30), para a troca still → vídeo não mudar de enquadramento. */}
 <section class="proof" id="autorizada" data-encaixe>
   <div class="proof__head">
     <span class="proof__label">Verificados pela maçã</span>
@@ -46,26 +48,56 @@ import locator from '../assets/apple-locator.png';
         geométrico (ver comentário no topo do arquivo) e sempre menor que a
         janela inteira, mas `100vw` continua uma estimativa segura por cima
         dele — só decide qual arquivo baixar, não afeta o layout.
-        O arquivo tem 1329px de largura, então a partir daí ele é ampliado —
-        o pedido de uma captura em retina, já anotado nas pendências. */}
+        O arquivo tem 1922px de largura (a da gravação), então a partir daí
+        ele é ampliado — a fonte não tem mais resolução que isso. */}
     <Image
       src={locator}
       alt="Busca oficial de revendedores da Apple mostrando a Pede Pro Dindo entre os resultados"
-      width={1329}
-      widths={[480, 768, 1080, 1329]}
+      width={1922}
+      widths={[480, 768, 1080, 1440, 1922]}
       sizes="100vw"
       format="webp"
       quality={80}
       loading="lazy"
-      class="proof__still"
+      class="proof__still proof__still--desktop"
+    />
+    {/* Gravação em retrato feita no próprio aparelho (1170×2532) — a busca
+        da Apple não recompõe para telas estreitas, então abaixo de 48rem a
+        prova é este clipe vertical, não o mesmo vídeo encolhido. */}
+    <Image
+      src={locatorMobile}
+      alt="Busca oficial de revendedores da Apple mostrando a Pede Pro Dindo entre os resultados"
+      width={1170}
+      widths={[375, 750, 1170]}
+      sizes="100vw"
+      format="webp"
+      quality={80}
+      loading="lazy"
+      class="proof__still proof__still--mobile"
     />
     <video class="proof__clip" autoplay muted loop playsinline aria-hidden="true">
-      <source src="/video/autorizada.mp4" media="(prefers-reduced-motion: no-preference)" type="video/mp4" />
+      <source
+        src="/video/autorizada-mobile.mp4"
+        media="(prefers-reduced-motion: no-preference) and (max-width: 47.99rem)"
+        type="video/mp4"
+      />
+      {/* Gravação de tela de 1924×1148 (2026-09-30): a fonte para aí, então
+          são duas variantes, não as quatro do hero — acima disso qualquer
+          arquivo seria a mesma imagem ampliada. Mesmo corte de janela do
+          hero para a de 1280. As duas colunas da direita da gravação eram
+          pretas (sobra da captura) e foram cortadas no encode: o arquivo
+          "1924" tem 1922px de largura, e o still, o mesmo recorte. */}
+      <source
+        src="/video/autorizada-1280.mp4"
+        media="(prefers-reduced-motion: no-preference) and (max-width: 1080px)"
+        type="video/mp4"
+      />
+      <source src="/video/autorizada-1924.mp4" media="(prefers-reduced-motion: no-preference)" type="video/mp4" />
     </video>
   </div>
 
-  {/* TODO: URL real da busca de revendedores da Apple. */}
-  <Button href="#">Fazer a pesquisa</Button>
+  {/* Busca oficial de revendedores da Apple, a mesma que o vídeo mostra. */}
+  <Button href="https://locate.apple.com/br/pt/sales" newTab>Fazer a pesquisa</Button>
 </section>
 
 <style>
@@ -130,10 +162,12 @@ import locator from '../assets/apple-locator.png';
     width: 80%;
     /* Substitui o `height: auto` de quando só havia uma imagem: com dois
        filhos absolutos (imagem + vídeo), nada aqui contribui para a altura
-       sozinho — a proporção do vídeo (1616×968) precisa ser declarada. */
-    aspect-ratio: 1616 / 968;
+       sozinho — a proporção do vídeo (1922×1148) precisa ser declarada. */
+    aspect-ratio: 1922 / 1148;
     overflow: hidden;
-    border: 1px solid var(--color-rule);
+    /* Sem borda (2026-09-30): o fio de 1px em `--color-rule` aparecia como
+       uma linha clara sobrando embaixo quando o rodapé escuro da Apple
+       chega na beirada do vídeo. */
     border-radius: var(--radius);
   }
 
@@ -147,6 +181,12 @@ import locator from '../assets/apple-locator.png';
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  /* Par mobile/desktop do still, mesmo par de classes do `<video>` acima:
+     só um dos dois está visível por vez, trocado no `@media` lá embaixo. */
+  .proof__still--mobile {
+    display: none;
   }
 
   /* Reforço ao `media` da fonte: garante que o movimento suma mesmo se
@@ -176,6 +216,29 @@ import locator from '../assets/apple-locator.png';
   .proof.is-encaixando .proof__shot {
     transform: scale(calc(1 + (var(--escala, 1) - 1) * (1 - var(--avanco, 1))));
     transform-origin: bottom center;
+  }
+
+  /* Abaixo de 48rem a prova troca de arquivo (retrato, gravado no aparelho)
+     e de moldura: em vez dos 80% do desktop — pensados para uma coluna
+     larga sobrando de ambos os lados —, a coluna toda (mesma largura do
+     título acima, respiro lateral de sempre) é ocupada. `aspect-ratio` muda
+     junto para a proporção real do arquivo (1170×2532); sem isso o
+     `object-fit: cover` cortaria o retrato numa faixa curta demais para
+     ler. O `is-encaixando` continua de pé: a coluna aqui não é a janela
+     inteira (sobra o respiro lateral), então ainda há para onde crescer. */
+  @media (max-width: 47.99rem) {
+    .proof__shot {
+      width: 100%;
+      aspect-ratio: 1170 / 2532;
+    }
+
+    .proof__still--desktop {
+      display: none;
+    }
+
+    .proof__still--mobile {
+      display: block;
+    }
   }
 </style>
 

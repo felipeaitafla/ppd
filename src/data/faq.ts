@@ -5,7 +5,16 @@
    (`p`, `ul`, `li`, `strong`).
 
    O Figma (`49:615`) desenhou nove linhas, todas escritas "Perguntas": é
-   preenchimento, não conteúdo. O documento é a fonte, e ele traz oito. */
+   preenchimento, não conteúdo. O documento é a fonte, e ele traz oito.
+
+   A nona — a mudança de endereço da matriz — veio do Felipe em 2026-09-30,
+   fora do documento: gente achando que a loja de Santo Ângelo tinha fechado.
+   O endereço novo é lido de `site.ts`, o mesmo que o acordeão de Unidades
+   mostra, para as duas telas nunca divergirem. */
+
+import { units } from './site';
+
+const matriz = units.find((unit) => unit.matriz)!;
 
 export type FaqItem = {
   question: string;
@@ -68,6 +77,12 @@ export const faq: FaqItem[] = [
     question: 'Comprar um seminovo tem a mesma qualidade de um novo?',
     answer: `
       <p>Sim — com a diferença de que você paga menos por isso. Todo seminovo PPD é revisado por especialistas do PPD Lab, com mais de 40 itens testados, e sai com garantia. A única diferença em relação a um produto lacrado é a possibilidade de marcas de uso, que informamos abertamente pela classificação (Excelente, Bom, Regular ou Outlet) e pela saúde da bateria. Ou seja: você sabe exatamente o estado do aparelho antes de comprar e leva um produto Apple original, testado e com suporte, por um preço mais acessível.</p>
+    `,
+  },
+  {
+    question: 'A loja de Santo Ângelo fechou?',
+    answer: `
+      <p>Não! A loja de Santo Ângelo não fechou: em 2025 ela <strong>mudou de endereço</strong>. Antes de deixar o ponto antigo, fizemos uma liquidação de despedida, e a reabertura veio com uma grande inauguração no novo endereço, <strong>${matriz.address}</strong>, numa loja mais moderna, pensada para receber você ainda melhor. Continua sendo a matriz da Pede Pro Dindo — só mudou de casa.</p>
     `,
   },
 ];
