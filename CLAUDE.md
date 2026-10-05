@@ -423,8 +423,9 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   e os itens de Menu/Contato do rodapé, os dois sobre o `#F6F6F6` claro —
   contraste igualmente aquém, anotado acima). O mínimo sobre branco seria
   `#767676`.
-- [ ] **Links `href="#"` restantes** — "Acessar Google Review"
-  (`Testimonials.astro`) e "Políticas de Privacidade" (`Footer.astro`). O
+- [ ] **Links `href="#"` restantes** — "Políticas de Privacidade"
+  (`Footer.astro`). "Acessar Google Review" (`Testimonials.astro`) saiu
+  daqui em 2026-10-05: as cinco cidades têm o link do próprio perfil. O
   grupo de ofertas (`Stores.astro`) saiu daqui em 2026-09-24: as cinco
   unidades têm link de verdade agora. "Fazer a pesquisa"
   (`AppleVerified.astro`) saiu em 2026-09-30: aponta para
@@ -447,11 +448,13 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
 
 ### Escopo deliberado (não é esquecimento)
 
-- [ ] **Pastilhas de cidade em Depoimentos são só visuais.** As cinco
-  aparecem como no Figma, com Santo Ângelo ativa, mas não filtram: só a
-  matriz tem avaliações no Figma. Quando chegarem depoimentos das outras
-  quatro unidades, aí sim vale ligar o filtro — hoje ele abriria abas
-  vazias. Fonte: comentário no topo de `src/components/Testimonials.astro`.
+- [ ] **Depoimentos: as cinco cidades filtram** (2026-10-05, os depoimentos
+  chegaram no mesmo dia, cada cidade com foto e link do Google Review). Para uma cidade nova: avatares em `src/assets/depo-*.png`, cartões em
+  `reviews` e a entrada em `cities` (com `reviewUrl`; sem ele o botão
+  renderiza sem link) (`src/components/Testimonials.astro`);
+  `filter: false` deixa a pastilha só visual enquanto não há avaliações, e um
+  cartão sem `avatar` mostra a inicial num círculo. Os avatares vieram em
+  36×36, como o do Pedro — ver "Assets".
 
 ### Assets
 

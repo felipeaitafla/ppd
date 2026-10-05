@@ -6,43 +6,216 @@ import eliane from '../assets/depo-eliane.png';
 import bruno from '../assets/depo-bruno.png';
 import loreni from '../assets/depo-loreni.png';
 import pedro from '../assets/depo-pedro.png';
+import jorge from '../assets/depo-jorge.png';
+import joaoMelgarejo from '../assets/depo-joao-melgarejo.png';
+import nelson from '../assets/depo-nelson.png';
+import joaoSegat from '../assets/depo-joao-segat.png';
+import fabiana from '../assets/depo-fabiana.png';
+import gabriela from '../assets/depo-gabriela.png';
+import ryckson from '../assets/depo-ryckson.png';
+import leticia from '../assets/depo-leticia.png';
+import nicoli from '../assets/depo-nicoli.png';
+import gabrielly from '../assets/depo-gabrielly.png';
+import pamela from '../assets/depo-pamela.png';
+import duda from '../assets/depo-duda.png';
+import jader from '../assets/depo-jader.png';
+import brenda from '../assets/depo-brenda.png';
+import nadir from '../assets/depo-nadir.png';
+import fabio from '../assets/depo-fabio.png';
+import felipeBuss from '../assets/depo-felipe-buss.png';
+import marilia from '../assets/depo-marilia.png';
+import guilherme from '../assets/depo-guilherme.png';
+import roberto from '../assets/depo-roberto.png';
 
-/* Só a matriz tem depoimentos no Figma. As pastilhas das outras cidades
-   entram como estado visual, sem clique — decisão de escopo, não
-   pendência: não há o que filtrar até existirem avaliações delas. */
-const cities = [
-  'Santo Ângelo',
-  'Santa Rosa',
-  'Ijuí',
-  'São Borja',
-  'Santiago',
+/* As cinco cidades têm depoimentos (chegaram em 2026-10-05) e todas filtram.
+   `filter: false` segue no tipo para uma cidade futura sem avaliações: a
+   pastilha fica só visual, sem clique, em vez de abrir uma aba vazia.
+   `reviews` é uma lista só, cada cartão com a sua cidade; a pastilha esconde
+   os das outras (atributo `hidden`). */
+const cities: { name: string; filter: boolean; reviewUrl?: string }[] = [
+  {
+    name: 'Santo Ângelo',
+    filter: true,
+    reviewUrl:
+      'https://www.google.com/maps/place/Pede+Pro+Dindo+-+Revendedor+Autorizado+Apple+e+Assist%C3%AAncia+T%C3%A9cnica/@-28.3021292,-54.2604038,17z/data=!4m8!3m7!1s0x94fe9b277a486a0b:0xf2ee01cda632b1a9!8m2!3d-28.3021292!4d-54.2604038!9m1!1b1!16s%2Fg%2F11j9dzww8b?entry=ttu&g_ep=EgoyMDI2MDkzMC4wIKXMDSoASAFQAw%3D%3D',
+  },
+  {
+    name: 'Santa Rosa',
+    filter: true,
+    reviewUrl:
+      'https://www.google.com/maps/place/Pede+Pro+Dindo+-+Revenda+autorizada+Apple+e+assist%C3%AAncia+t%C3%A9cnica/@-27.8645962,-54.4775169,16.71z/data=!4m18!1m9!3m8!1s0x94f93556f4885359:0x82a276f213977890!2sPede+Pro+Dindo+-+Revenda+autorizada+Apple+e+assist%C3%AAncia+t%C3%A9cnica!8m2!3d-27.866714!4d-54.4764949!9m1!1b1!16s%2Fg%2F11s7cmwqx2!3m7!1s0x94f93556f4885359:0x82a276f213977890!8m2!3d-27.866714!4d-54.4764949!9m1!1b1!16s%2Fg%2F11s7cmwqx2?entry=ttu&g_ep=EgoyMDI2MDkzMC4wIKXMDSoASAFQAw%3D%3D',
+  },
+  {
+    name: 'Ijuí',
+    filter: true,
+    reviewUrl:
+      'https://www.google.com/maps/place/Pede+Pro+Dindo+-+Revenda+autorizada+Apple+e+assist%C3%AAncia+t%C3%A9cnica/@-28.3910367,-53.9125158,16z/data=!4m8!3m7!1s0x94fc2debd51a4e73:0xbb37d57f8fcbe106!8m2!3d-28.3910367!4d-53.9125158!9m1!1b1!16s%2Fg%2F11st69wrhv?entry=ttu&g_ep=EgoyMDI2MDkzMC4wIKXMDSoASAFQAw%3D%3D',
+  },
+  {
+    name: 'São Borja',
+    filter: true,
+    reviewUrl:
+      'https://www.google.com/maps/place/Pede+Pro+Dindo+-+Revenda+Autorizada+Apple+e+assist%C3%AAncia+t%C3%A9cnica/@-28.6594749,-56.0030975,17z/data=!4m8!3m7!1s0x9455c7983e2881e5:0xc6dd5b6c84f14f5a!8m2!3d-28.6594749!4d-56.0030975!9m1!1b1!16s%2Fg%2F11st7ccp96?entry=ttu&g_ep=EgoyMDI2MDkzMC4wIKXMDSoASAFQAw%3D%3D',
+  },
+  {
+    name: 'Santiago',
+    filter: true,
+    reviewUrl:
+      'https://www.google.com/maps/place/Pede+Pro+Dindo+-+Revenda+autorizada+Apple+e+assist%C3%AAncia+t%C3%A9cnica/@-29.1900966,-54.8682443,17z/data=!4m8!3m7!1s0x94ffd3c16f78bfeb:0x1751f2bb4e3b07dc!8m2!3d-29.1900966!4d-54.8682443!9m1!1b1!16s%2Fg%2F11wv034w4v?entry=ttu&g_ep=EgoyMDI2MDkzMC4wIKXMDSoASAFQAw%3D%3D',
+  },
 ];
+const initialCity = cities[0].name;
 
 const reviews = [
   {
     name: 'Amanda',
+    city: 'Santo Ângelo',
     avatar: amanda,
     text: 'Tive uma ótima experiência de atendimento na loja da Pede Pro Dindo de Santo Ângelo. Precisei realizar a troca da bateria do celular e fiz uma boa pesquisa de preços em 5 lojas da cidade. O valor do serviço da Pede pro Dindo ficou bem parecido com...',
   },
   {
     name: 'Eliane Palmeiro',
+    city: 'Santo Ângelo',
     avatar: eliane,
     text: 'Fui maravilhosamente bem atendida, não tenho palavras para o belo atendimento, voltarei sempre!',
   },
   {
     name: 'Bruno Rodrigues Silva',
+    city: 'Santo Ângelo',
     avatar: bruno,
     text: 'Atendimento excepcional e produtos de qualidade! Super recomendo! Um destaque para o atendimento do Luan, sempre atencioso e prestativo! Parabéns pelo ótimo trabalho!',
   },
   {
     name: 'Loreni Oliveira',
+    city: 'Santo Ângelo',
     avatar: loreni,
     text: 'Ótima super indico pois fui muito bem atendida ótima funcionária uma menina Paola maravilhosa tratamento especial.olha nota 10 e super indico a loja pede pro dindo ótimos funcionários parabéns é 10 em tudo de Minha aquisição e ótimo',
   },
   {
     name: 'Pedro Pezzini',
+    city: 'Santo Ângelo',
     avatar: pedro,
     text: 'Atendimento muito bom, com vendas consultivas. Tirei todas as minhas dúvidas e ainda saí com meu novo aparelho.',
+  },
+  {
+    name: 'Jorge Central Motos',
+    city: 'Santa Rosa',
+    avatar: jorge,
+    text: 'Atendimento nota 1000 🙏 Pessoal bem solicito, profissional, recomendo a Pede pro Dindo, tanto na compra como na assistência. Parabéns ao pessoal. …',
+  },
+  {
+    name: 'João Víctor Melgarejo',
+    city: 'Santa Rosa',
+    avatar: joaoMelgarejo,
+    text: 'Atendimento nota 10! Sempre vou comprar com eles e sempre sou agraciado com o melhor atendimento de Santa Rosa. Além disso, trabalham apenas com a maior qualidade de produtos!',
+  },
+  {
+    name: 'Nelson Freire',
+    city: 'Santa Rosa',
+    avatar: nelson,
+    text: 'Empresa séria, comprometida com a qualidade, tecnologia e a satisfação de seus clientes. Equipe atenciosa, super recomendo! Parabéns Pedro Henrique e equipe. Indico ir conhecer a loja e viver esta experiência.',
+  },
+  {
+    name: 'João Vitor Segat',
+    city: 'Santa Rosa',
+    avatar: joaoSegat,
+    text: 'Excelente atendimento e ótima experiência de compra! A equipe foi muito atenciosa, e prestativa, os produtos são originais, com total confiança e garantia, além de um ambiente organizado e agradável além do melhor preço da cidade. Fiquei muito satisfeito com a qualidade do serviço e com o profissionalismo no atendimento.',
+  },
+  {
+    name: 'Fabiana Sulzbach',
+    city: 'Santa Rosa',
+    avatar: fabiana,
+    text: 'Atendimento maravilhoso tive a oportunidade de ser atendida pelo Deric que me atendeu muito bem, super prestativo. Loja está de parabéns pelo atendimento e prestação de serviços.',
+  },
+  {
+    name: 'Gabriela de Paula Possani',
+    city: 'Ijuí',
+    avatar: gabriela,
+    text: 'Já comprei 3 iPhones com eles! 2 semi e agora adquiri o 17 novo. Atendimento muito bom, condições de pagamento e garantia ótimas. Indico!',
+  },
+  {
+    name: 'Ryckson Barbosa',
+    city: 'Ijuí',
+    avatar: ryckson,
+    text: 'O atendimento foi ótimo. Os vendedores são atenciosas e prestativos. O atendimento ocorreu tudo tranquilo e rápido pretendo voltar para adquirir outros celulares. Indico o PPD para amigos e família.',
+  },
+  {
+    name: 'Letícia Persson',
+    city: 'Ijuí',
+    avatar: leticia,
+    text: 'Fui adquirir o meu aparelho na Operação 48 horas da PPD e mesmo chegando no final da ação do primeiro dia fui bem recebida e o Eduardo me ajudou com algumas dúvidas que tinha na hora de escolher. O atendimento foi ótimo e bem receptivo.',
+  },
+  {
+    name: 'Nicoli Rosa',
+    city: 'Ijuí',
+    avatar: nicoli,
+    text: 'O atendimento da pede pro dindo foi excelente. Fui atendida pelo Eduardo Donadel, que foi extremamente atencioso e deu todas as informações necessárias. Obrigada com certeza voltarei a loja 🙏🏽🙌🏽👏🏽',
+  },
+  {
+    name: 'Gabrielly Francino de Campos',
+    city: 'Ijuí',
+    avatar: gabrielly,
+    text: 'A experiência foi excelente, os atendentes são atenciosos e prestativos, o atendimento foi rápido e ocorreu tudo bem. Pretendemos voltar para adquirir outros celulares.',
+  },
+  {
+    name: 'Pamela Canabarro',
+    city: 'São Borja',
+    avatar: pamela,
+    text: 'Excelente experiência que tive na loja. O atendimento foi impecável, com destaque para a colaboradora Camila, que me auxiliou com a escolha e sanou todas as minhas dúvidas com muita atenção e presteza.',
+  },
+  {
+    name: 'Maria Eduarda Della Méa (Duda)',
+    city: 'São Borja',
+    avatar: duda,
+    text: 'Atendimento excelente!! Foi uma ótima experiência comprando na loja, e atendimento incrível, tanto virtualmente quanto presencialmente pela vendedora Viviane! Fiquei muito feliz pela compra',
+  },
+  {
+    name: 'Jader Wohlfahrt',
+    city: 'São Borja',
+    avatar: jader,
+    text: 'Tive uma experiência maravilhosa, fora os preços muito acessíveis, atendimento pelo WhatsApp e logo em seguida presencial pela Vendedora Viviane, agradeço demais pela atenção, muito atenciosa, educada, carismática, super recomendo 👏🏼 …',
+  },
+  {
+    name: 'Brenda Pereira',
+    city: 'São Borja',
+    avatar: brenda,
+    text: 'Gostei muito da loja e do atendimento da Camila. Ela foi super atenciosa, explicou bem sobre os produtos da Apple e me ajudou a decidir o aparelho ideal sem pressa.',
+  },
+  {
+    name: 'Nadir Spohr',
+    city: 'São Borja',
+    avatar: nadir,
+    text: 'Excelente atendimento, toda paciência e entendimento para deixar o cliente a par do que está adquirindo, totalmente satisfeito, atendimento humanizado... parabéns vendedora Viviane...showw',
+  },
+  {
+    name: 'Fabio flores',
+    city: 'Santiago',
+    avatar: fabio,
+    text: 'A única loja que realmente entrega o que promete sem enrolar. ambiente climatizado, variedade extensa em aparelhos e o melhor atendimento de Santiago! A atenção do Yuri e dos vendedores Cadu e Larissa também fazem toda diferença!',
+  },
+  {
+    name: 'Felipe Buss Victora',
+    city: 'Santiago',
+    avatar: felipeBuss,
+    text: 'Foi excelente, atendimento excepcional. Os atendentes são muito simpáticos e atenciosos. O ambiente é acolhedor e tem uma grande variedade dos acessórios necessários.',
+  },
+  {
+    name: 'Marilia Bartmann',
+    city: 'Santiago',
+    avatar: marilia,
+    text: 'Resposta imediata, informações precisas, disponibilidade e variedade de produtos. Atendimento ótimo, fui atendida pelo Carlos, muito atencioso e o Yuri um querido! Recomendo demais!',
+  },
+  {
+    name: 'Guilherme Floriano',
+    city: 'Santiago',
+    avatar: guilherme,
+    text: 'Fiz um upgrade do iPhone 12 para o 17 e fui muito bem atendido, ambiente muito legal com grande variedade de acessórios, atendente muito simpática e atenciosa! Recomendo muito a loja ❤️',
+  },
+  {
+    name: 'Roberto Pes Perazzollo',
+    city: 'Santiago',
+    avatar: roberto,
+    text: 'Foi ótimo o atendimento da Larissa principalmente e do resto da equipe sempre interessados em resolver o mais rápido possível e trabalharam muito rápido, vou sugerir a empresa para outras pessoas, voltarei a fazer negócios, obrigado a todos pelo profissionalismo, nota 10.',
   },
 ];
 ---
@@ -79,12 +252,30 @@ const reviews = [
       <div class="depos__body">
         <div class="depos__bar">
           <ul class="depos__cities">
-            {cities.map((city, i) => (
-              <li class:list={[{ 'is-active': i === 0 }]}>{city}</li>
+            {cities.map((city) => (
+              <li>
+                {city.filter ? (
+                  <button
+                    type="button"
+                    class:list={['pill', { 'is-active': city.name === initialCity }]}
+                    data-cidade={city.name}
+                    aria-pressed={city.name === initialCity ? 'true' : 'false'}
+                  >
+                    {city.name}
+                  </button>
+                ) : (
+                  <span class="pill">{city.name}</span>
+                )}
+              </li>
             ))}
           </ul>
-          {/* TODO: URL real do perfil no Google. */}
-          <Button href="#">Acessar Google Review</Button>
+          {/* Um botão por cidade, só o da ativa aparece. Santo Ângelo ainda
+              não tem URL do perfil (sem href vira `<p>`, ver Button). */}
+          {cities.filter((c) => c.filter).map((city) => (
+            <div data-google={city.name} hidden={city.name !== initialCity}>
+              <Button href={city.reviewUrl} newTab={!!city.reviewUrl}>Acessar Google Review</Button>
+            </div>
+          ))}
         </div>
 
         {/* Focável de propósito: com a barra de rolagem escondida, o teclado
@@ -97,18 +288,24 @@ const reviews = [
           aria-label="Depoimentos de clientes"
         >
           {reviews.map((review) => (
-            <li class="depo">
+            <li class="depo" data-cidade={review.city} hidden={review.city !== initialCity}>
               <div class="depo__quote"><p>{review.text}</p></div>
               <div class="depo__by">
-                <Image
-                  src={review.avatar}
-                  alt=""
-                  width={80}
-                  format="webp"
-                  quality={80}
-                  loading="lazy"
-                  class="depo__avatar"
-                />
+                {review.avatar ? (
+                  <Image
+                    src={review.avatar}
+                    alt=""
+                    width={80}
+                    format="webp"
+                    quality={80}
+                    loading="lazy"
+                    class="depo__avatar"
+                  />
+                ) : (
+                  <span class="depo__avatar depo__avatar--inicial" aria-hidden="true">
+                    {review.name[0]}
+                  </span>
+                )}
                 <span>{review.name}</span>
               </div>
             </li>
@@ -208,25 +405,40 @@ const reviews = [
     gap: var(--space-2xs);
   }
 
-  /* Sem clique por decisão de escopo: são `li`, não botões, para nada
-     anunciar-se como acionável enquanto não filtram de fato. */
+  /* Só as cidades com avaliações são botões; as demais ficam `li` simples,
+     para nada anunciar-se como acionável enquanto não filtram de fato. */
   .depos__cities {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-list); /* 24px @1440 */
   }
 
-  .depos__cities li {
+  /* A pastilha inteira é o `.pill`: botão (cidade com avaliações) ou `span`
+     (as demais). Borda de `--color-placeholder` (#e6e6e6; o Figma usava
+     `#f4f4f4` a 30%, que sumia sobre o branco). */
+  .depos__cities .pill {
+    display: block;
     padding: var(--space-3xs) var(--space-list);
+    font: inherit;
     font-size: var(--fs-nav);
     font-weight: 500;
     line-height: 1.5;
     color: var(--color-pill);
-    border: 1px solid color-mix(in srgb, var(--color-pill-line) 30%, transparent);
-    border-radius: 63px;
+    background: none;
+    border: 1px solid var(--color-placeholder);
+    border-radius: var(--radius);
   }
 
-  .depos__cities .is-active {
+  .depos__cities button.pill {
+    cursor: pointer;
+  }
+
+  .depos__cities button.pill:focus-visible {
+    outline: 2px solid var(--color-black);
+    outline-offset: 2px;
+  }
+
+  .depos__cities .pill.is-active {
     color: var(--color-ink-soft);
     background: var(--color-card);
     border-color: transparent;
@@ -302,6 +514,12 @@ const reviews = [
     scroll-snap-align: start;
   }
 
+  /* O `display: flex` acima vence o `display: none` do navegador para
+     `hidden`; sem esta linha o filtro por cidade não esconderia nada. */
+  .depo[hidden] {
+    display: none;
+  }
+
   .depo__quote {
     min-height: max(9rem, 8.263vw + 7.0634rem); /* 232px @1440 — escala fluida sem teto, ver CLAUDE.md */
     padding: var(--space-sm);
@@ -321,6 +539,17 @@ const reviews = [
     font-size: var(--fs-card);
     font-weight: 500;
     color: var(--color-ink-soft);
+  }
+
+  /* Reserva para quem veio sem foto: a inicial num círculo, como o próprio
+     Google faz. Sai quando a foto chegar (basta preencher `avatar`). */
+  .depo__avatar--inicial {
+    display: grid;
+    place-items: center;
+    background: var(--color-rule);
+    color: var(--color-ink-soft);
+    font-weight: 600;
+    line-height: 1;
   }
 
   .depo__avatar {
@@ -371,7 +600,7 @@ const reviews = [
       gap: 1.8293cqi; /* 24 ÷ 1312 × 100 */
     }
 
-    .depos__cities li {
+    .depos__cities .pill {
       font-size: 1.0671cqi; /* 14 ÷ 1312 × 100 */
     }
 
@@ -478,6 +707,13 @@ const reviews = [
       agendada = requestAnimationFrame(medir);
     };
 
+    /* Troca de cidade muda a largura da faixa, e nenhum observador de altura
+       percebe isso: o script de pastilhas, mais abaixo, avisa por evento. */
+    secao.addEventListener('depos:troca', () => {
+      faixa.scrollLeft = 0;
+      remedir();
+    });
+
     window.addEventListener('scroll', acompanhar, { passive: true });
     /* `resize` pela altura da tela, que decide o `top`; ResizeObserver pela
        altura do pino, que muda com a fonte carregada e com a quebra do
@@ -489,5 +725,28 @@ const reviews = [
     desktop.addEventListener('change', remedir);
 
     medir();
+  });
+
+  /* Pastilhas de cidade: mostram só os cartões e o botão da cidade clicada. */
+  document.querySelectorAll<HTMLElement>('[data-secao]').forEach((secao) => {
+    const botoes = secao.querySelectorAll<HTMLButtonElement>('button[data-cidade]');
+
+    botoes.forEach((botao) => {
+      botao.addEventListener('click', () => {
+        const cidade = botao.dataset.cidade;
+        botoes.forEach((b) => {
+          const ativo = b === botao;
+          b.setAttribute('aria-pressed', String(ativo));
+          b.classList.toggle('is-active', ativo);
+        });
+        secao.querySelectorAll<HTMLElement>('.depo').forEach((cartao) => {
+          cartao.hidden = cartao.dataset.cidade !== cidade;
+        });
+        secao.querySelectorAll<HTMLElement>('[data-google]').forEach((g) => {
+          g.hidden = g.dataset.google !== cidade;
+        });
+        secao.dispatchEvent(new Event('depos:troca'));
+      });
+    });
   });
 </script>
