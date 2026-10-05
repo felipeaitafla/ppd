@@ -10,9 +10,12 @@ export default defineConfig({
   env: {
     schema: {
       /* Grade de publicações do Instagram (`src/components/Instagram.astro`).
-         Secretos e só de servidor: nunca devem ir para o bundle do cliente. */
-      INSTAGRAM_ACCESS_TOKEN: envField.string({ context: 'server', access: 'secret' }),
-      INSTAGRAM_USER_ID: envField.string({ context: 'server', access: 'secret' }),
+         Secretos e só de servidor: nunca devem ir para o bundle do cliente.
+         Opcionais: sem elas `getInstagramPosts` devolve lista vazia e a grade
+         cai nos quadrados de reserva — obrigatórias, o Astro derrubava o
+         build inteiro antes disso (deploy da Vercel de 2026-10-05). */
+      INSTAGRAM_ACCESS_TOKEN: envField.string({ context: 'server', access: 'secret', optional: true }),
+      INSTAGRAM_USER_ID: envField.string({ context: 'server', access: 'secret', optional: true }),
     },
   },
 });
