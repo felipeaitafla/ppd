@@ -30,7 +30,7 @@ import locatorMobile from '../assets/apple-locator-mobile.png';
 <section class="proof" id="autorizada" data-encaixe>
   <div class="proof__head">
     <span class="proof__label">Verificados pela maçã</span>
-    <h2>Revenda Autorizada Apple</h2>
+    <h2>Revenda <br class="quebra-mobile" />Autorizada Apple</h2>
   </div>
 
   {/* Imagem e vídeo empilhados, mesmo padrão do Hero: a imagem é a base,
@@ -61,7 +61,7 @@ import locatorMobile from '../assets/apple-locator-mobile.png';
       loading="lazy"
       class="proof__still proof__still--desktop"
     />
-    {/* Gravação em retrato feita no próprio aparelho (1170×2532) — a busca
+    {/* Gravação em retrato feita no próprio aparelho (1170×2532, topo de 140px cortado: 1170×2392) — a busca
         da Apple não recompõe para telas estreitas, então abaixo de 48rem a
         prova é este clipe vertical, não o mesmo vídeo encolhido. */}
     <Image
@@ -148,6 +148,19 @@ import locatorMobile from '../assets/apple-locator-mobile.png';
     line-height: 1.25;
   }
 
+  /* Quebra só do mobile: "Revenda" numa linha, "Autorizada Apple" na outra,
+     como no frame. O espaço antes do `<br>` mantém a frase inteira quando ele
+     some no desktop. */
+  .quebra-mobile {
+    display: none;
+  }
+
+  @media (max-width: 47.99rem) {
+    .quebra-mobile {
+      display: inline;
+    }
+  }
+
   /* Pedido do Felipe em 2026-09-08: tamanho padrão de 0.8 × a largura
      disponível (a tela menos o respiro lateral fluido de sempre), sempre —
      nunca para de crescer, ao contrário do antigo `--w-locator` (880px
@@ -167,7 +180,11 @@ import locatorMobile from '../assets/apple-locator-mobile.png';
     overflow: hidden;
     /* Sem borda (2026-09-30): o fio de 1px em `--color-rule` aparecia como
        uma linha clara sobrando embaixo quando o rodapé escuro da Apple
-       chega na beirada do vídeo. */
+       chega na beirada do vídeo. Em 2026-10-19 voltou o contorno, a pedido
+       do Felipe, como `outline`: desenha por fora da caixa, então não
+       ocupa nem cobre nada do vídeo — a linha clara de antes vinha da
+       borda comendo a beirada. */
+    outline: 1px solid var(--color-rule);
     border-radius: var(--radius);
   }
 
@@ -222,14 +239,14 @@ import locatorMobile from '../assets/apple-locator-mobile.png';
      e de moldura: em vez dos 80% do desktop — pensados para uma coluna
      larga sobrando de ambos os lados —, a coluna toda (mesma largura do
      título acima, respiro lateral de sempre) é ocupada. `aspect-ratio` muda
-     junto para a proporção real do arquivo (1170×2532); sem isso o
+     junto para a proporção real do arquivo (1170×2532, topo de 140px cortado: 1170×2392); sem isso o
      `object-fit: cover` cortaria o retrato numa faixa curta demais para
      ler. O `is-encaixando` continua de pé: a coluna aqui não é a janela
      inteira (sobra o respiro lateral), então ainda há para onde crescer. */
   @media (max-width: 47.99rem) {
     .proof__shot {
       width: 100%;
-      aspect-ratio: 1170 / 2532;
+      aspect-ratio: 1170 / 2392;
     }
 
     .proof__still--desktop {

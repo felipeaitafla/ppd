@@ -63,7 +63,7 @@
   --fs-h2: max(1.75rem, 1.315vw + 1.4419rem); /* 42px @1440 */
   --fs-unit: max(1.125rem, 0.282vw + 1.059rem); /* 21px @1440 */
   --fs-question: max(1.0625rem, 0.282vw + .9965rem); /* 20px @1440 */
-  --fs-card: max(.9375rem, 0.094vw + .9155rem); /* 16px @1440 */
+  --fs-card: max(.875rem, 0.188vw + .831rem); /* 16px @1440, piso 14px @375 */
   --fs-nav: max(.8125rem, 0.094vw + .7905rem); /* 14px @1440 */
   --fs-label: max(.6875rem, 0.094vw + .6655rem); /* 12px @1440 */
   --fs-micro: max(.625rem, 0.094vw + .603rem); /* 11px @1440 */
@@ -117,7 +117,7 @@ body {
   font-family: var(--font-body);
   color: var(--color-black);
   background: var(--color-white);
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   -webkit-font-smoothing: antialiased;
 }
 

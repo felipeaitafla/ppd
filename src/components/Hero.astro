@@ -274,7 +274,10 @@ const social = [
   .hero__text h1 {
     width: max-content;
     max-width: 100%;
-    font-size: var(--fs-h1);
+    /* Mesmo corpo da headline de economia circular (pedido do Felipe,
+       2026-10-19): mesma fórmula, mesmo piso (28px @375), 58px @1440 e,
+       a partir de 90rem, a mesma fração do container (`cqi`, abaixo). */
+    font-size: max(1.75rem, 2.817vw + 1.0898rem);
     line-height: 1.3;
     font-weight: 400;
   }
@@ -300,9 +303,23 @@ const social = [
      carga. */
   .hero__text p {
     width: 0;
-    min-width: 100%;
+    /* Teto de 37.9em (pedido do Felipe, 2026-10-19): a primeira linha
+       termina em "…processo assegura" (37.45em) e "a" (38.39em) já não
+       cabe, então "a entrega do melhor da tecnologia, com…" cai para a
+       segunda. Medido no navegador, Poppins incluído. Em `em`, acompanha o
+       corpo; no mobile a coluna é mais estreita que isso e o `min()` fica
+       com os 100%. */
+    min-width: min(100%, 37.9em);
     font-size: max(.9375rem, 1.111vw); /* 16px @1440 — proporcional, ver comentário acima */
     line-height: 1.5;
+  }
+
+  /* Mobile: 14px fixos (pedido do Felipe, 2026-10-19) no lugar do piso de
+     15px do desktop. Abaixo de 48rem o corpo deixa de escalar. */
+  @media (max-width: 47.99rem) {
+    .hero__text p {
+      font-size: .875rem;
+    }
   }
 
   /* Teto de corpo para o `h1`, e só para ele: garante que a maior linha
@@ -313,7 +330,7 @@ const social = [
      corpo.
      Hoje só morde perto de ~770px, onde a coluna é de 690px e a linha pede
      685px (a 0,1% de corpo, invisível) — no resto da faixa quem vence o
-     `min()` é `--fs-h1`, então o corpo é o da escala fluida do CLAUDE.md,
+     `min()` é a fórmula fluida de economia circular, então o corpo é o da escala fluida do CLAUDE.md,
      igual ao Figma em 1440px. Até 2026-09-08 também mordia acima de
      ~3390px, quando `--page-max` travava `.hero__inner` em 1920px e o
      respiro lateral passava a comer a coluna; esse teto saiu (ver comentário
@@ -324,7 +341,19 @@ const social = [
      teto puxaria a headline para uns 21px. */
   @media (min-width: 48rem) {
     .hero__text h1 {
-      font-size: min(var(--fs-h1), 6.2cqi);
+      font-size: min(max(1.75rem, 2.817vw + 1.0898rem), 6.2cqi);
+    }
+  }
+
+  /* Acima de 90rem a headline de economia circular troca `vw` por `cqi`
+     (58 ÷ 1312 × 100 = 4.4207, ver `CircularEconomy.astro`) — o container
+     daqui tem a mesma largura (tela menos o mesmo `--space-md` dos dois
+     lados), então a mesma fração dá o mesmo corpo em qualquer tela larga.
+     Fica abaixo da regra de 48rem para vencê-la; 4.4207cqi < 6.2cqi, então
+     o teto das quebras travadas nunca morde aqui. */
+  @media (min-width: 90rem) {
+    .hero__text h1 {
+      font-size: 4.4207cqi;
     }
   }
 
@@ -351,7 +380,7 @@ const social = [
      piso do Figma nunca chega a caber sozinho abaixo de 48rem. */
   @media (max-width: 47.99rem) {
     .hero__text h1 {
-      font-size: min(var(--fs-h1), 8.6cqi);
+      font-size: min(max(1.75rem, 2.817vw + 1.0898rem), 8.6cqi);
     }
   }
 

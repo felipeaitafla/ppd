@@ -73,6 +73,14 @@ const schema = {
   definirAlturas();
   window.addEventListener('resize', definirAlturas);
   document.fonts?.ready.then(definirAlturas);
+  /* Remede quando o texto muda de altura sem a janela mudar (corpo fluido,
+     fonte que chega depois, abertura do item) — senão a última linha fica
+     cortada pelo `max-height` de uma medida velha. */
+  const observador = new ResizeObserver(definirAlturas);
+  document.querySelectorAll('.faq__answer-inner').forEach((el) => observador.observe(el));
+  document.querySelectorAll('.faq__item').forEach((item) => {
+    item.addEventListener('toggle', definirAlturas);
+  });
 </script>
 
 <style>
@@ -205,8 +213,10 @@ const schema = {
   .faq__answer-inner {
     padding-top: var(--space-list);
     font-size: var(--fs-card);
-    line-height: 1.5;
-    color: var(--color-text-mid);
+    line-height: 1.7;
+    /* Mais escuro que `--color-text-mid` (#8b8b8b, ~3:1) a pedido do Felipe,
+       2026-10-19: #707070 dá ~4,7:1 sobre o #F6F6F6, já acima do AA. */
+    color: #707070;
   }
 
   /* Abertura suave: `.faq__answer` (sem padding próprio, ver acima) anima
@@ -251,21 +261,8 @@ const schema = {
      string em `faq.ts` e nunca recebem o atributo de escopo do Astro, então
      um seletor descendente comum não os alcançaria. O escopo continua preso
      ao `.faq__answer-inner` à esquerda. */
-  .faq__answer-inner :global(p + p),
-  .faq__answer-inner :global(ul),
-  .faq__answer-inner :global(ul + p) {
+  .faq__answer-inner :global(p + p) {
     margin-top: var(--space-2xs);
-  }
-
-  /* Lista com marcador pendurado, como no frame. `display: flex` some com o
-     `::marker`, então aqui é bloco e o respiro entre itens sai da margem. */
-  .faq__answer-inner :global(ul) {
-    padding-left: 1.4em;
-    list-style: disc;
-  }
-
-  .faq__answer-inner :global(li + li) {
-    margin-top: var(--space-3xs);
   }
 
   /* O Figma deixa o negrito na mesma cor do corpo — só o peso muda. */
