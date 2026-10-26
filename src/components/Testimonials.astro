@@ -220,13 +220,8 @@ const reviews = [
 ];
 ---
 
-{/* Trilho e pino existem para a seção prender: o pino gruda na tela e o
-    trilho, mais alto que ele exatamente na medida do que sobra do carrossel,
-    dá à página o percurso que o script converte em rolagem lateral. Sem JS
-    ligado, os dois são `div`s comuns e a seção fica como sempre foi. */}
 <section class="depos" data-secao>
-  <div class="depos__trilho" data-trilho>
-    <div class="depos__pino" data-pino>
+  <div class="depos__inner">
       <div class="depos__head">
         <span class="depos__label">Depoimentos</span>
         <div class="depos__title">
@@ -312,7 +307,6 @@ const reviews = [
           ))}
         </ul>
       </div>
-    </div>
   </div>
 </section>
 
@@ -324,7 +318,7 @@ const reviews = [
     background: var(--color-white);
   }
 
-  .depos__pino {
+  .depos__inner {
     display: flex;
     flex-direction: column;
     gap: var(--space-block);
@@ -334,14 +328,6 @@ const reviews = [
        esta caixa já cresce quase 1:1 com a tela; é essa proporção que o
        `cqi` lê. */
     container-type: inline-size;
-  }
-
-  /* Prender é decisão do script — só ele sabe quanto excedente há para
-     percorrer —, então a classe, a altura do trilho e o `top` do pino saem
-     todos de lá, de uma vez: CSS e JS nunca discordam sobre o percurso. */
-  .depos.is-preso .depos__pino {
-    position: sticky;
-    top: var(--pino-topo, 0px);
   }
 
   .depos__head {
@@ -450,7 +436,7 @@ const reviews = [
      cartões) empilha em coluna única e ficava espremido; no desktop o layout
      já tem folga própria e os tokens base bastam. */
   @media (max-width: 47.99rem) {
-    .depos__pino {
+    .depos__inner {
       gap: var(--space-xl);
     }
 
@@ -478,10 +464,27 @@ const reviews = [
     padding-inline: var(--space-md);
     scroll-padding-inline: var(--space-md);
     overscroll-behavior-x: contain;
-    /* Barra escondida: com a seção presa, quem tem mouse anda a faixa
-       rolando a própria página, e quem usa teclado alcança a faixa pelo
-       foco — a barra só cobrava espaço embaixo dos cartões. */
+    /* Barra escondida: quem tem mouse arrasta a faixa, quem usa teclado a
+       alcança pelo foco e quem tem toque joga com o dedo — a barra só
+       cobrava espaço embaixo dos cartões. */
     scrollbar-width: none;
+  }
+
+  /* Arrastar com o mouse (ver o script): a mãozinha avisa que a faixa anda, e
+     durante o arraste nada de selecionar texto nem arrastar a foto do avatar. */
+  @media (pointer: fine) {
+    .depos__row {
+      cursor: grab;
+    }
+
+    .depos__row.is-arrastando {
+      cursor: grabbing;
+      user-select: none;
+    }
+
+    .depos__row img {
+      -webkit-user-drag: none;
+    }
   }
 
   .depos__row::-webkit-scrollbar {
@@ -495,10 +498,9 @@ const reviews = [
     outline-offset: -2px;
   }
 
-  /* Snap só no toque — que é justamente onde a seção não prende: o dedo joga
-     a faixa e ela precisa parar alinhada. No mouse quem escreve `scrollLeft`
-     é o script, quadro a quadro, e o snap obrigatório puxaria cada passo de
-     volta ao cartão mais próximo. */
+  /* Snap só no toque: o dedo joga a faixa e ela precisa parar alinhada. No
+     mouse quem escreve `scrollLeft` é o script de arraste, quadro a quadro, e
+     o snap obrigatório puxaria cada passo de volta ao cartão mais próximo. */
   @media (pointer: coarse) {
     .depos__row {
       scroll-snap-type: x mandatory;
@@ -563,12 +565,12 @@ const reviews = [
   /* Pedido do Felipe em 2026-09-08, mesmo raciocínio e mesma técnica do
      `@media (min-width: 90rem)` da economia circular (ver o comentário
      longo em `CircularEconomy.astro`): os tokens `--fs-*`/`--w-card` usados
-     aqui crescem a uma taxa fixa (px por vw), mais devagar que `.depos__pino`
+     aqui crescem a uma taxa fixa (px por vw), mais devagar que `.depos__inner`
      — que não tem teto e acompanha a tela quase 1:1 — então em telas muito
      largas a proporção do design em 1440px se perde: os cartões (e o resto
      da faixa) ficam pequenos demais sobre um vão de página crescente demais.
      Cada valor abaixo é o mesmo do Figma em 1440px, só que expresso como
-     fração de `.depos__pino` (`valor ÷ 1312 × 100`, a largura do container
+     fração de `.depos__inner` (`valor ÷ 1312 × 100`, a largura do container
      nesse instante) em vez de fração da viewport — daí em diante cresce com
      o espaço disponível da seção, não com a tela. Bate exatamente com os
      valores atuais em 1440px, por definição; abaixo de 90rem ninguém lê
@@ -628,103 +630,67 @@ const reviews = [
 </style>
 
 <script>
-  /* Os cinco cartões nunca cabem na tela, e com a barra de rolagem escondida
-     nada mais denunciava que havia depoimento à direita. Então a seção
-     prende: enquanto o pino está grudado, o quanto a página andou dentro do
-     trilho é exatamente o quanto a faixa anda para o lado, um pixel para cada
-     pixel. Quem passou da seção leu todos os cartões no caminho.
-
-     É posição, não evento: ninguém intercepta a roda, então não há disputa
-     com a rolagem suave do Lenis, e roda, toque, teclado e barra de rolagem
-     chegam todos ao mesmo lugar. Sem JS, a seção continua a faixa rolável
-     que sempre foi. */
-
-  /* Onde a trava não entra: no toque o dedo já arrasta a faixa direto, e
-     prender a página tomaria dele um gesto que funciona; quem pediu menos
-     movimento não tem por que ganhar a página andando de lado; e abaixo de
-     48rem (mesmo corte de sempre, ver CLAUDE.md) a seção é estreita demais
-     para valer o sequestro da rolagem — um mouse testando a versão mobile
-     numa janela estreita não deve ganhar o pino que só faz sentido em
-     desktop. */
-  const ponteiroPreciso = matchMedia('(pointer: fine)');
-  const menosMovimento = matchMedia('(prefers-reduced-motion: reduce)');
-  const desktop = matchMedia('(min-width: 48rem)');
-
+  /* Arrastar a faixa com o mouse (2026-10-26). Antes a seção prendia na tela
+     e convertia a rolagem vertical em lateral; o Felipe pediu o contrário: a
+     página rola livre e a faixa se arrasta, segurando e puxando. Toque e
+     caneta já rolam a faixa nativamente (e com snap), então só o mouse entra
+     aqui. */
   document.querySelectorAll<HTMLElement>('[data-secao]').forEach((secao) => {
-    const trilho = secao.querySelector<HTMLElement>('[data-trilho]');
-    const pino = secao.querySelector<HTMLElement>('[data-pino]');
     const faixa = secao.querySelector<HTMLElement>('[data-carrossel]');
-    if (!trilho || !pino || !faixa) return;
+    if (!faixa) return;
 
-    let percurso = 0;
-    let topo = 0;
+    /* Abaixo disto é gesto, não clique: um arraste não pode terminar em clique
+       num botão ou link dentro do cartão. */
+    const LIMIAR = 5;
+    let inicioX = 0;
+    let inicioScroll = 0;
+    let arrastando = false;
+    let moveu = false;
 
-    const medir = () => {
-      /* Desfaz antes de medir: altura do trilho e `top` do pino são o que
-         está sendo calculado, e medir por cima dos valores da vez anterior
-         devolveria a resposta anterior. Como nada disso é pintado antes do
-         fim da função, a desmontagem não pisca. */
-      secao.classList.remove('is-preso');
-      trilho.style.height = '';
-      pino.style.removeProperty('--pino-topo');
-
-      const excedente = faixa.scrollWidth - faixa.clientWidth;
-      const alturaPino = pino.offsetHeight;
-
-      if (excedente < 1 || !ponteiroPreciso.matches || menosMovimento.matches || !desktop.matches) {
-        percurso = 0;
-        /* Volta ao primeiro cartão: sem a trava, uma faixa parada no meio do
-           percurso só pareceria cortada. */
-        faixa.scrollLeft = 0;
-        return;
-      }
-
-      /* Centrado quando sobra tela; encostado embaixo quando o pino é mais
-         alto que ela, para o corte cair no título e não nos cartões. */
-      const folga = window.innerHeight - alturaPino;
-      topo = folga > 0 ? folga / 2 : folga;
-      percurso = excedente;
-
-      trilho.style.height = `${alturaPino + percurso}px`;
-      pino.style.setProperty('--pino-topo', `${topo}px`);
-      secao.classList.add('is-preso');
-      acompanhar();
-    };
-
-    const acompanhar = () => {
-      if (!percurso) return;
-      /* Zero no instante em que o pino gruda, `percurso` no instante em que
-         ele solta — o mesmo intervalo que a faixa tem para percorrer. */
-      const andado = topo - trilho.getBoundingClientRect().top;
-      faixa.scrollLeft = Math.min(Math.max(andado, 0), percurso);
-    };
-
-    /* A medição força layout; num `resize` contínuo isso é caro, e o quadro
-       seguinte é cedo o bastante para ninguém perceber. */
-    let agendada = 0;
-    const remedir = () => {
-      cancelAnimationFrame(agendada);
-      agendada = requestAnimationFrame(medir);
-    };
-
-    /* Troca de cidade muda a largura da faixa, e nenhum observador de altura
-       percebe isso: o script de pastilhas, mais abaixo, avisa por evento. */
-    secao.addEventListener('depos:troca', () => {
-      faixa.scrollLeft = 0;
-      remedir();
+    faixa.addEventListener('pointerdown', (evento) => {
+      if (evento.pointerType !== 'mouse' || evento.button !== 0) return;
+      arrastando = true;
+      moveu = false;
+      inicioX = evento.clientX;
+      inicioScroll = faixa.scrollLeft;
     });
 
-    window.addEventListener('scroll', acompanhar, { passive: true });
-    /* `resize` pela altura da tela, que decide o `top`; ResizeObserver pela
-       altura do pino, que muda com a fonte carregada e com a quebra do
-       título — nenhum dos dois avisa pelo outro. */
-    window.addEventListener('resize', remedir);
-    new ResizeObserver(remedir).observe(pino);
-    ponteiroPreciso.addEventListener('change', remedir);
-    menosMovimento.addEventListener('change', remedir);
-    desktop.addEventListener('change', remedir);
+    faixa.addEventListener('pointermove', (evento) => {
+      if (!arrastando) return;
+      const delta = evento.clientX - inicioX;
+      if (!moveu && Math.abs(delta) < LIMIAR) return;
+      if (!moveu) {
+        moveu = true;
+        faixa.classList.add('is-arrastando');
+        faixa.setPointerCapture(evento.pointerId);
+      }
+      faixa.scrollLeft = inicioScroll - delta;
+    });
 
-    medir();
+    const soltar = () => {
+      arrastando = false;
+      faixa.classList.remove('is-arrastando');
+    };
+    faixa.addEventListener('pointerup', soltar);
+    faixa.addEventListener('pointercancel', soltar);
+
+    /* O clique que fecha um arraste não é clique de ninguém. */
+    faixa.addEventListener(
+      'click',
+      (evento) => {
+        if (moveu) {
+          evento.preventDefault();
+          evento.stopPropagation();
+          moveu = false;
+        }
+      },
+      true
+    );
+
+    /* Troca de cidade muda a largura da faixa: volta ao primeiro cartão. */
+    secao.addEventListener('depos:troca', () => {
+      faixa.scrollLeft = 0;
+    });
   });
 
   /* Pastilhas de cidade: mostram só os cartões e o botão da cidade clicada. */

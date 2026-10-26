@@ -87,8 +87,13 @@ técnica com um par de seções de cores diferentes.
   contrário não é isso.
 
 ### Trilho e pino — carrossel horizontal por rolagem vertical
-Referência: `src/components/Testimonials.astro` (comentário,
-linhas 49-52).
+
+**Fora da página desde 2026-10-26**: a pedido do Felipe, os depoimentos
+deixaram de prender a seção. A página rola livre e a faixa se arrasta com o
+mouse (segurar e puxar; `Testimonials.astro`), nativa por toque. O trilho, o
+pino e o script que convertia rolagem Y em X saíram do componente — a
+descrição abaixo é só a técnica, para quem for reusá-la. A referência no
+código morreu junto; o histórico do git tem a implementação.
 
 - **Pin:** sim — `.depos__pino` trava enquanto a rolagem vertical dentro do
   trilho inflado vira, 1:1, `scrollLeft` de uma `<ul>` horizontal.
