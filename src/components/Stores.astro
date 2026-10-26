@@ -28,6 +28,10 @@ const pecas = [
   { src: colagem6, x: 0, y: 292, w: 206, alt: 'Mesa de madeira com iPhones em exposição' },
   { src: colagem7, x: 316, y: 346, w: 175, alt: 'iPhones em exposição sobre a bancada, presos nos suportes' },
 ];
+/* `eager` + `fetchpriority="low"`, e não `lazy`: a seção fica longe do topo e o
+   `lazy` só começa a baixar quando ela está quase na tela, o que deixava a
+   colagem em branco por segundos. Assim as sete (~330KB) baixam logo após o
+   que importa de verdade (hero e vídeo), sem disputar com eles. */
 const pct = (valor: number, total: number) => `${((valor / total) * 100).toFixed(4)}%`;
 ---
 
@@ -45,7 +49,8 @@ const pct = (valor: number, total: number) => `${((valor / total) * 100).toFixed
         width={Math.round(peca.w * 3)}
         format="webp"
         quality={80}
-        loading="lazy"
+        loading="eager"
+        fetchpriority="low"
         decoding="async"
         class="stores__piece"
         style={
