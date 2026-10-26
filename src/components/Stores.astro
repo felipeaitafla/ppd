@@ -2,167 +2,60 @@
 import { Image } from 'astro:assets';
 import Button from './Button.astro';
 import { units } from '../data/site';
-import loja1 from '../assets/loja-1.png';
-import loja2 from '../assets/loja-2.png';
-import loja3 from '../assets/loja-3.png';
-import loja4 from '../assets/loja-4.png';
-import santaRosa1 from '../assets/loja-santa-rosa-1.png';
-import santaRosa2 from '../assets/loja-santa-rosa-2.png';
-import santaRosa3 from '../assets/loja-santa-rosa-3.png';
-import santaRosa4 from '../assets/loja-santa-rosa-4.png';
-import ijui1 from '../assets/loja-ijui-1.png';
-import ijui2 from '../assets/loja-ijui-2.png';
-import ijui3 from '../assets/loja-ijui-3.png';
-import ijui4 from '../assets/loja-ijui-4.png';
-import saoBorja1 from '../assets/loja-sao-borja-1.png';
-import saoBorja2 from '../assets/loja-sao-borja-2.png';
-import saoBorja3 from '../assets/loja-sao-borja-3.png';
-import saoBorja4 from '../assets/loja-sao-borja-4.png';
-import santiago1 from '../assets/loja-santiago-1.png';
-import santiago2 from '../assets/loja-santiago-2.png';
-import santiago3 from '../assets/loja-santiago-3.png';
-import santiago4 from '../assets/loja-santiago-4.png';
+import colagem1 from '../assets/loja-colagem-1.png';
+import colagem2 from '../assets/loja-colagem-2.png';
+import colagem3 from '../assets/loja-colagem-3.png';
+import colagem4 from '../assets/loja-colagem-4.png';
+import colagem5 from '../assets/loja-colagem-5.png';
+import colagem6 from '../assets/loja-colagem-6.png';
+import colagem7 from '../assets/loja-colagem-7.png';
 
-/* A ordem é a do Figma: a primeira ocupa o slot grande, as três seguintes
-   a faixa de baixo. A rotação embaralha isso a cada ciclo, então toda foto
-   passa pelo slot grande — por isso todas são servidas no tamanho dele.
-
-   Uma galeria por unidade, não mais uma só: cada cidade tem as próprias
-   quatro fotos, e a que aparece é a da unidade aberta no acordeão (ver
-   `.stores__gallery-wrap` e o script no fim do arquivo). Chave é o nome da
-   cidade, igual a `unit.city` em `src/data/site.ts`. */
-const galleryPhotos: Record<string, { src: ImageMetadata; alt: string }[]> = {
-  'Santo Ângelo': [
-    {
-      src: loja1,
-      alt: 'Fachada da loja ao entardecer, com o letreiro "Pede Pro Dindo" e a vitrine refletindo a rua',
-    },
-    {
-      src: loja2,
-      alt: 'Fachada de uma unidade Pede Pro Dindo',
-    },
-    {
-      src: loja3,
-      alt: 'Área de exposição da loja com aparelhos sobre as bancadas',
-    },
-    {
-      src: loja4,
-      alt: 'iPhones em exposição sobre a bancada de atendimento',
-    },
-  ],
-  'Santa Rosa': [
-    {
-      src: santaRosa1,
-      alt: 'Fachada da unidade com o letreiro azul "Pede Pro Dindo" e placa da Apple na calçada',
-    },
-    {
-      src: santaRosa2,
-      alt: 'Atendente no balcão da loja, com árvore decorativa e iPhones em exposição na parede',
-    },
-    {
-      src: santaRosa3,
-      alt: 'iPhones em exposição sobre o balcão, em diferentes cores',
-    },
-    {
-      src: santaRosa4,
-      alt: 'Parede com capas e acessórios para iPhone em exposição',
-    },
-  ],
-  Ijuí: [
-    {
-      src: ijui1,
-      alt: 'Fachada da unidade com a logo iluminada e cartazes de liquidação na vitrine',
-    },
-    {
-      src: ijui2,
-      alt: 'Salão da loja com mesas de madeira, poltronas e vista para a rua',
-    },
-    {
-      src: ijui3,
-      alt: 'iPhones em exposição sobre a mesa, em diferentes cores',
-    },
-    {
-      src: ijui4,
-      alt: 'Prateleira da loja com fones, caixas de som e acessórios',
-    },
-  ],
-  'São Borja': [
-    {
-      src: saoBorja1,
-      alt: 'Fachada da unidade com o letreiro "Pede Pro Dindo" e a vitrine iluminada',
-    },
-    {
-      src: saoBorja2,
-      alt: 'Mesa de atendimento com árvore decorativa e iPhones em exposição',
-    },
-    {
-      src: saoBorja3,
-      alt: 'iPhones em exposição sobre a mesa, em diferentes cores',
-    },
-    {
-      src: saoBorja4,
-      alt: 'Balcão com o logo "ppd" e prateleira de acessórios ao fundo',
-    },
-  ],
-  Santiago: [
-    {
-      src: santiago1,
-      alt: 'Parede com capas de iPhone em várias cores e acessórios em exposição',
-    },
-    {
-      src: santiago2,
-      alt: 'Detalhe do logo "ppd" na parede da loja',
-    },
-    {
-      src: santiago3,
-      alt: 'Corredor da loja com prateleiras de acessórios e mesa de atendimento',
-    },
-    {
-      src: santiago4,
-      alt: 'Prateleira com capas e acessórios em exposição',
-    },
-  ],
-};
+/* Colagem das lojas (2026-10-26), no lugar da galeria rotativa por unidade.
+   Veio de um export do Framer: sete recortes PNG com transparência — a forma
+   (pílula, arco) já está no arquivo, não no CSS — soltos numa caixa de
+   524×520. Cada `x`/`y`/`w` abaixo é a medida do original naquela caixa, e
+   o CSS as converte em porcentagem: a colagem inteira escala com a coluna,
+   sem altura fixa. A ordem é a do original e é também a ordem de empilhar:
+   o arco grande (`centro`) fica acima dos dois primeiros e abaixo dos
+   quatro seguintes. O arco é o único posicionado pelo centro. */
+const CAIXA = { w: 524, h: 520 };
+const pecas = [
+  { src: colagem1, x: 54, y: 119, w: 109, alt: 'Fachada de uma unidade, com o letreiro azul "Pede Pro Dindo"' },
+  { src: colagem2, x: 389, y: 193, w: 122, alt: 'Fachada de uma unidade, com o letreiro azul "Pede Pro Dindo"' },
+  { src: colagem3, centro: [0.52, 0.49], w: 278, alt: 'Interior da loja, com árvore decorativa, mesa de madeira e o logo "ppd" na parede azul' },
+  { src: colagem4, x: 342, y: 109, w: 182, alt: 'Parede da loja com capas e acessórios em exposição' },
+  { src: colagem5, x: 67, y: 354, w: 110, alt: 'Fachada de uma unidade, com o letreiro azul "Pede Pro Dindo"' },
+  { src: colagem6, x: 0, y: 292, w: 206, alt: 'Mesa de madeira com iPhones em exposição' },
+  { src: colagem7, x: 316, y: 346, w: 175, alt: 'iPhones em exposição sobre a bancada, presos nos suportes' },
+];
+const pct = (valor: number, total: number) => `${((valor / total) * 100).toFixed(4)}%`;
 ---
 
 {/* O `id` voltou para cá em 2026-09-04, quando a revelação saiu da passagem
     da economia circular para esta seção: sem camada nenhuma andando, a seção
     está sempre onde o fluxo a coloca, e o alvo do menu pode ser ela mesma. */}
 <section class="stores" id="unidades">
-  {/* Cinco galerias empilhadas no mesmo lugar, não uma: só a da unidade
-      aberta no acordeão fica com `.is-active` (sincronizado pelo índice —
-      ver o script no fim do arquivo), e a troca é um crossfade — mesma
-      linguagem da rotação de fotos abaixo, não um corte seco. */}
-  <div class="stores__gallery-wrap">
-    {units.map((unit, unitIndex) => (
-      <div
-        class:list={['stores__gallery', { 'is-active': unit.matriz }]}
-        data-gallery
-        data-gallery-index={unitIndex}
-      >
-        {galleryPhotos[unit.city].map((photo, position) => (
-          <figure
-            class:list={['stores__slot', { 'stores__slot--lead': position === 0 }]}
-            data-slot
-          >
-            {galleryPhotos[unit.city].map((item, index) => (
-              <Image
-                src={item.src}
-                alt={item.alt}
-                width={1440}
-                widths={[480, 768, 1080, 1440]}
-                sizes="(min-width: 60rem) 44vw, 92vw"
-                format="webp"
-                quality={70}
-                loading="lazy"
-                decoding="async"
-                class:list={['stores__photo', { 'is-active': index === position }]}
-              />
-            ))}
-          </figure>
-        ))}
-      </div>
+  {/* Decorativa: cada recorte tem o próprio `alt`, mas a colagem inteira é
+      uma imagem só para quem lê — as lojas em si estão descritas na lista. */}
+  <div class="stores__collage" role="group" aria-label="Fotos das lojas">
+    {pecas.map((peca) => (
+      <Image
+        src={peca.src}
+        alt={peca.alt}
+        width={Math.round(peca.w * 3)}
+        format="webp"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+        class="stores__piece"
+        style={
+          peca.centro
+            ? `left:${peca.centro[0] * 100}%;top:${peca.centro[1] * 100}%;width:${pct(peca.w, CAIXA.w)};transform:translate(-50%,-50%)`
+            : `left:${pct(peca.x, CAIXA.w)};top:${pct(peca.y, CAIXA.h)};width:${pct(peca.w, CAIXA.w)}`
+        }
+      />
     ))}
+    <p class="stores__badge">Até 200m² de conforto<br />e segurança.</p>
   </div>
 
   <div class="stores__content">
@@ -172,12 +65,10 @@ const galleryPhotos: Record<string, { src: ImageMetadata; alt: string }[]> = {
     </div>
 
     <ul class="stores__list">
-      {units.map((unit, unitIndex) => (
+      {units.map((unit) => (
         <li>
-          {/* `details name` dá acordeão exclusivo sem uma linha de JS.
-              `data-unit-index` casa esta linha com a galeria do mesmo
-              índice em `.stores__gallery-wrap`. */}
-          <details class="stores__unit" name="unidades" open={unit.matriz} data-unit-index={unitIndex}>
+          {/* `details name` dá acordeão exclusivo sem uma linha de JS. */}
+          <details class="stores__unit" name="unidades" open={unit.matriz}>
             <summary class="stores__unit-head">
               {/* `h3` para o nome da unidade ser título (h2 "Visite a PPD
                   mais próxima" → h3 por cidade) para quem lê a estrutura;
@@ -193,9 +84,6 @@ const galleryPhotos: Record<string, { src: ImageMetadata; alt: string }[]> = {
               <div class="stores__unit-body-inner">
                 <Button href={unit.mapsUrl}>{unit.address}</Button>
                 <Button href={unit.instagramUrl} newTab>{unit.instagram}</Button>
-                {unit.groupUrl && (
-                  <Button href={unit.groupUrl} newTab>Acessar grupo de ofertas</Button>
-                )}
               </div>
             </div>
           </details>
@@ -230,77 +118,55 @@ const galleryPhotos: Record<string, { src: ImageMetadata; alt: string }[]> = {
     }
   }
 
-  /* Três colunas com a foto grande atravessando as três: a altura de cada
-     slot vem da proporção do Figma, então a galeria inteira acompanha a
-     largura sem altura fixa em nenhum ponto. */
-  /* As cinco vivem empilhadas no mesmo lugar (ver comentário no HTML): só a
-     `.is-active` fica `position: relative` — é ela que dá altura à
-     `.stores__gallery-wrap`, já que as outras saem do fluxo. As demais ficam
-     `position: absolute` + `inset: 0`, encaixando exatamente na área que a
-     ativa define, com opacidade zero — por isso a troca de qual está ativa
-     é um crossfade (`opacity`), não um corte, e a caixa nunca pula de
-     tamanho: as cinco compartilham a mesma proporção fixa por slot. */
-  .stores__gallery {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-gallery);
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 400ms ease;
-  }
-
-  .stores__gallery.is-active {
+  /* A caixa tem a proporção do original (524×520); as peças dentro são
+     porcentagem dela, então tudo cresce junto com a coluna. Abaixo de 60rem
+     a coluna é a página inteira, e a colagem pararia de fazer sentido de tão
+     larga: o teto de 36rem centraliza e segura. */
+  .stores__collage {
     position: relative;
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .stores__gallery-wrap {
-    position: relative;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .stores__gallery {
-      transition: none;
-    }
-  }
-
-  .stores__slot {
-    position: relative;
-    margin: 0;
-    overflow: hidden;
-    aspect-ratio: 608 / 435;
-    border-radius: var(--radius);
-    background: var(--color-bg-alt);
-  }
-
-  .stores__slot--lead {
-    grid-column: 1 / -1;
-    aspect-ratio: 624 / 505;
-  }
-
-  /* As quatro fotos ficam empilhadas em cada slot e só a ativa aparece:
-     a troca é um crossfade, sem carregar nada no momento do corte. */
-  .stores__photo {
-    position: absolute;
-    inset: 0;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0;
-    transition: opacity 800ms ease;
+    max-width: 36rem;
+    margin-inline: auto;
+    aspect-ratio: 524 / 520;
+    container-type: inline-size;
   }
 
-  .stores__photo.is-active {
-    opacity: 1;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .stores__photo {
-      transition: none;
+  @media (min-width: 60rem) {
+    .stores__collage {
+      max-width: none;
     }
+  }
+
+  .stores__piece {
+    position: absolute;
+    height: auto;
+  }
+
+  /* Vidro fosco no canto superior esquerdo do arco grande, com o canto
+     inferior esquerdo reto, como no original. A posição é a do original em
+     porcentagem da caixa: 103px/524 e 84px/520. */
+  .stores__badge {
+    position: absolute;
+    z-index: 1;
+    left: 19.6565%;
+    top: 16.1538%;
+    /* Largura do texto, não da caixa do original: com a quebra manual
+       depois de "conforto", o vidro cola na linha mais longa e o respiro é
+       igual dos dois lados. */
+    width: max-content;
+    padding: 1em 1.25em;
+    border: 1px solid rgb(255 255 255 / 0.2);
+    border-radius: 1rem 1rem 1rem 0;
+    /* Cinza translúcido, e não o branco 60% do original: a ponta esquerda
+       do vidro cai sobre o fundo branco da página, onde o texto branco
+       sumiria. Sobre branco dá ~#C5C5C5, o tom do print. */
+    background: rgb(150 150 150 / 0.55);
+    backdrop-filter: blur(26px);
+    /* 14px na caixa de 524px do original: o texto acompanha a colagem e
+       quebra em duas linhas como lá, em qualquer largura. */
+    font-size: 2.6718cqi;
+    line-height: 1.3;
+    color: var(--color-white);
   }
 
   .stores__content {
@@ -462,76 +328,4 @@ const galleryPhotos: Record<string, { src: ImageMetadata; alt: string }[]> = {
   definirAlturas();
   window.addEventListener('resize', definirAlturas);
   document.fonts?.ready.then(definirAlturas);
-
-  /* JS porque a rotação é estado — que foto está em que slot — e o ciclo
-     atravessa elementos diferentes; CSS não alcança. */
-  const INTERVALO = 4000;
-  const motion = matchMedia('(prefers-reduced-motion: reduce)');
-
-  document.querySelectorAll('[data-gallery]').forEach((gallery) => {
-    const slots = [...gallery.querySelectorAll('[data-slot]')].map((slot) => [
-      ...slot.querySelectorAll('img'),
-    ]);
-    const total = slots[0]?.length ?? 0;
-    if (slots.length < 2 || total < 2) return;
-
-    let offset = 0;
-    let visivel = false;
-    let timer: ReturnType<typeof setInterval> | null = null;
-
-    const tick = () => {
-      offset = (offset + 1) % total;
-      slots.forEach((fotos, posicao) => {
-        const ativa = (posicao + offset) % total;
-        fotos.forEach((foto, i) => foto.classList.toggle('is-active', i === ativa));
-      });
-    };
-
-    /* Fora da tela não há o que animar, quem pediu menos movimento já vê
-       as quatro fotos de uma vez, e a galeria de uma unidade fechada não
-       deve rodar por baixo do crossfade — nenhuma dessas esconde nada de
-       quem está vendo, então parar é seguro nas três. */
-    const sync = () => {
-      const rodar = visivel && gallery.classList.contains('is-active') && !motion.matches;
-      if (rodar && !timer) timer = setInterval(tick, INTERVALO);
-      if (!rodar && timer) {
-        clearInterval(timer);
-        timer = null;
-      }
-    };
-
-    new IntersectionObserver(
-      ([entry]) => {
-        visivel = entry.isIntersecting;
-        sync();
-      },
-      { threshold: 0.2 }
-    ).observe(gallery);
-
-    motion.addEventListener('change', sync);
-
-    /* A troca de unidade muda a classe `is-active`, não a posição na tela
-       (ver comentário em `.stores__gallery-wrap`) — só um `MutationObserver`
-       no atributo `class` avisa este fechamento de que chegou sua vez de
-       rodar ou de parar. */
-    new MutationObserver(sync).observe(gallery, { attributes: true, attributeFilter: ['class'] });
-  });
-
-  /* Uma galeria por unidade (ver comentário em `.stores__gallery-wrap`):
-     ao abrir uma linha do acordeão, marca a galeria do mesmo índice como
-     `.is-active` e tira a marca das demais — a troca visual (crossfade) é
-     só CSS a partir daí. `toggle` dispara nas duas direções (abrindo e
-     fechando); só importa reagir a quem abriu — como o acordeão é
-     exclusivo, a que fechou nunca é a que deveria ficar ativa. */
-  const galerias = document.querySelectorAll<HTMLElement>('[data-gallery]');
-
-  document.querySelectorAll<HTMLDetailsElement>('[data-unit-index]').forEach((unidade) => {
-    unidade.addEventListener('toggle', () => {
-      if (!unidade.open) return;
-      const indice = unidade.dataset.unitIndex;
-      galerias.forEach((galeria) => {
-        galeria.classList.toggle('is-active', galeria.dataset.galleryIndex === indice);
-      });
-    });
-  });
 </script>

@@ -323,10 +323,12 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   abreviados, vírgula antes do número) — o rodapé do Figma escrevia curto.
   Ijuí e Santiago vieram sem o tipo do logradouro; as duas são Rua,
   conferido no cadastro do CNPJ.
-- [x] ~~**Link do grupo de ofertas**~~ — resolvido em 2026-09-24. As cinco
-  unidades ganharam `groupUrl` em `src/data/site.ts`, cada uma com o link do
-  próprio grupo (`2gq3jya.s.gy/ofertas-iphone-<cidade>`) — o botão "Acessar
-  grupo de ofertas" agora aparece nas cinco, não só na matriz.
+- [x] ~~**Link do grupo de ofertas**~~ — removido em 2026-10-26, a pedido do
+  Felipe: o site passou a falar com parceiros (B2B), e o botão "Acessar grupo
+  de ofertas" era de consumidor. O botão (`Stores.astro`) e o `groupUrl` das
+  cinco unidades (`site.ts`) saíram juntos; os links eram
+  `2gq3jya.s.gy/ofertas-iphone-<cidade>` (sa, sr, ijui, sb, santiago), no
+  histórico do git.
 - [ ] **Handles de Instagram das filiais** — `@pedeprodindo.sr`, `.ijui` e
   `.sb` vieram do Figma e ninguém abriu os perfis; só `.stgo` e o da matriz
   estão confirmados. O acordeão já linka os cinco (`instagram.com/<handle>`,
@@ -423,28 +425,16 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
   e os itens de Menu/Contato do rodapé, os dois sobre o `#F6F6F6` claro —
   contraste igualmente aquém, anotado acima). O mínimo sobre branco seria
   `#767676`.
-- [ ] **Links `href="#"` restantes** — "Políticas de Privacidade"
-  (`Footer.astro`). "Acessar Google Review" (`Testimonials.astro`) saiu
-  daqui em 2026-10-05: as cinco cidades têm o link do próprio perfil. O
-  grupo de ofertas (`Stores.astro`) saiu daqui em 2026-09-24: as cinco
-  unidades têm link de verdade agora. "Fazer a pesquisa"
-  (`AppleVerified.astro`) saiu em 2026-09-30: aponta para
-  `locate.apple.com/br/pt/sales`.
-- [x] ~~**Destino dos ícones de IA no rodapé**~~ — resolvido em 2026-08-21.
-  Os cinco abrem a plataforma com a mesma pergunta pronta, escrita na voz de
-  um consumidor decidindo se compra e pedindo verificação da autorização
-  Apple. Texto e URLs em `Footer.astro`. Três aceitam a pergunta por
-  parâmetro (`chatgpt.com/?q=`, `grok.com/?q=`,
-  `perplexity.ai/search?q=`); Gemini não aceita nenhum, então o ícone dele
-  vai para o AI Mode da Busca (`google.com/search?udm=50&q=`), que é o mesmo
-  modelo por baixo — decisão tomada sabendo que a tela que abre é a do
-  Google Search, e não o `gemini.google.com`.
-- [ ] **`?q=` do Claude não é mais documentado** — o parâmetro existiu na web
-  e saiu do ar (relatos de out/2025, ligados a injeção de prompt). O link em
-  `Footer.astro` o mantém porque parâmetro desconhecido é ignorado: o pior
-  caso é abrir um chat vazio. Clicar o ícone do Claude antes do deploy e ver
-  se a pergunta chega; se não chegar, decidir entre deixar assim ou tirar o
-  ícone.
+- [ ] **Link "Políticas de Privacidade" é `href="#"`** (`Footer.astro`, base
+  da coluna de contato). A página nunca existiu; o link voltou ao rodapé em
+  2026-10-26 a pedido do Felipe, ainda sem destino. Os outros `href="#"`
+  do site já saíram (Google Review, grupo de ofertas, pesquisa da Apple).
+- [x] ~~**Ícones de IA no rodapé**~~ — removidos em 2026-10-26, a pedido do
+  Felipe: o rodapé foi refeito em três colunas (marca + aviso legal, lojas
+  físicas, contato + "Nos acompanhe") e o bloco "Pergunte às IAs sobre a
+  PPD", os assets `ai-*.svg` e o menu do rodapé saíram. Sobra só o Instagram
+  em "Nos acompanhe"; Facebook e LinkedIn do rodapé de referência não têm
+  URL em `site.ts`. Os links estão no histórico do git.
 
 ### Escopo deliberado (não é esquecimento)
 
@@ -458,9 +448,16 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
 
 ### Assets
 
-- [ ] **`src/assets/loja-2.png` (fachada) veio do Figma em 510×510.** A
-  rotação da galeria leva toda foto ao slot grande (~1250px na tela), e
-  nesse tamanho ela fica visivelmente mole. Pedir o arquivo original.
+- [x] ~~**Galeria rotativa por unidade**~~ — saiu em 2026-10-26: Unidades
+  (`Stores.astro`) trocou as quatro fotos por cidade, com rotação e troca ao
+  abrir o acordeão, por uma colagem fixa de sete recortes PNG com
+  transparência (`src/assets/loja-colagem-1..7.png`, vindos de um export do
+  Framer) e o selo "Até 200m² de conforto e segurança.". A colagem é igual
+  para as cinco cidades, e o texto do selo veio do material do Felipe, não de
+  dado do site. Os arquivos `loja-*.png` das galerias antigas continuam em
+  `src/assets/`, sem uso (e a pendência da `loja-2.png` em 510×510 morreu
+  junto) — apagar quando o Felipe confirmar. As fotos novas por cidade, em
+  `fotos-unidades/`, seguem fora do site.
 - [ ] **Avatares dos depoimentos vieram pequenos** — 72×72, e o do Pedro só
   36×36, para exibição a 40px. Em tela de alta densidade ficam moles,
   principalmente o do Pedro. Puxar as fotos originais do Google Review.
@@ -497,7 +494,7 @@ _Atualizar aqui sempre que uma pendência for resolvida ou surgir._
 - [ ] Definir a hospedagem de produção — ver `contexto-agente.md`, seção
   "Estado atual". Vercel hoje é só o ambiente de aprovação.
 - [ ] Conectar o CMS e migrar o conteúdo hoje hard-coded nos componentes
-  (textos, lista de unidades, fotos da galeria).
+  (textos, lista de unidades, fotos da colagem).
 - [ ] **Confirmar o domínio em `site`** (`astro.config.mjs`). Hoje é
   `https://www.pedeprodindo.com.br`, presumido — o domínio ainda serve o
   site antigo em Framer. Canonical, `og:url`/`og:image`, sitemap, a linha

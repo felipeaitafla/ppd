@@ -3,7 +3,7 @@ import { faq } from '../data/faq';
 
 /* `<details>` e não um acordeão em JS: a resposta fica no HTML servido esteja
    a linha aberta ou fechada, então rastreador, leitor de tela e LLM leem as
-   nove respostas inteiras sem executar nada. `name` agrupa as nove num
+   respostas inteiras sem executar nada. `name` agrupa todas num
    acordeão exclusivo, como em Unidades — sem uma linha de script. */
 
 /* O mesmo conteúdo, de novo, em JSON-LD: o `<details>` resolve quem lê a
@@ -35,7 +35,7 @@ const schema = {
       <ul class="faq__list">
         {faq.map((item, index) => (
           <li>
-            {/* A primeira nasce aberta: fechadas, as nove linhas leem como uma
+            {/* A primeira nasce aberta: fechadas, as linhas leem como uma
                 lista de links e nada denuncia que há resposta atrás. */}
             <details class="faq__item" name="faq" open={index === 0}>
               {/* `h3` dentro do `summary`, como em Unidades: a pergunta vira

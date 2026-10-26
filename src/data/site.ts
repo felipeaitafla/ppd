@@ -30,13 +30,18 @@ const profileUrl = (handle: string) => `https://instagram.com/${handle.slice(1)}
 export const instagramHandle = '@pedeprodindo';
 export const instagramUrl = profileUrl(instagramHandle);
 
+/* Facebook e LinkedIn vieram do rodapé do site antigo (export do Framer,
+   2026-10-26) e só aparecem em 'Nos acompanhe', no rodapé. O Framer linkava
+   o LinkedIn por dois domínios (`www` e `br`); ficou o `www`. */
+export const facebookUrl = 'https://www.facebook.com/pedeprodindo01/';
+export const linkedinUrl = 'https://www.linkedin.com/company/pede-pro-dindo/';
+
 type Unit = {
   city: string;
   address: string;
   mapsUrl: string;
   instagram: string;
   matriz?: boolean;
-  groupUrl?: string;
 };
 
 /* As cinco unidades, lidas pelo acordeão de Unidades e pelo rodapé.
@@ -54,7 +59,6 @@ const unitList: Unit[] = [
       'https://www.google.com/maps/place/Pede+Pro+Dindo+-+Revendedor+Autorizado+Apple+e+Assist%C3%AAncia+T%C3%A9cnica/data=!4m2!3m1!1s0x0:0xf2ee01cda632b1a9?sa=X&ved=1t:2428&ictx=111',
     instagram: instagramHandle,
     matriz: true,
-    groupUrl: 'https://2gq3jya.s.gy/ofertas-iphone-sa',
   },
   {
     city: 'Santa Rosa',
@@ -62,7 +66,6 @@ const unitList: Unit[] = [
     mapsUrl:
       'https://www.google.com/maps/place/Pede+Pro+Dindo+-+Revenda+autorizada+Apple+e+assist%C3%AAncia+t%C3%A9cnica/@-27.8667092,-54.4790752,17z/data=!3m1!4b1!4m6!3m5!1s0x94f93556f4885359:0x82a276f213977890!8m2!3d-27.866714!4d-54.4764949!16s%2Fg%2F11s7cmwqx2?entry=ttu&g_ep=EgoyMDI2MDkyMS4wIKXMDSoASAFQAw%3D%3D',
     instagram: '@pedeprodindo.sr',
-    groupUrl: 'https://2gq3jya.s.gy/ofertas-iphone-sr',
   },
   {
     city: 'Ijuí',
@@ -70,7 +73,6 @@ const unitList: Unit[] = [
     mapsUrl:
       'https://www.google.com/maps/place/Pede+Pro+Dindo+-+Revenda+autorizada+Apple+e+assist%C3%AAncia+t%C3%A9cnica/@-28.391032,-53.9150961,17z/data=!3m1!4b1!4m6!3m5!1s0x94fc2debd51a4e73:0xbb37d57f8fcbe106!8m2!3d-28.3910367!4d-53.9125158!16s%2Fg%2F11st69wrhv?entry=ttu&g_ep=EgoyMDI2MDkyMS4wIKXMDSoASAFQAw%3D%3D',
     instagram: '@pedeprodindo.ijui',
-    groupUrl: 'https://2gq3jya.s.gy/ofertas-iphone-ijui',
   },
   {
     city: 'São Borja',
@@ -78,7 +80,6 @@ const unitList: Unit[] = [
     mapsUrl:
       'https://www.google.com/maps/place/Pede+Pro+Dindo+-+Revenda+Autorizada+Apple+e+assist%C3%AAncia+t%C3%A9cnica/@-28.6594702,-56.0056778,17z/data=!3m1!4b1!4m6!3m5!1s0x9455c7983e2881e5:0xc6dd5b6c84f14f5a!8m2!3d-28.6594749!4d-56.0030975!16s%2Fg%2F11st7ccp96?entry=ttu&g_ep=EgoyMDI2MDkyMS4wIKXMDSoASAFQAw%3D%3D',
     instagram: '@pedeprodindo.sb',
-    groupUrl: 'https://2gq3jya.s.gy/ofertas-iphone-sb',
   },
   {
     city: 'Santiago',
@@ -86,7 +87,6 @@ const unitList: Unit[] = [
     mapsUrl:
       'https://www.google.com/maps/place/Pede+Pro+Dindo+-+Revenda+autorizada+Apple+e+assist%C3%AAncia+t%C3%A9cnica/@-29.1900919,-54.8708246,17z/data=!3m1!4b1!4m6!3m5!1s0x94ffd3c16f78bfeb:0x1751f2bb4e3b07dc!8m2!3d-29.1900966!4d-54.8682443!16s%2Fg%2F11wv034w4v?entry=ttu&g_ep=EgoyMDI2MDkyMS4wIKXMDSoASAFQAw%3D%3D',
     instagram: '@pedeprodindo.stgo',
-    groupUrl: 'https://2gq3jya.s.gy/ofertas-iphone-santiago',
   },
 ];
 
